@@ -9,7 +9,7 @@ const $  = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const FA = '۰۱۲۳۴۵۶۷۸۹';
 const fa = n => String(n).replace(/\d/g, d => FA[d]);
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 /* ================================================================
    ۱) آیکون‌های SVG — بدون ایموجی
@@ -50,7 +50,7 @@ const icon = (n,s=24) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fi
    ۲) ذخیره‌سازی محلی — تنظیمات، پیشرفت، ویدیوها و آزمون‌ها
 ================================================================ */
 const store = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
-const prefs = Object.assign({ theme:'system', accent:'default', color:'#0891a0', radius:16 }, store('faraz.prefs', {}));
+const prefs = Object.assign({ theme:'system', accent:'default', color:'#0891a0', radius:16, skin:'glass' }, store('faraz.prefs', {}));
 let P = store('faraz.progress', {});   // کلید درس → true
 let V = store('faraz.videos',   {});   // کلید ویدیو → true
 let Q = store('faraz.quiz',     {});   // کلید آزمون → اندکس پاسخ
@@ -96,6 +96,7 @@ const effTheme = () => prefs.theme === 'system' ? (mq.matches ? 'dark' : 'light'
 function applyPrefs(){
   const t = effTheme(), root = document.documentElement;
   root.dataset.theme = t;
+  root.dataset.skin = prefs.skin || 'glass';
   if(prefs.accent === 'custom'){
     const { ac, ink } = deriveAccent(prefs.color, t === 'dark');
     root.style.setProperty('--ac', ac);
@@ -110,6 +111,7 @@ function applyPrefs(){
   const tb = document.getElementById('theme-btn');
   if(tb) tb.innerHTML = icon(t === 'dark' ? 'moon' : 'sun');
   $$('#theme-seg button').forEach(b => b.classList.toggle('on', b.dataset.val === prefs.theme));
+  $$('#skin-seg button').forEach(b => b.classList.toggle('on', b.dataset.val === (prefs.skin || 'glass')));
   $$('.swatch').forEach(s => s.classList.toggle('on', s.dataset.val === prefs.accent));
   const cr = document.getElementById('color-row');
   if(cr) cr.classList.toggle('on', prefs.accent === 'custom');
@@ -395,13 +397,14 @@ function videoBlock(key, ls, lang){
   const list = ls.videos?.[lang] || [];
   const cards = list.map((v,i) => {
     const vk = `${key}:${lang}:${i}`;
+    const title = v.title || v.q || 'ویدیو';
     const href = v.vid
       ? `https://www.youtube.com/watch?v=${encodeURIComponent(v.vid)}`
-      : `https://www.youtube.com/results?search_query=${encodeURIComponent(v.q||v.title||'')}`;
+      : `https://www.youtube.com/results?search_query=${encodeURIComponent(v.q||title)}`;
     return `<div class="vid-card ${V[vk]?'watched':''}">
-      <a class="v-link" href="${href}" target="_blank" rel="noopener" title="${esc(v.title)}">
+      <a class="v-link" href="${href}" target="_blank" rel="noopener" title="${esc(title)}">
         <span class="v-ico">${icon('play',15)}</span>
-        <span class="v-body"><b>${esc(v.title)}</b><span>${[v.channel, v.dur].filter(Boolean).join(' · ') || 'youtube.com'}</span></span>
+        <span class="v-body"><b>${esc(title)}</b><span>${[v.channel, v.dur].filter(Boolean).join(' · ') || 'youtube.com'}</span></span>
         ${v.vid ? '' : `<span class="lang-tag">جست‌وجو</span>`}
         <span class="ext">${icon('ext',14)}</span>
       </a>
@@ -412,8 +415,10 @@ function videoBlock(key, ls, lang){
     <div class="vid-head">
       <span class="t-ico">${icon('film',20)}</span>
       <div><h3>ویدیوهای مرتبط با این درس</h3><p>انتخاب‌شده برای همین موضوع — تیک «دیدم» در مرورگر ذخیره می‌شود</p></div>
-      <div class="vid-tabs">${Object.entries(groups).map(([k,l]) =>
-        `<button class="${k===lang?'on':''}" data-action="vid-tab" data-lang="${k}">${l} <b>${fa((ls.videos?.[k]||[]).length)}</b></button>`).join('')}
+      <div class="vid-tabs">${Object.entries(groups).map(([k,l])=>{
+        const n = (ls.videos?.[k]||[]).length;
+        return `<button class="${k===lang?'on':''}" data-action="vid-tab" data-lang="${k}">${l} <b>${k==='fa'?fa(n):n}</b></button>`;
+      }).join('')}
       </div>
     </div>
     <div class="vid-grid" data-grid>${cards}</div>
@@ -572,6 +577,7 @@ document.addEventListener('click', e => {
     applyPrefs(); savePrefs(); toast(cur === 'dark' ? 'حالت روشن فعال شد' : 'حالت تیره فعال شد');
   }
   if(act === 'set-theme'){ prefs.theme = el.dataset.val; applyPrefs(); savePrefs(); }
+  if(act === 'set-skin'){ prefs.skin = el.dataset.val; applyPrefs(); savePrefs(); toast('سبک ظاهری عوض شد'); }
   if(act === 'set-accent'){ prefs.accent = el.dataset.val; applyPrefs(); savePrefs(); toast('رنگ اصلی عوض شد'); }
   if(act === 'reset-radius'){ prefs.radius = 16; applyPrefs(); savePrefs(); toast('گردی گوشه‌ها به حالت پیش‌فرض برگشت'); }
   if(act === 'reset-progress'){

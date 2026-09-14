@@ -38,6 +38,55 @@ html[data-theme="dark"][data-accent="red"]  {--ac:#ff8085;--ac-ink:#4a0d10;--ac-
 html[data-theme="light"][data-accent="green"]{--ac:#189a48;--ac-ink:#fff;--ac-soft:rgba(24,154,72,.12);--ac-glow:rgba(24,154,72,.35)}
 html[data-theme="dark"][data-accent="green"]  {--ac:#4ede87;--ac-ink:#07351c;--ac-soft:rgba(78,222,135,.12);--ac-glow:rgba(78,222,135,.28)}
 
+/* ============ سبک‌های ظاهری: مات / نئونی / شیشه ============ */
+/* شیشه = پیش‌فرض سایت (بدون override) */
+
+/* مات: پس‌زمینه‌های کاملاً مات، بدون بلور و بدون بلاب‌های رنگی */
+html[data-skin="matte"][data-theme="light"]{
+  --glass:#f7f8f7; --glass-strong:#ffffff;
+  --stroke:rgba(20,30,50,.15); --stroke-soft:rgba(20,30,50,.1);
+  --shadow:0 10px 26px -14px rgba(15,30,60,.2);
+  --shadow-lg:0 20px 48px -20px rgba(15,30,60,.26);
+  --blob-op:0;
+}
+html[data-skin="matte"][data-theme="dark"]{
+  --glass:#161a23; --glass-strong:#1d222e;
+  --stroke:rgba(255,255,255,.1); --stroke-soft:rgba(255,255,255,.06);
+  --shadow:0 12px 30px -16px rgba(0,0,0,.6);
+  --shadow-lg:0 24px 56px -24px rgba(0,0,0,.75);
+  --blob-op:0;
+}
+html[data-skin="matte"] .glass,
+html[data-skin="matte"] .top,
+html[data-skin="matte"] .panel,
+html[data-skin="matte"] .btn-ghost,
+html[data-skin="matte"] #toast{
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+
+/* نئونی: کنتراست بالا، درخشش رنگ اصلی روی کارت‌ها و کدها */
+html[data-skin="neon"]{
+  --shadow:0 0 0 1px var(--ac-glow), 0 10px 34px -12px var(--ac-glow);
+  --shadow-lg:0 0 0 1px var(--ac-glow), 0 22px 60px -18px var(--ac-glow);
+}
+html[data-skin="neon"][data-theme="light"]{
+  --bg:#e7eaef; --glass:rgba(255,255,255,.72); --glass-strong:rgba(255,255,255,.92);
+  --blob-op:.5;
+}
+html[data-skin="neon"][data-theme="dark"]{
+  --bg:#060912; --glass:rgba(15,19,32,.62); --glass-strong:rgba(17,21,36,.9);
+  --code-bg:rgba(2,4,10,.96); --blob-op:.4;
+}
+html[data-skin="neon"] .glass{border-color:var(--ac-glow)}
+html[data-skin="neon"] .blob{filter:blur(90px) saturate(1.6)}
+html[data-skin="neon"] .btn-primary{box-shadow:0 0 24px -4px var(--ac-glow)}
+html[data-skin="neon"] .codeblock{
+  border-color:var(--ac-glow);
+  box-shadow:0 0 0 1px var(--ac-glow), 0 18px 44px -18px rgba(0,0,0,.6);
+}
+html[data-skin="neon"] .logo svg{filter:drop-shadow(0 0 8px var(--ac-glow))}
+
+
 *{box-sizing:border-box;margin:0;padding:0}
 ::selection{background:var(--ac);color:var(--ac-ink)}
 html{scroll-behavior:smooth}
@@ -280,7 +329,7 @@ html[data-theme="dark"]  .lv-a{background:rgba(255,128,133,.14);color:#ff8f93}
 .tip ul{margin:8px 18px 0 0}
 .tip li{margin-bottom:4px}
 .lesson-foot{display:flex;gap:14px;margin:36px 0 50px;flex-wrap:wrap;align-items:center}
-.pager{display:flex;gap:10px;margin-inline-start:auto}
+.pager{display:flex;gap:10px;margin-inline-start:auto;flex-wrap:wrap}
 .pager .btn{padding:11px 18px;font-size:13.5px}
 .empty{padding:60px 30px;text-align:center;color:var(--muted)}
 .empty svg{width:40px;height:40px;margin-bottom:14px;opacity:.5}
@@ -294,7 +343,7 @@ html[data-theme="dark"]  .lv-a{background:rgba(255,128,133,.14);color:#ff8f93}
 .vid-tabs{display:flex;gap:6px;margin-inline-start:auto;background:var(--well);padding:4px;border-radius:calc(var(--radius)*.6)}
 .vid-tabs button{
   border:none;background:none;cursor:pointer;padding:7px 16px;border-radius:calc(var(--radius)*.45);
-  font-size:12.5px;font-weight:700;color:var(--muted);transition:.2s;direction:ltr;
+  font-size:12.5px;font-weight:700;color:var(--muted);transition:.2s;unicode-bidi:plaintext;
 }
 .vid-tabs button.on{background:var(--glass-strong);color:var(--ac);box-shadow:0 2px 8px rgba(0,0,0,.14)}
 .vid-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -303,7 +352,7 @@ html[data-theme="dark"]  .lv-a{background:rgba(255,128,133,.14);color:#ff8f93}
   background:var(--well);border:1px solid var(--stroke-soft);transition:.2s;
 }
 .vid-card:hover{border-color:var(--ac-glow);transform:translateY(-2px)}
-.vid-card .v-link{display:flex;align-items:center;gap:11px;flex:1;min-width:0}
+.vid-card .v-link{display:flex;align-items:center;gap:11px;flex:1;min-width:0;overflow:hidden}
 .vid-card .v-ico{
   width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:50%;
   background:var(--ac-soft);color:var(--ac);transition:.2s;
@@ -311,7 +360,7 @@ html[data-theme="dark"]  .lv-a{background:rgba(255,128,133,.14);color:#ff8f93}
 .vid-card:hover .v-ico{background:var(--ac);color:var(--ac-ink)}
 .vid-card .v-body{flex:1;min-width:0}
 .vid-card .v-body b{display:block;font-size:13px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vid-card .v-body span{display:block;font-size:11.5px;color:var(--muted);direction:ltr;text-align:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vid-card .v-body span{display:block;font-size:11.5px;color:var(--muted);unicode-bidi:plaintext;text-align:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vid-card .ext{color:var(--muted);flex:none}
 .vid-card .ext svg{width:14px;height:14px}
 .lang-tag{
@@ -472,7 +521,17 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
     transform:translateY(14px) scale(.98);
   }
   .panel.open{transform:none}
+  .vids{padding:20px 14px}
+  .vid-head{gap:10px}
+  .vid-head .t-ico{display:none}
+  .vid-tabs{width:100%;margin-inline-start:0}
+  .vid-tabs button{flex:1;padding:8px 6px}
   .vid-grid{grid-template-columns:1fr}
-  .vid-tabs{margin-inline-start:0}
   .ring-sm{display:none}
+}
+@media(max-width:480px){
+  .vid-card{gap:8px;padding:10px}
+  .vid-card .v-ico{width:30px;height:30px}
+  .vid-card .lang-tag{display:none}
+  .vid-card .ext{display:none}
 }
