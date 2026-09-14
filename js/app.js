@@ -50,7 +50,7 @@ const icon = (n,s=24) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fi
    ۲) ذخیره‌سازی محلی — تنظیمات، پیشرفت، ویدیوها و آزمون‌ها
 ================================================================ */
 const store = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
-const prefs = Object.assign({ theme:'system', accent:'default', color:'#0891a0', radius:16, skin:'glass' }, store('faraz.prefs', {}));
+const prefs = Object.assign({ theme:'system', accent:'default', color:'#0891a0', radius:16, skin:'glass', fontScale:100 }, store('faraz.prefs', {}));
 let P = store('faraz.progress', {});   // کلید درس → true
 let V = store('faraz.videos',   {});   // کلید ویدیو → true
 let Q = store('faraz.quiz',     {});   // کلید آزمون → اندکس پاسخ
@@ -108,6 +108,13 @@ function applyPrefs(){
   }
   root.dataset.accent = prefs.accent === 'custom' ? 'default' : prefs.accent;
   root.style.setProperty('--radius', prefs.radius + 'px');
+  const fs = Math.min(130, Math.max(85, +prefs.fontScale || 100));
+  root.style.setProperty('font-scale', fs + '%');
+  root.style.fontSize = (16 * fs / 100) + 'px';
+  const fsi = document.getElementById('font-input');
+  if(fsi) fsi.value = fs;
+  const fsv = document.getElementById('fsv');
+  if(fsv) fsv.textContent = fs + '%';
   const tb = document.getElementById('theme-btn');
   if(tb) tb.innerHTML = icon(t === 'dark' ? 'moon' : 'sun');
   $$('#theme-seg button').forEach(b => b.classList.toggle('on', b.dataset.val === prefs.theme));
@@ -258,7 +265,7 @@ function lessonRow(course, tr, li, mi){
    ۷) صفحات
 ================================================================ */
 function pageHome(){
-  const st = allStats(DB);
+  const total = allStats(DB);
   const last = store('faraz.last', null);
   let target = last;
   for(const c of DB){
@@ -266,10 +273,18 @@ function pageHome(){
     if(p){ target = target || `#/lesson/${p.course.id}/${p.tr.id}/${p.li}/${p.mi}`; break; }
   }
   target = target || `#/course/${DB[0]?.id||''}`;
-  const started = st.done > 0;
+  const started = total.done > 0;
   const cta = started
-    ? `<a class="btn btn-primary" href="${target}">${icon('play',17)}ادامه از جایی که بودی · ٪${fa(st.pct)}</a>`
+    ? `<a class="btn btn-primary" href="${target}">${icon('play',17)}ادامه از جایی که بودی</a>`
     : `<a class="btn btn-primary" href="${target}">${icon('play',17)}شروع کن</a>`;
+  const selCourse = store('faraz.homeSel', DB[0]?.id);
+  const sel = DB.find(c=>c.id===selCourse) || DB[0];
+  const st = sel ? stats(sel) : {pct:0,done:0,total:0,minsDone:0,vidsDone:0};
+  const tabs = DB.map(c=>{
+    const s = stats(c);
+    return `<button class="ptab ${c.id===sel?.id?'on':''}" data-action="home-sel" data-val="${c.id}" title="${esc(c.title)} — ٪${s.pct}">${esc(c.title)} · ٪${fa(s.pct)}</button>`;
+  }).join('');
+  const sumPct = total.total ? Math.round(total.done/total.total*100) : 0;
   return `
   <div class="wrap">
     <section class="hero">
@@ -284,13 +299,15 @@ function pageHome(){
         </div>
       </div>
       <div class="prog-card glass rise" style="animation-delay:.12s">
-        <h3>پیشرفت شما در همهٔ دوره‌ها</h3>
-        <div class="ring-wrap">${ring(st.pct)}<div class="num">${fa(st.pct)}٪<small>کل مسیر</small></div></div>
+        <h3>پیشرفت شما — مجموع همه: ٪${fa(sumPct)}</h3>
+        <div class="prog-tabs" id="prog-tabs">${tabs}</div>
+        <div class="ring-wrap">${ring(st.pct)}<div class="num">${fa(st.pct)}٪<small>${esc(sel?.title||'')}</small></div></div>
         <div class="stat-row">
           <div class="stat"><b>${fa(st.done)}</b><span>درس تکمیل‌شده</span></div>
-          <div class="stat"><b>${fa(st.vidsDone)}</b><span>ویدیو دیده‌شده</span></div>
+          <div class="stat"><b>${fa(st.minsDone)}</b><span>دقیقهٔ یادگیری</span></div>
           <div class="stat"><b>${fa(st.total)}</b><span>درس مجموع</span></div>
         </div>
+        ${sel ? `<a class="btn btn-soft" style="width:100%;justify-content:center;margin-top:14px" href="#/course/${sel.id}">${icon('book',15)}رفتن به ${esc(sel.title)}</a>` : ''}
       </div>
     </section>
 
@@ -579,12 +596,16 @@ document.addEventListener('click', e => {
   if(act === 'set-theme'){ prefs.theme = el.dataset.val; applyPrefs(); savePrefs(); }
   if(act === 'set-skin'){ prefs.skin = el.dataset.val; applyPrefs(); savePrefs(); toast('سبک ظاهری عوض شد'); }
   if(act === 'set-accent'){ prefs.accent = el.dataset.val; applyPrefs(); savePrefs(); toast('رنگ اصلی عوض شد'); }
-  if(act === 'reset-radius'){ prefs.radius = 16; applyPrefs(); savePrefs(); toast('گردی گوشه‌ها به حالت پیش‌فرض برگشت'); }
+  if(act === 'reset-radius'){ prefs.radius = 16; prefs.fontScale = 100; applyPrefs(); savePrefs(); toast('گوشه‌ها و اندازهٔ متن به حالت پیش‌فرض برگشت'); }
   if(act === 'reset-progress'){
     if(confirm('همهٔ پیشرفت‌ها، ویدیوها و آزمون‌های ذخیره‌شده پاک شود؟')){
       P = {}; V = {}; Q = {};
       saveProg(); saveVids(); saveQuiz(); render(); toast('همهٔ پیشرفت‌ها پاک شد');
     }
+  }
+  if(act === 'home-sel'){
+    localStorage.setItem('faraz.homeSel', JSON.stringify(el.dataset.val));
+    render();
   }
   if(act === 'toggle-level') el.closest('.level').classList.toggle('open');
   if(act === 'complete'){ P[el.dataset.key] = true; saveProg(); render(); toast('آفرین! درس تکمیل شد'); }
@@ -618,6 +639,9 @@ document.addEventListener('click', e => {
 
 document.getElementById('radius-input')?.addEventListener('input', e => {
   prefs.radius = +e.target.value; applyPrefs(); savePrefs();
+});
+document.getElementById('font-input')?.addEventListener('input', e => {
+  prefs.fontScale = +e.target.value; applyPrefs(); savePrefs();
 });
 document.getElementById('color-input')?.addEventListener('input', e => {
   prefs.color = e.target.value; prefs.accent = 'custom';

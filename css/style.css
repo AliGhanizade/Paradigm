@@ -174,7 +174,14 @@ h1.big em{font-style:normal;color:var(--ac)}
 .hero-actions{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap}
 
 .prog-card{padding:26px;position:relative}
-.prog-card h3{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:16px}
+.prog-card h3{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:12px}
+.prog-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.ptab{
+  padding:6px 14px;border-radius:999px;border:1px solid var(--stroke-soft);
+  background:var(--well);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:.2s;
+}
+.ptab:hover{color:var(--ink)}
+.ptab.on{background:var(--ac);border-color:transparent;color:var(--ac-ink)}
 .ring-wrap{position:relative;width:132px;margin-inline:auto}
 .ring-wrap .num{
   position:absolute;inset:0;display:grid;place-items:center;
@@ -196,6 +203,8 @@ h1.big em{font-style:normal;color:var(--ac)}
 
 /* کارت‌های دوره */
 .library{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.track-panel{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.track-panel .tp-head{grid-column:1/-1}
 .library-side{display:grid;gap:22px}
 .course-card-lg{padding:28px;display:flex;flex-direction:column;gap:16px}
 .course-card-lg:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
@@ -245,6 +254,7 @@ h1.big em{font-style:normal;color:var(--ac)}
   width:100%;display:flex;align-items:center;gap:14px;padding:16px 18px;background:none;border:none;
   cursor:pointer;text-align:start;transition:background .2s;
 }
+.level-head > span:not(.chip):not(.level-prog):not(.chev){min-width:0}
 .level-head:hover{background:var(--ac-soft)}
 .level-head strong{font-size:15.5px;display:block}
 .level-head .lmeta{font-size:12.5px;color:var(--muted)}
@@ -260,7 +270,7 @@ h1.big em{font-style:normal;color:var(--ac)}
 .lesson{
   display:flex;align-items:center;gap:16px;padding:13px 16px;
   border-radius:calc(var(--radius)*.7);background:var(--glass);
-  border:1px solid var(--stroke-soft);transition:transform .2s,box-shadow .2s;
+  border:1px solid var(--stroke-soft);transition:transform .2s,box-shadow .2s;min-width:0;
 }
 .lesson:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 .lesson .num{
@@ -349,7 +359,7 @@ html[data-theme="dark"]  .lv-a{background:rgba(255,128,133,.14);color:#ff8f93}
 .vid-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .vid-card{
   display:flex;align-items:center;gap:6px;padding:10px 12px;border-radius:calc(var(--radius)*.7);
-  background:var(--well);border:1px solid var(--stroke-soft);transition:.2s;
+  background:var(--well);border:1px solid var(--stroke-soft);transition:.2s;min-width:0;
 }
 .vid-card:hover{border-color:var(--ac-glow);transform:translateY(-2px)}
 .vid-card .v-link{display:flex;align-items:center;gap:11px;flex:1;min-width:0;overflow:hidden}
@@ -477,6 +487,7 @@ input[type=range]::-webkit-slider-thumb{
 }
 input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--ac);border:none}
 #rv{font-family:var(--mono);font-size:12.5px;color:var(--ac);font-weight:700;min-width:52px;text-align:center;direction:ltr}
+#fsv{font-family:var(--mono);font-size:12.5px;color:var(--ac);font-weight:700;min-width:46px;text-align:center;direction:ltr}
 .panel .btn{width:100%;justify-content:center;padding:10px;font-size:13px;margin-top:8px}
 
 /* ============ توست و بوت ============ */
@@ -505,6 +516,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
 @media(max-width:960px){
   .hero{grid-template-columns:1fr;padding-top:52px}
   .library{grid-template-columns:1fr}
+  .track-panel{grid-template-columns:1fr}
   .library-side{grid-template-columns:1fr 1fr}
   .tp-prog{margin-inline-start:0}
   .ov-points{grid-template-columns:1fr}
@@ -528,6 +540,16 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
   .vid-tabs button{flex:1;padding:8px 6px}
   .vid-grid{grid-template-columns:1fr}
   .ring-sm{display:none}
+  /* سرصفحهٔ سطح: در گوشی کوچک سه سطر تمیز به‌جای یک ردیف فشرده */
+  .level-head{flex-wrap:wrap;row-gap:10px;padding:14px 16px}
+  .level-head .chip{order:1}
+  .level-head .chev{order:2;margin-inline-start:auto}
+  .level-head > span:not(.chip):not(.level-prog):not(.chev){
+    order:3;flex:1 1 100%;min-width:0;
+  }
+  .level-head strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .level-prog{order:4;width:100%;margin-inline-start:0}
+  .level-prog .bar{width:auto;flex:1}
 }
 @media(max-width:480px){
   .vid-card{gap:8px;padding:10px}
