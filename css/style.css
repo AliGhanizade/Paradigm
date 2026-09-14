@@ -378,12 +378,12 @@ html[data-theme="dark"]  .lv-a{background:rgba(255,128,133,.14);color:#ff8f93}
 
 /* ============ پنل تنظیمات ============ */
 .panel{
-  position:fixed;top:78px;inset-inline-end:20px;width:308px;z-index:70;padding:22px;
+  position:fixed;top:72px;inset-inline-end:12px;width:288px;z-index:70;padding:22px;
   border-radius:calc(var(--radius) + 6px);background:var(--glass-strong);
   backdrop-filter:blur(26px) saturate(1.6);-webkit-backdrop-filter:blur(26px) saturate(1.6);
   border:1px solid var(--stroke);box-shadow:var(--shadow-lg);
   opacity:0;transform:translateY(-10px) scale(.98);pointer-events:none;transition:.28s cubic-bezier(.2,.9,.3,1.2);
-  max-height:calc(100vh - 100px);overflow-y:auto;
+  max-height:calc(100vh - 90px);overflow-y:auto;
 }
 .panel.open{opacity:1;transform:none;pointer-events:auto}
 .panel h3{font-size:15px;font-weight:900;display:flex;align-items:center;gap:9px;margin-bottom:20px}
@@ -460,13 +460,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
   .tp-prog{margin-inline-start:0}
   .ov-points{grid-template-columns:1fr}
   .quiz-opts{grid-template-columns:1fr}
+  .panel{width:262px;top:70px}
 }
 @media(max-width:640px){
   .nav{display:none}
   .library-side{grid-template-columns:1fr}
   .lesson .mins{display:none}
   .pager{margin-inline-start:0}
-  .panel{inset-inline:14px;width:auto}
+  .panel{
+    inset-inline:10px;top:auto;bottom:10px;width:auto;max-height:70vh;
+    transform:translateY(14px) scale(.98);
+  }
+  .panel.open{transform:none}
   .vid-grid{grid-template-columns:1fr}
   .vid-tabs{margin-inline-start:0}
   .ring-sm{display:none}
