@@ -1,0 +1,629 @@
+{
+  "id": "go",
+  "title": "گولنگ (Go)",
+  "tagline": "از اولین خط کد تا محصول واقعی روی سرور",
+  "icon": "go",
+  "status": "active",
+  "overview": {
+    "summary": "گو زبانی مینیمال برای دوران چند-هسته‌ای است: کامپایل سریع، باینری تک‌فایل، هم‌زمانی بومی با گوروتین و مدیریت خطای شفاف. این دوره از نصب و اولین برنامه شروع می‌شود و تا سرویس واقعی روی سرور جلو می‌رود.",
+    "keyPoints": [
+      "متغیرها تایپ استاتیک دارند اما کامپایلر تایپ را حدس می‌زند؛ := فقط داخل تابع",
+      "هر تایپ یک «مقدار صفر» دارد؛ متغیر بی‌مقدار nil نیست",
+      "فقط یک حلقه (for) و switch بدون break — زبان عمداً مینیمال است",
+      "توابع چند مقدار برمی‌گردانند؛ خطا یک مقدار است نه استثنا",
+      "اسلایس پنجره‌ای انعطاف‌پذیر روی آرایه است؛ مپ با الگوی comma-ok خوانده می‌شود",
+      "کلاس و وراثت نداریم؛ struct، receiver و ترکیب داریم",
+      "اینترفیس‌ها پیاده‌سازی ضمنی دارند: فقط کافی است متدها را داشته باشی",
+      "گوروتین با یک کلمهٔ go ساخته می‌شود؛ کانال راه امن ارتباط بین آن‌هاست",
+      "context همیشه اولین آرگومان است؛ ددلاین و لغو را در همهٔ زنجیرهٔ فراخوانی می‌برد",
+      "جنریک‌ها از نسخهٔ 1.18 با type parameter آمدند",
+      "تست با go test و الگوی table-driven بخشی از خود زبان است",
+      "باینری استاتیک یعنی image داکری چند-مگابایتی از scratch",
+      "slog خروجی JSON می‌دهد که مستقیم در ELK و Loki جست‌وجو می‌شود",
+      "لایه‌بندی (handler / service / repository) پروژه را برای بزرگ‌شدن آماده نگه می‌دارد"
+    ],
+    "cheatsheet": [
+      { "f": "basics.go", "x": "// ماژول و اجرا\n// go mod init example.com/app && go run main.go\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n    // متغیرها و مقدار صفر\n    var count int      // 0\n    label := \"سلام\"   // حدس تایپ\n\n    // حلقه و شرط\n    for i := 0; i < 3; i++ {\n        if i == 1 {\n            continue\n        }\n        fmt.Println(label, i, count)\n    }\n\n    // خطا به‌جای استثنا\n    _, err := os.Open(\"data.txt\")\n    if err != nil {\n        fmt.Errorf(\"باز شدن فایل: %w\", err)\n    }\n}" },
+      { "f": "concurrency.go", "x": "// گوروتین، کانال، WaitGroup و context\nch := make(chan string, 10)\nvar wg sync.WaitGroup\n\nfor _, u := range urls {\n    wg.Add(1)\n    go func(u string) {\n        defer wg.Done()\n        ch <- fetch(u)\n    }(u)\n}\ngo func() { wg.Wait(); close(ch) }()\n\nctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)\ndefer cancel()\nselect {\ncase r := <-ch:\n    fmt.Println(r)\ncase <-ctx.Done():\n    fmt.Println(\"لغو شد:\", ctx.Err())\n}" },
+      { "f": "server.go", "x": "// سرویس HTTP با کتابخانهٔ استاندارد\nmux := http.NewServeMux()\nmux.HandleFunc(\"GET /api/health\", func(w http.ResponseWriter, r *http.Request) {\n    w.WriteHeader(http.StatusOK)\n    fmt.Fprintln(w, \"سرویس زنده است\")\n})\nlog.Fatal(http.ListenAndServe(\":8080\", mux))\n\n// استقرار: CGO_ENABLED=0 go build → image از scratch" }
+    ]
+  },
+  "tracks": [
+    {
+      "id": "academic", "kind": "academic", "title": "مسیر اکادمیک", "icon": "cap",
+      "desc": "بر پایهٔ خودِ زبان: مفاهیم را از پایه و عمیق پیش می‌روی — همان‌طور که گو فکر می‌کند.",
+      "levels": [
+        { "t": "مقدماتی", "chip": "b", "lessons": [
+          { "id": "setup", "t": "آشنایی با گو و اولین برنامه", "m": 15,
+            "sum": "نصب، ساخت ماژول و اجرای اولین برنامه در پنج دقیقه",
+            "body": [
+              { "t": "p", "x": "گو (یا Golang) را گوگل سال ۲۰۰۹ معرفی کرد؛ با هدف ساختن زبانی که هم ساده باشد، هم در کامپایل سریع و هم برای دورانِ چند-هسته‌ای ساخته شده باشد. فلسفه‌اش یک جمله است: ابزار کمتر، کار بیشتر." },
+              { "t": "p", "x": "برخلاف زبان‌هایی که هر سال ویژگی جدید اضافه می‌کنند، تیم طراح گو سخت‌گیرانه از سادگی دفاع می‌کند. نتیجه این است که کد گو بعد از ده سال هم شبیه همان است که نوشته شده — و خواندن کد دیگران به‌جای رمزگشایی، شبیه خواندن متن است." },
+              { "t": "p", "x": "بعد از نصب از go.dev فقط دو کار لازم است: با <b>go mod init</b> یک ماژول (یعنی پروژه) بسازی و با <b>go run</b> اجرا کنی. همین!" },
+              { "t": "code", "f": "main.go", "x": "package main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"سلام، فراز!\")\n}" },
+              { "t": "p", "x": "سه چیز در این چند خط مهم است: هر فایل به یک package تعلق دارد؛ بستهٔ اجرایی باید package main و تابع main داشته باشد؛ و import فقط بسته‌هایی را می‌پذیرد که واقعاً استفاده شده‌اند — یک import بلااستفاده حتی اجازهٔ کامپایل هم نمی‌گیرد." },
+              { "t": "code", "f": "bash", "x": "go mod init example.com/hello\ngo run main.go\ngo build -o hello   # ساخت باینری تک‌فایل" },
+              { "t": "tip", "x": "فایل main.go بساز، دستور <b>go mod init</b> و بعد <b>go run main.go</b> را بزن — اولین برنامه‌ات اجرا شد. با <b>go build</b> هم خروجی باینری می‌گیری که بدون هیچ وابستگی‌ای روی هر سروری اجرا می‌شود." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "آشنایی با زبان گو و نصب", "q": "معرفی زبان برنامه نویسی گو فارسی" },
+                { "title": "نوشتن اولین برنامه در گو", "q": "نوشتن اولین برنامه گولنگ go run فارسی" },
+                { "title": "ساخت ماژول با go mod init", "q": "go mod init آموزش فارسی گولنگ" }
+              ],
+              "en": [
+                { "title": "Golang Tutorial for Beginners (TechWorld with Nana)", "vid": "yyUHQIec83I", "channel": "TechWorld with Nana", "dur": "1:11:45" },
+                { "title": "Go in 100 Seconds", "q": "Go in 100 seconds Fireship" },
+                { "title": "Your first Go program", "q": "golang first program go mod init tutorial" }
+              ]
+            }
+          },
+          { "id": "vars", "t": "متغیرها و انواع داده", "m": 15,
+            "sum": "var، := و قانون «مقدار صفر» در گو",
+            "body": [
+              { "t": "p", "x": "در گو دو راه تعریف متغیر داری: var برای حالت کلی و := فقط داخل تابع — که هم مقدار و هم تایپ را یک‌جا می‌سازد. تایپ‌ها استاتیک‌اند اما کامپایلر حدس می‌زند، پس تکرارشان لازم نیست." },
+              { "t": "p", "x": "گو به‌دقت بین int و int64 تفاوت می‌گذارد؛ int روی هر پلتفرم اندازهٔ بهینهٔ همان ماشین را دارد. برای عدد اعشاری هم float64 انتخاب پیش‌فرض است مگر دلیل خاصی داشته باشی." },
+              { "t": "code", "f": "vars.go", "x": "var name string = \"سارا\"\nage := 27        // int\nratio := 0.87    // float64\nactive := true   // bool\n\n// هر تایپ یک «مقدار صفر» دارد:\nvar count int    // 0\nvar label string // رشته‌ی خالی\nvar ok bool      // false" },
+              { "t": "p", "x": "قانون مقدار صفر یکی از عمدی‌ترین تصمیم‌های طراحی گوست: هیچ متغیری «تعریف‌نشده» نیست. int تازه‌ساخته صفر است، bool تازه‌ساخته false است و پوینتر تازه‌ساخته nil. این یعنی مسیر خطای Undefined Behavior از اول بسته است." },
+              { "t": "p", "x": "نکتهٔ کامپایلری مهم: متغیر تعریف‌شده ولی استفاده‌نشده در گو خطای کامپایل است، نه هشدار. کامپایلر مثل یک هم‌تیمی سخت‌گیر رفتار می‌کند که کد مرده را نمی‌پذیرد." },
+              { "t": "tip", "x": "متغیرِ بی‌مقدار در گو nil نیست؛ مقدار صفرِ همان تایپ است — منبع خیلی از باگ‌های اولیهٔ تازه‌کارها!" }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "متغیرها و انواع داده در گو", "q": "متغیرها و انواع داده در گولنگ فارسی" },
+                { "title": "مقدار صفر و تایپ‌های پایه", "q": "zero value گولنگ آموزش فارسی" },
+                { "title": "تفاوت var و := در گو", "q": "تفاوت var و := در زبان go فارسی" }
+              ],
+              "en": [
+                { "title": "Variables and types in Go", "q": "golang variables and types tutorial" },
+                { "title": "Go zero values explained", "q": "golang zero values explained" },
+                { "title": "Basic types tour of Go", "q": "tour of go basic types" }
+              ]
+            }
+          },
+          { "id": "flow", "t": "کنترل جریان: if، for و switch", "m": 20,
+            "sum": "یک حلقه برای همه‌چیز، if با statement و switch بدون break",
+            "body": [
+              { "t": "p", "x": "گو عمداً مینیمال است: فقط یک حلقه دارد (for)، شرطش می‌تواند قبل از خودش یک متغیر تعریف کند و switch بدون نوشتن break کار می‌کند — چون رفتار پیش‌فرض همین است. سه شکل حلقهٔ while و do-while هم با همین for ساخته می‌شوند." },
+              { "t": "code", "f": "flow.go", "x": "if n := len(items); n == 0 {\n    fmt.Println(\"لیست خالی است\")\n}\n\nfor i := 0; i < 5; i++ {\n    fmt.Println(\"دور\", i)\n}\n\n// شکل while:\nfor n < 100 {\n    n *= 2\n}\n\n// حلقه بی‌نهایت:\n// for { ... }\n\nswitch day := \"شنبه\"; day {\ncase \"شنبه\", \"یکشنبه\":\n    fmt.Println(\"شروع هفته\")\ndefault:\n    fmt.Println(\"ادامه‌ی هفته\")\n}" },
+              { "t": "p", "x": "switch در گو فقط برای مقایسهٔ برابری نیست: می‌تواند شرط بپذیرد (switch { case x > 10: }) و اولین شاخهٔ درست را اجرا کند — یک زنجیرهٔ if-else تمیزتر. اگر هم بخواهی رفتار fall-through زبان‌های C را داشته باشی، باید صریح با کلمهٔ fallthrough بنویسی." },
+              { "t": "tip", "x": "<b>for range</b> برای پیمایش اسلایس و مپ ساخته شده — در درس اسلایس‌ها با آن آشنا می‌شوی. از نسخهٔ 1.22 متغیر حلقه در هر دور تازه‌سازی می‌شود و باگ شکارِ متغیر حلقه همیشه‌شرحا حل شده است." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "شرط‌ها و حلقه‌ها در گو", "q": "شرط if و حلقه for در گولنگ فارسی" },
+                { "title": "switch در زبان گو", "q": "switch case در گولنگ فارسی" },
+                { "title": "for range و پیمایش", "q": "for range در زبان go فارسی" }
+              ],
+              "en": [
+                { "title": "Control flow in Go", "q": "golang if for switch control flow tutorial" },
+                { "title": "Go switch without break", "q": "golang switch statement fallthrough" },
+                { "title": "Loops in Go (the only loop)", "q": "golang for loop tutorial while equivalent" }
+              ]
+            }
+          },
+          { "id": "funcs", "t": "توابع؛ سوپرقدرت گو", "m": 20,
+            "sum": "چند مقدار برگشتی، خروجی نام‌دار و آرگومان متغیر",
+            "body": [
+              { "t": "p", "x": "توابع گو می‌توانند چند مقدار هم‌زمان برگردانند — و دقیقاً همین ویژگی ساده است که مدیریت خطا در گو را شفاف می‌کند: خطا همان‌جا در خروجی تابع نشست می‌دهد، نه اینکه یک روز از وسط کد بالا بپرد." },
+              { "t": "code", "f": "funcs.go", "x": "func divide(a, b float64) (float64, error) {\n    if b == 0 {\n        return 0, fmt.Errorf(\"تقسیم بر صفر\")\n    }\n    return a / b, nil\n}\n\nfunc sum(nums ...int) int { // تعداد آرگومان متغیر\n    total := 0\n    for _, n := range nums {\n        total += n\n    }\n    return total\n}" },
+              { "t": "p", "x": "توابع در گو «شهروند درجه‌یک» هستند: می‌توانی تابع را در متغیر نگه داری، به تابع دیگر رد کنی و از تابع برگردانی — پایهٔ همان الگوی middleware که در مسیر حرفه‌ای می‌بینی. تابع هم می‌تواند متدِ هیچ ساختاری نباشد؛ برای همین کارهای کوچک بدون ساختار اضافه انجام می‌شوند." },
+              { "t": "p", "x": "خروجی نام‌دار (named return) کد را در توابع طولانی خواناتر می‌کند و در حالت‌های خاص با defer کاربرد واقعی دارد؛ اما در توابع کوتاه همان return صریح واضح‌تر است." },
+              { "t": "tip", "x": "<b>_</b> یعنی «این مقدار را نمی‌خواهم» — الگویی که در کد گو همه‌جا می‌بینی. مثلاً line, err := f() و اگر خطا مهم نیست: _, err" }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "توابع در گو و خروجی چندگانه", "q": "توابع در زبان گولنگ multiple return فارسی" },
+                { "title": "آرگومان متغیر (variadic)", "q": "variadic function گولنگ فارسی" },
+                { "title": "توابع درجه‌یک و closure", "q": "first class functions گو فارسی" }
+              ],
+              "en": [
+                { "title": "Functions in Go", "q": "golang functions multiple return values tutorial" },
+                { "title": "Variadic and anonymous functions", "q": "golang variadic anonymous functions" },
+                { "title": "Closures in Go", "q": "golang closures explained" }
+              ]
+            }
+          },
+          { "id": "modules", "t": "پکیج‌ها و ماژول‌ها؛ نظم پروژه", "m": 20,
+            "sum": "go.mod، ایمپورت و چیدمان فایل‌های پروژه",
+            "body": [
+              { "t": "p", "x": "ماژول واحد انتشار کد در گو است و ریشه‌اش فایل go.mod است — جایی که نام ماژول، نسخهٔ زبان و وابستگی‌ها ثبت می‌شوند. داخل ماژول، کد در پکیج‌ها تقسیم می‌شود و هر پوشه یک پکیج است." },
+              { "t": "p", "x": "قاعدهٔ مهم: هر چیزی که با حرف بزرگ شروع شود (تایپ، تابع، متغیر) از بیرون پکیج دیده می‌شود؛ با حرف کوچک فقط داخل همان پکیج است. سطح دسترسی در گو همین یک قانون است — نه private، نه protected." },
+              { "t": "code", "f": "go.mod", "x": "module example.com/shop\n\ngo 1.22\n\nrequire github.com/google/uuid v1.6.0" },
+              { "t": "code", "f": "bash", "x": "go get github.com/google/uuid  # افزودن وابستگی\ngo mod tidy                    # پاک‌سازی وابستگی‌های بلااستفاده\ngo mod download                # دانلود به‌صورت کش محلی" },
+              { "t": "tip", "x": "پکیج را بر اساس «چه چیزی می‌دهد» نام‌گذاری کن، نه «چه چیزی هست»: پکیج pricing منطقی است، utils و helpers معمولاً نشانهٔ چیدمان نامناسب‌اند." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "پکیج و ماژول در گو", "q": "پکیج و ماژول در گولنگ go mod فارسی" },
+                { "title": "مدیریت وابستگی‌ها", "q": "go get go mod tidy فارسی گولنگ" },
+                { "title": "چیدمان پروژهٔ گو", "q": "ساختار پوشه پروژه گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Go modules explained", "q": "golang modules go.mod tutorial" },
+                { "title": "Packages and visibility", "q": "golang packages exported unexported" },
+                { "title": "Project layout in Go", "q": "golang project layout best practices" }
+              ]
+            }
+          }
+        ]},
+        { "t": "متوسط", "chip": "m", "lessons": [
+          { "id": "slices", "t": "اسلایس و مپ؛ قلب داده در گو", "m": 25,
+            "sum": "append، make و الگوی comma-ok",
+            "body": [
+              { "t": "p", "x": "آرایه در گو طول ثابت دارد، اما کار روزمره با «اسلایس» است — پنجره‌ای انعطاف‌پذیر روی آرایه که با append بزرگ می‌شود. مپ هم دیکشنری کلید-مقدار است با ساختار نوشتنی و خواندن سریع." },
+              { "t": "code", "f": "slices.go", "x": "names := []string{\"آلیس\", \"بابک\", \"نیما\"}\nnames = append(names, \"رها\")\n\nages := map[string]int{\n    \"آلیس\": 31,\n    \"بابک\": 27,\n}\nages[\"نیما\"] = 19\n\n// الگوی comma-ok: وجود کلید را هم می‌گوید\nif v, ok := ages[\"رها\"]; ok {\n    fmt.Println(\"سن رها:\", v)\n}" },
+              { "t": "p", "x": "زیر کاپوت اسلایس سه چیز است: اشاره‌گر به آرایهٔ زیرین، طول (len) و ظرفیت (cap). وقتی با s[1:3] برش می‌زنی، اسلایس جدید همان آرایهٔ زیرین را شریک است — تغییر در یکی در دیگری هم دیده می‌شود. append هم وقتی ظرفیت پر شود، آرایهٔ بزرگ‌تری می‌سازد و کپی می‌کند." },
+              { "t": "code", "f": "cap.go", "x": "s := make([]int, 0, 10) // طول ۰، ظرفیت ۱۰\ns = append(s, 1, 2, 3)\n\nsub := s[1:3]        // برش: شریکِ آرایهٔ زیرین\ncopy := append([]int(nil), s...) // کپی مستقل\n\nfor i, v := range s { // پیمایش: اندیس و مقدار\n    fmt.Println(i, v)\n}" },
+              { "t": "tip", "x": "append ممکن است زیرمجموعه‌ی آرایه‌ی زیرین را کپی کند؛ اگر دو اسلایس باید مستقل باشند از <b>copy</b> استفاده کن. مپ nil هم خواندنش امن است اما نوشتنش panic می‌دهد — اول با make بساز." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "اسلایس در گو از صفر", "q": "اسلایس در گولنگ append فارسی" },
+                { "title": "مپ و الگوی comma-ok", "q": "map در گولنگ فارسی comma ok" },
+                { "title": "تفاوت آرایه و اسلایس", "q": "تفاوت array و slice در گو فارسی" }
+              ],
+              "en": [
+                { "title": "Slices in Go (deep dive)", "q": "golang slices internals append cap len" },
+                { "title": "Go maps tutorial", "q": "golang maps comma ok idiom" },
+                { "title": "Arrays vs slices", "q": "golang array vs slice difference" }
+              ]
+            }
+          },
+          { "id": "pointers", "t": "پوینترها؛ بدون ترس و بدون اغراق", "m": 20,
+            "sum": "& و *، تفاوت مقدار و مرجع، و وقتی receiver پوینتری بخواهی",
+            "body": [
+              { "t": "p", "x": "پوینتر در گو آدرس یک متغیر است — و خبر خوب اینکه خبری از pointer arithmetic زبان C نیست. فقط دو عملگر می‌شناسی: & آدرس می‌دهد و * مقدار پشت آدرس را. گو garbage collector دارد، پس آزادسازی حافظه هم غمت نیست." },
+              { "t": "code", "f": "pointers.go", "x": "func bump(n *int) {\n    *n++ // مقدار پشت آدرس را تغییر بده\n}\n\nx := 5\nbump(&x)\nfmt.Println(x) // 6\n\np := &x        // پوینتر به x\nfmt.Println(*p) // 5\np = nil        // پوینترِ بدون مقصد؛ دوباره‌کَستِ: *p اینجا panic می‌دهد" },
+              { "t": "p", "x": "در گو همه‌چیز با مقدار پاس می‌شود — حتی وقتی پوینتر می‌فرستی، خود پوینتر کپی می‌شود اما هر دو به یک مقصد اشاره می‌کنند. برای همین تابعی که می‌خواهد دادهٔ بزرگ را تغییر دهد یا کپی سنگین را بی‌معنی کند، پوینتر می‌گیرد." },
+              { "t": "p", "x": "قاعدهٔ سرانگشتی متدها: اگر متد باید ساختار را تغییر دهد، یا ساختار بعد از اولین بار دیگر کپی نشود، receiver پوینتری بگیر؛ و یک‌دست بمان — همهٔ متدهای یک تایپ یا همه مقداری‌اند یا همه پوینتری." },
+              { "t": "tip", "x": "پوینترِ nil را قبل از dereference چک کن. خطرناک‌ترین جا جایی است که تابعی پوینتر برمی‌گرداند و در خطای مسیر، nil با خطا همراه است — همان‌جا است که if err != nil نجاتت می‌دهد." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "پوینتر در گو به زبان ساده", "q": "پوینتر در گولنگ فارسی" },
+                { "title": "پاس شدن با مقدار و مرجع", "q": "pass by value گولنگ فارسی" },
+                { "title": "pointer receiver در متدها", "q": "pointer receiver گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Pointers in Go explained", "q": "golang pointers explained simply" },
+                { "title": "Value vs pointer receivers", "q": "golang value vs pointer receiver" },
+                { "title": "Everything passes by value", "q": "golang pass by value copy semantics" }
+              ]
+            }
+          },
+          { "id": "structs", "t": "ساختارها و متدها", "m": 25,
+            "sum": "کلاس نداریم؛ struct، receiver و ترکیب داریم",
+            "body": [
+              { "t": "p", "x": "گو کلاس و وراثت ندارد. داده در struct می‌نشیند، متدها با «گیرنده» (receiver) به آن وصل می‌شوند و به‌جای وراثت، «ترکیب» (embedding) داریم — ساده‌تر و قابل‌پیش‌بینی‌تر." },
+              { "t": "code", "f": "structs.go", "x": "type User struct {\n    Name string\n    Age  int\n}\n\nfunc (u User) IsAdult() bool {\n    return u.Age >= 18\n}\n\nfunc (u *User) Birthday() {\n    u.Age++\n}\n\ntype Admin struct {\n    User          // ترکیب: فیلدهای User مستقیم در دسترس\n    Level int\n}\n\na := Admin{User: User{Name: \"بابک\", Age: 27}, Level: 2}\nfmt.Println(a.Name, a.IsAdult())" },
+              { "t": "p", "x": "ساختارها با تگ (tag) به دنیای بیرون هم معنی می‌دهند: تگ json مشخص می‌کند فیلد در JSON با چه نامی برود. این همان پلی است که بعداً در مسیر حرفه‌ای برای API واقعی لازم می‌شود." },
+              { "t": "code", "f": "json.go", "x": "type Order struct {\n    ID    int64   `json:\"id\"`\n    Title string  `json:\"title\"`\n    Total float64 `json:\"-,\"` // در JSON نیاید\n}\n\no := Order{ID: 7, Title: \"کتاب\"}\nb, _ := json.Marshal(o)\nfmt.Println(string(b)) // {\"id\":7,\"title\":\"کتاب\"}" },
+              { "t": "tip", "x": "ترکیب (embedding) وراثت نیست: متدهای ساختار داخلی «ارتقا» می‌یابند اما چندریختی آن را نمی‌دهد — برای چندریختی گو اینترفیس دارد." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "ساختار (struct) در گو", "q": "struct در گولنگ فارسی" },
+                { "title": "متدها و receiver", "q": "متد و receiver در گولنگ فارسی" },
+                { "title": "ترکیب به‌جای وراثت", "q": "embedding composition گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Structs and methods in Go", "q": "golang structs methods receiver tutorial" },
+                { "title": "Struct embedding", "q": "golang struct embedding composition" },
+                { "title": "JSON tags and marshaling", "q": "golang struct json tags marshal" }
+              ]
+            }
+          },
+          { "id": "interfaces", "t": "اینترفیس‌ها؛ بدون اعلام، فقط رفتار", "m": 30,
+            "sum": "پیاده‌سازی ضمنی، زیباترین ایدهٔ طراحی گو",
+            "body": [
+              { "t": "p", "x": "در گو هیچ‌کس «اعلام» نمی‌کند که اینترفیسی را پیاده کرده؛ کافیست تایپ شما متدهای لازم را داشته باشد — تمام. این پیاده‌سازی ضمنی است و کل انعطاف طراحی گو از همین می‌آید." },
+              { "t": "code", "f": "interfaces.go", "x": "type Speaker interface {\n    Speak() string\n}\n\n// هر چیزی که Speak داشته باشد، یک Speaker است\nfunc greet(s Speaker) {\n    fmt.Println(s.Speak())\n}\n\ntype Dog struct{}\nfunc (d Dog) Speak() string { return \"هاپ\" }\n\ntype Robot struct{}\nfunc (r Robot) Speak() string { return \"بیپ\" }" },
+              { "t": "p", "x": "بزرگ‌ترین اینترفیس‌های استاندارد گو یک‌متدی‌اند: io.Reader، io.Writer، fmt.Stringer. همین کوچکی باعث می‌شود ترکیب‌های خلاقانه ممکن شود: هر چیزی که می‌خواند را می‌توانی به هر چیزی که می‌نویسد وصل کنی (io.Copy) بدون آنکه هیچ‌کدام از دیگری خبر داشته باشند." },
+              { "t": "code", "f": "compose.go", "x": "// فایل، اتصال شبکه و بافر همه Reader/Writer اند\n// پس با یک کد، همه‌جا کار می‌کند:\n_, err := io.Copy(dst, src)\n\n// اینترفیس خالی: هر مقداری را می‌پذیرد\n// اما تا جای ممکن از any پرهیز کن؛ تایپ‌امنیتی می‌سوزد" },
+              { "t": "tip", "x": "اصطلاح معروف گو: «اینترفیس را آن‌جا بپذیر که استفاده می‌شود، نه آن‌جا که پیاده می‌شود». اینترفیس‌های بزرگ و چندمتدی را فقط وقتی بساز که مصرف‌کنندهٔ واقعی دارد." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "اینترفیس در گو", "q": "اینترفیس در گولنگ فارسی" },
+                { "title": "پیاده‌سازی ضمنی اینترفیس", "q": "implicit interface گولنگ فارسی" },
+                { "title": "io.Reader و io.Writer", "q": "io reader writer گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Interfaces in Go (implicit)", "q": "golang interfaces implicit implementation" },
+                { "title": "Small interfaces, big wins", "q": "golang io.Reader io.Writer composition" },
+                { "title": "Accept interfaces, return structs", "q": "golang accept interfaces return structs" }
+              ]
+            }
+          },
+          { "id": "errors", "t": "مدیریت خطا؛ صادقانه و بی‌ابهام", "m": 20,
+            "sum": "خطا یک مقدار است، نه یک استثنای پنهان",
+            "body": [
+              { "t": "p", "x": "خطا در گو «مقدار» است؛ تابعش برمی‌گرداند و تو همان‌جا هندلش می‌کنی. هیچ مسیر پنهانی برای پرش از وسط کد وجود ندارد — خواندن جریان خطا مثل خواندن متن است." },
+              { "t": "code", "f": "errors.go", "x": "file, err := os.Open(\"data.txt\")\nif err != nil {\n    return fmt.Errorf(\"باز کردن فایل: %w\", err) // %w خطا را می‌پیچد\n}\n\nif errors.Is(err, os.ErrNotExist) {\n    fmt.Println(\"فایل وجود ندارد\")\n}\n\nvar pathErr *os.PathError\nif errors.As(err, &pathErr) {\n    fmt.Println(\"مسیر مشکل‌دار:\", pathErr.Path)\n}" },
+              { "t": "p", "x": "سه ابزار اصلی داری: errors.Is برای مقایسه با خطای شناخته‌شده، errors.As برای بیرون‌کشیدن تایپ خطای سفارشی، و %w برای پیچیدن خطا با حفظ زنجیره. پیچیدن خطا با زمینهٔ کوتاه (چه کاری می‌شد؟) دیباگ شبانه را به دیباگ پنج‌دقیقه‌ای تبدیل می‌کند." },
+              { "t": "p", "x": "خطای سفارشی فقط یک تایپ است که Error() string دارد. برای خطاهای سطح دامنه (کاربر پیدا نشد، موجودی ناکافی) همین الگو را بساز تا لایه‌های بالاتر بتوانند روی خطا تصمیم بگیرند، نه فقط لاگش کنند." },
+              { "t": "tip", "x": "<b>panic</b> فقط برای حالت‌های غیرقابل بازیابی است (دادهٔ برنامه در حافظه خراب شده و ادامه دادن معنا ندارد)؛ در کد روزمره همیشه error برگردان." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "مدیریت خطا در گو", "q": "مدیریت خطا در گولنگ error فارسی" },
+                { "title": "errors.Is و errors.As", "q": "errors is as گولنگ فارسی" },
+                { "title": "پیچیدن خطا با %w", "q": "error wrapping گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Error handling in Go", "q": "golang error handling best practices" },
+                { "title": "errors.Is vs errors.As", "q": "golang errors.Is errors.As wrapping %w" },
+                { "title": "Custom error types", "q": "golang custom error type Error() string" }
+              ]
+            }
+          }
+        ]},
+        { "t": "پیشرفته", "chip": "a", "lessons": [
+          { "id": "concurrency", "t": "هم‌زمانی: گوروتین و کانال", "m": 35,
+            "sum": "هزاران کار موازی، بدون کلاس و بدون دردسر",
+            "body": [
+              { "t": "p", "x": "گوروتین تابعی است که موازی اجرا می‌شود — و ساختنش فقط یک کلمهٔ go قبل از فراخوانی است. گوروتین چند کیلوبایت حافظه می‌خواهد و scheduler گو آن را روی چند هسته می‌پراند؛ به‌همین دلیل ساختن ده‌ها هزار گوروتین معمولی است، نه استثنا." },
+              { "t": "p", "x": "کانال‌ها راه امن ارتباط بین گوروتین‌ها هستند. شعار گو: «حافظه را با ارتباط به اشتراک بگذار، نه با قفل‌ها». کانال بدون بافر هم‌زمان‌سازی می‌کند (فرستنده تا گیرنده آماده شود می‌ایستد) و کانال با بافر صف‌گونه رفتار می‌کند." },
+              { "t": "code", "f": "concurrency.go", "x": "func fetch(url string, out chan string) {\n    out <- \"نتیجه‌ی \" + url // ارسال به کانال\n}\n\nfunc main() {\n    out := make(chan string)\n    urls := []string{\"a.com\", \"b.com\", \"c.com\"}\n    for _, u := range urls {\n        go fetch(u, out) // سه گوروتین، هم‌زمان\n    }\n    for range urls {\n        fmt.Println(<-out) // دریافت از کانال\n    }\n}" },
+              { "t": "p", "x": "دو خطای کلاسیک را از همین ابتدا بشناس: گوروتین یتیم (leak) وقتی روی کانالی می‌ماند که هیچ‌وقت خوانده نمی‌شود؛ و race condition وقتی چند گوروتین هم‌زمان یک متغیر را می‌نویسند. دومی را با go run -race خودِ ابزار گو پیدا می‌کنی — قبل از پروداکشن، نه بعدش." },
+              { "t": "tip", "x": "برای انتظار از گروهی از گوروتین‌ها <b>sync.WaitGroup</b> تمیزتر است؛ برای صف با بافر: make(chan T, n). و یادت باشد کانال بسته‌شده فقط از سمت فرستنده بسته می‌شود." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "گوروتین و کانال در گو", "q": "گوروتین و کانال گولنگ فارسی" },
+                { "title": "هم‌زمانی در گو به زبان ساده", "q": "برنامه نویسی همزمان گو فارسی goroutine" },
+                { "title": "race condition و ابزار -race", "q": "data race گولنگ detect فارسی" }
+              ],
+              "en": [
+                { "title": "Goroutines and channels explained", "q": "golang goroutines channels explained" },
+                { "title": "Go concurrency patterns", "q": "golang concurrency patterns pipelining fan-in" },
+                { "title": "Race detector in Go", "q": "golang race detector -race tutorial" }
+              ]
+            }
+          },
+          { "id": "sync", "t": "ابزارهای sync؛ وقتی کانال اضافه‌کاری است", "m": 25,
+            "sum": "WaitGroup، Mutex و atomic برای اشتراک امن حافظه",
+            "body": [
+              { "t": "p", "x": "شعار «با ارتباط به اشتراک بگذار» عالی است، اما گاهی دادهٔ مشترک ساده‌ای داری (یک شمارنده، یک کش) و ساخت کانال برای آن اضافه‌کاری است. پکیج sync همین‌جا وارد می‌شود: قفل‌های سبک و primitiveهای هم‌زمانی." },
+              { "t": "code", "f": "sync.go", "x": "var (\n    counter int64\n    mu      sync.Mutex\n)\n\nfunc increment(wg *sync.WaitGroup) {\n    defer wg.Done()\n    mu.Lock()\n    counter++\n    mu.Unlock()\n}\n\nvar wg sync.WaitGroup\nfor i := 0; i < 1000; i++ {\n    wg.Add(1)\n    go increment(&wg)\n}\nwg.Wait()\nfmt.Println(counter) // دقیقاً ۱۰۰۰" },
+              { "t": "p", "x": "برای شمارنده‌های عددی حتی قفل هم لازم نیست: sync/atomic عملیات‌های اتمی می‌دهد که چند برابر سریع‌ترند. و sync.Once برای کاری که باید فقط یک بار انجام شود (مثل باز کردن اتصال دیتابیس) ساخته شده." },
+              { "t": "tip", "x": "قانون طلایی: روی مسیرهای بحرانی (hot path) از Mutex و در طراحی سطح بالا از کانال استفاده کن. و هرگز Mutex را کپی نکن — همیشه با پوینتر بگردش." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "WaitGroup در عمل", "q": "sync waitgroup گولنگ فارسی" },
+                { "title": "Mutex و قفل در گو", "q": "mutex گولنگ فارسی قفل" },
+                { "title": "عملیات اتمی با atomic", "q": "sync atomic گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "sync.WaitGroup tutorial", "q": "golang sync.WaitGroup tutorial" },
+                { "title": "Mutexes in Go", "q": "golang sync.Mutex explained" },
+                { "title": "Atomic operations", "q": "golang sync/atomic tutorial" }
+              ]
+            }
+          },
+          { "id": "context", "t": "Context؛ فرماندهٔ زمان و لغو", "m": 30,
+            "sum": "ددلاین، سیگنال لغو و مقادیر درخواست در یک قرارداد",
+            "body": [
+              { "t": "p", "x": "در سرویس‌های واقعی هر درخواست یک context دارد: ددلاین، سیگنال لغو و مقدارهایی که در طول زنجیرهٔ فراخوانی منتقل می‌شود. هر عملیاتی — از کوئری دیتابیس تا فراخوانی HTTP — باید به لغو بودن آن واکنش نشان دهد؛ وگرنه سرویس مشغول کارِ بی‌مصرف می‌ماند." },
+              { "t": "code", "f": "context.go", "x": "ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)\ndefer cancel()\n\nselect {\ncase <-ctx.Done():\n    fmt.Println(\"لغو شد:\", ctx.Err()) // deadline یا cancel\ncase result := <-out:\n    fmt.Println(\"نتیجه:\", result)\n}" },
+              { "t": "p", "x": "درخواست HTTP ورودی هم یک context آماده دارد (r.Context()) که وقتی کلاینت قطع شود، لغو می‌شود. اگر آن را به کوئری دیتابیس پاس بدهی (ctx از database/sql پشتیبانی می‌کند)، درخواست رهاشده دیگر منبع سرور را اشغال نمی‌کند." },
+              { "t": "code", "f": "chain.go", "x": "// زنجیره: context از بالا به پایین جریان دارد\nfunc handle(w http.ResponseWriter, r *http.Request) {\n    ctx := r.Context()\n    rows, err := db.QueryContext(ctx,\n        \"SELECT name FROM users WHERE id = $1\", 7)\n    // ...\n}" },
+              { "t": "tip", "x": "قانون طلایی: context همیشه <b>اولین آرگومان</b> تابع و نامش ctx باشد — کل اکوسیستم گو همین‌طور نوشته شده. و مقادیر داخل context را فقط برای اطلاعات درخواست (trace id و مانند آن) نگه دار، نه برای پاس دادن پارامترهای تابع." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "Context در گو", "q": "context در گولنگ فارسی" },
+                { "title": "لغو و ددلاین درخواست", "q": "context timeout cancel گولنگ فارسی" },
+                { "title": "context در کوئری دیتابیس", "q": "QueryContext گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Go context explained", "q": "golang context explained deadline cancel" },
+                { "title": "Context cancellation patterns", "q": "golang context cancellation patterns" },
+                { "title": "Request context in HTTP", "q": "golang http request context QueryContext" }
+              ]
+            }
+          },
+          { "id": "generics", "t": "جنریک‌ها؛ یک بار بنویس، هر تایپی بده", "m": 25,
+            "sum": "پارامتر تایپ از نسخهٔ ۱.۱۸ به بعد",
+            "body": [
+              { "t": "p", "x": "از نسخهٔ 1.18 گو type parameter دارد؛ می‌توانی توابع و تایپ‌های عمومی بنویسی بدون آنکه ایمنی تایپ از دست برود — یعنی هم DRY می‌مانی هم type-safe. قبل از جنریک، چنین کدی فقط با اینترفیس خالی (any) و castهای خطرناک ممکن بود." },
+              { "t": "code", "f": "generics.go", "x": "func Max[T cmp.Ordered](a, b T) T {\n    if a > b {\n        return a\n    }\n    return b\n}\n\nfunc Map[T, U any](in []T, f func(T) U) []U {\n    out := make([]U, len(in))\n    for i, v := range in {\n        out[i] = f(v)\n    }\n    return out\n}\n\ntype Stack[T any] struct {\n    items []T\n}\nfunc (s *Stack[T]) Push(v T) { s.items = append(s.items, v) }" },
+              { "t": "p", "x": "قید تایپ (constraint) مشخص می‌کند پارامتر T چه توانایی‌هایی باید داشته باشد. cmp.Ordered یعنی هر تایپی که > و < دارد؛ برای قیدهای خاص خودت هم می‌توانی اینترفیسی از union تایپ‌ها بسازی: type Number interface { int | float64 }." },
+              { "t": "tip", "x": "جنریک را وقتی بنویس که واقعاً لازم است؛ بیشترِ کدهای گو با اینترفیس ساده هم خوانا می‌مانند. اول اینترفیس، بعد جنریک." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "جنریک در گو از 1.18", "q": "generic گولنگ فارسی type parameter" },
+                { "title": "قیدهای تایپ (constraints)", "q": "type constraints گولنگ فارسی" },
+                { "title": "ساختار دادهٔ جنریک", "q": "generic struct گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Generics in Go", "q": "golang generics type parameters tutorial" },
+                { "title": "Type constraints deep dive", "q": "golang generics constraints cmp.Ordered" },
+                { "title": "When (not) to use generics", "q": "golang when to use generics" }
+              ]
+            }
+          },
+          { "id": "testing", "t": "تست‌نویسی؛ عادت حرفه‌ای‌ها", "m": 25,
+            "sum": "go test و الگوی table-driven",
+            "body": [
+              { "t": "p", "x": "ابزار تست داخل خودِ گو است: فایلی که به _test.go ختم شود و توابعش با Test شروع شوند، با go test اجرا می‌شود. محبوب‌ترین الگو table-driven است — همهٔ حالت‌ها در یک جدول و یک حلقهٔ اجرا." },
+              { "t": "code", "f": "user_test.go", "x": "func TestIsAdult(t *testing.T) {\n    cases := []struct {\n        name string\n        age  int\n        want bool\n    }{\n        {\"نوجوان\", 17, false},\n        {\"مرز دقیق\", 18, true},\n        {\"بزرگسال\", 30, true},\n    }\n\n    for _, c := range cases {\n        t.Run(c.name, func(t *testing.T) {\n            if got := (User{\"تست\", c.age}).IsAdult(); got != c.want {\n                t.Errorf(\"IsAdult(%d) = %v, می‌خواستم %v\",\n                    c.age, got, c.want)\n            }\n        })\n    }\n}" },
+              { "t": "p", "x": "ابزار استاندارد بیشتر از تست ساده می‌دهد: t.Parallel برای اجرای موازی، testing.Short برای حالت خلاصه، و benchmark با تابع‌های BenchmarkXxx که go test -bench اجرایشان می‌کند. برای تقلید وابستگی‌ها (network، db) نیازی به کتابخانه نیست — همان اینترفیس‌ها را با پیاده‌سازی قلابی پاس بده." },
+              { "t": "tip", "x": "<b>go test ./... -cover</b> پوشش تست کل ماژول را هم نشان می‌دهد و <b>-race</b> در حین تست race condition می‌گیرد — هر دو را عادت CI کن." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "تست‌نویسی در گو", "q": "تست نویسی در گولنگ go test فارسی" },
+                { "title": "الگوی table-driven", "q": "table driven test گولنگ فارسی" },
+                { "title": "بنچمارک در گو", "q": "benchmark گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Testing in Go", "q": "golang testing tutorial table driven" },
+                { "title": "Table-driven tests in depth", "q": "golang table driven tests subtests" },
+                { "title": "Benchmarking Go code", "q": "golang benchmarking b.N tutorial" }
+              ]
+            }
+          }
+        ]}
+      ]
+    },
+    {
+      "id": "business", "kind": "business", "title": "مسیر حرفه‌ای و بیزینسی", "icon": "brief",
+      "desc": "از نیاز واقعی برندها و تیم‌ها شروع می‌کنیم: ابزار داخلی، API، دیتابیس و استقرار.",
+      "levels": [
+        { "t": "مبتدی", "chip": "b", "lessons": [
+          { "id": "why", "t": "چرا گو برای کسب‌وکار؟", "m": 10,
+            "sum": "انتخابی که تیم‌های مهندسی بزرگ گرفتند و چرا",
+            "body": [
+              { "t": "p", "x": "داکر، کلادفلر، اوبر، دیجی‌کالا و خیلی از تیم‌های بزرگ زیرساخت را به گو آوردند. دلیلش فنی است: سرعت کامپایل بالا، باینری تک‌فایل بدون وابستگی، هم‌زمانی بومی و مصرف رم پایین." },
+              { "t": "p", "x": "ترجمهٔ این‌ها به زبان کسب‌وکار: onboarding سریع نیروی جدید (زبان کوچک است)، استقرار با یک کپی ساده و هزینهٔ ابری کمتر — چون هر نمونه از سرویس، رم کمتری می‌خواهد. نحوهٔ استخدام هم راحت‌تر است: برنامه‌نویس باتجربه معمولاً در چند هفته به بهره‌وری کامل در گو می‌رسد." },
+              { "t": "p", "x": "گو جای همه‌چیز را نمی‌گیرد: برای UI مرورگر جاوااسکریپت حرف اول را می‌زند و برای تحلیل داده پایتون قوی‌تر است. نقطهٔ درخشش گو بک‌اند، زیرساخت، CLI و هر سرویسی که باید هم‌زمانی بالا را با مصرف منبع پایین نگه دارد است." },
+              { "t": "tip", "x": "برای APIهای داخلی و سرویس‌های پرترافیک، گو یکی از کم‌هزینه‌ترین انتخاب‌های موجود است.",
+               "list": ["یک باینری، بدون وابستگی و بدون نصب runtime","استقرار با یک کپی روی سرور","گوروتین‌ها به‌جای سرورهای گران‌تر"]}
+            ],
+            "videos": {
+              "fa": [
+                { "title": "چرا گو برای پروژه‌های واقعی؟", "q": "چرا زبان گو فارسی مزایا" },
+                { "title": "گو در شرکت‌های بزرگ", "q": "استفاده از گولنگ در شرکت‌ها فارسی" },
+                { "title": "مقایسهٔ گو با زبان‌های بک‌اند", "q": "مقایسه go با python و node فارسی" }
+              ],
+              "en": [
+                { "title": "Why Go is taking over backend", "q": "why use golang for backend" },
+                { "title": "Companies using Go", "q": "companies using golang in production" },
+                { "title": "Go vs other languages", "q": "golang vs nodejs vs python performance" }
+              ]
+            }
+          },
+          { "id": "cli", "t": "اولین ابزار خط فرمان محصول", "m": 25,
+            "sum": "گزارش‌گیر، پشتیبان‌گیر یا اسکریپت مهاجرت؛ در چند خط",
+            "body": [
+              { "t": "p", "x": "هر تیمی ابزار داخلی لازم دارد: گزارش‌گیر، مهاجرت داده، پشتیبان‌گیری شبانه. با پکیج استاندارد flag همین ابزارها در چند خط ساخته می‌شوند — و چون باینری است، روی هر سروری بدون نصب چیزی اجرا می‌شود." },
+              { "t": "code", "f": "main.go", "x": "func main() {\n    word := flag.String(\"w\", \"دنیا\", \"نام مخاطب\")\n    n := flag.Int(\"n\", 1, \"تعداد تکرار\")\n    flag.Parse()\n\n    for i := 0; i < *n; i++ {\n        fmt.Printf(\"سلام، %s!\\n\", *word)\n    }\n}" },
+              { "t": "p", "x": "برای ابزار جدی‌تر: خروجی از stdin بگیر، به stdout بده و کدهای خروج (exit code) را معنادار کن — این سه چیز باعث می‌شود ابزارت در pipelineها و کرون‌جاب‌ها قابل اتکا باشد. لاگ خطا همیشه به stderr برود نه stdout، تا خروجی اصلی آلوده نشود." },
+              { "t": "code", "f": "bash", "x": "# اجرای ابزار با فلگ‌ها\n./backup --source /data --dest s3://bucket -v\n\n# خروجی معنادار: 0 موفق، 1 خطای ورودی، 2 خطای شبکه\n# cron: هر شب ۳ بامداد\n0 3 * * * /opt/tools/backup >> /var/log/backup.log 2>&1" },
+              { "t": "tip", "x": "وقتی پروژه بزرگ شد، پکیج <b>cobra</b> استاندارد de-facto CLI است — kubectl هم با آن ساخته شده." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "ساخت ابزار CLI با گو", "q": "ساخت cli با گولنگ فارسی" },
+                { "title": "فلگ‌ها و ورودی خط فرمان", "q": "flag package گولنگ فارسی" },
+                { "title": "ابزارهای داخلی تیم‌ها", "q": "ابزار خط فرمان با go فارسی" }
+              ],
+              "en": [
+                { "title": "Building CLI tools in Go", "q": "golang cli tool flag package tutorial" },
+                { "title": "Cobra CLI framework", "q": "golang cobra cli tutorial" },
+                { "title": "12-factor CLI design", "q": "golang cli best practices exit codes stdin stdout" }
+              ]
+            }
+          },
+          { "id": "rest", "t": "اولین REST API واقعی", "m": 30,
+            "sum": "با net/http کتابخانهٔ استاندارد، بدون فریم‌ورک",
+            "body": [
+              { "t": "p", "x": "یکی از دلایل محبوبیت گو در استارتاپ‌ها همین است: یک HTTP سرور Production-پسند با کتابخانهٔ استاندارد ساخته می‌شود — بدون هیچ وابستگی خارجی." },
+              { "t": "code", "f": "server.go", "x": "func main() {\n    mux := http.NewServeMux()\n    mux.HandleFunc(\"GET /api/health\", func(w http.ResponseWriter, r *http.Request) {\n        w.Header().Set(\"Content-Type\", \"application/json\")\n        w.WriteHeader(http.StatusOK)\n        json.NewEncoder(w).Encode(map[string]string{\"status\": \"ok\"})\n    })\n\n    log.Fatal(http.ListenAndServe(\":8080\", mux))\n}" },
+              { "t": "p", "x": "الگوی استاندارد endpoint: خواندن ورودی، اعتبارسنجی، فراخوانی منطق دامنه، و در پایان نوشتن خروجی JSON با کد وضعیت درست. خطا را همیشه با یک ساختار یکسان برگردان تا کلاینت سمت دیگر بتواند روی آن اتکا کند." },
+              { "t": "code", "f": "handler.go", "x": "type apiError struct {\n    Code    string `json:\"code\"`\n    Message string `json:\"message\"`\n}\n\nfunc writeErr(w http.ResponseWriter, status int, msg string) {\n    w.Header().Set(\"Content-Type\", \"application/json\")\n    w.WriteHeader(status)\n    json.NewEncoder(w).Encode(apiError{\"ERR\", msg})\n}\n// POST /api/orders → 201 Created\n// ورودی نامعتبر   → 400 Bad Request\n// خطای داخلی      → 500 + لاگ با شناسهٔ خطا" },
+              { "t": "tip", "x": "از نسخهٔ 1.22 به بعد مسیرهای متد-دار مثل <b>GET /api/health</b> و پارامترهای مسیر مثل <b>/api/orders/{id}</b> بدون فریم‌ورک پشتیبانی می‌شوند — برای خیلی از پروژه‌ها دیگر نیازی به router خارجی نیست." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "ساخت REST API با گو", "q": "rest api با گولنگ فارسی" },
+                { "title": "net/http از پایه", "q": "net http گولنگ فارسی سرور" },
+                { "title": "مدیریت خطا در API", "q": "handler خطا در golang api فارسی" }
+              ],
+              "en": [
+                { "title": "REST API with stdlib only", "q": "golang rest api net http no framework" },
+                { "title": "Go 1.22 new ServeMux", "q": "golang 1.22 servemux method routing" },
+                { "title": "JSON APIs in Go", "q": "golang json api handler best practices" }
+              ]
+            }
+          }
+        ]},
+        { "t": "متوسط", "chip": "m", "lessons": [
+          { "id": "db", "t": "اتصال به دیتابیس مثل حرفه‌ای‌ها", "m": 35,
+            "sum": "database/sql، connection pool و پارامترها",
+            "body": [
+              { "t": "p", "x": "پکیج database/sql یک رابط یکسان برای همهٔ دیتابیس‌هاست — PostgreSQL، MySQL و… فقط درایورشان عوض می‌شود. کانکشن‌پول هم داخلی مدیریت می‌شود؛ فقط سقف‌ها را تنظیم می‌کنی." },
+              { "t": "code", "f": "db.go", "x": "db, err := sql.Open(\"postgres\", os.Getenv(\"DATABASE_URL\"))\nif err != nil {\n    log.Fatal(err)\n}\ndb.SetMaxOpenConns(10)\ndb.SetMaxIdleConns(5)\ndb.SetConnMaxLifetime(time.Hour)\n\nvar name string\nerr = db.QueryRow(\n    \"SELECT name FROM users WHERE id = $1\", 7,\n).Scan(&name)" },
+              { "t": "p", "x": "سه تنظیم پول را جدی بگیر: MaxOpenConns سقف کل اتصال‌هاست (بیشتر از سقف دیتابیس بگذاری، دیتابیس خودش را بست می‌زند)؛ ConnMaxLifetime اتصال‌های کهنه را می‌گرداند تا اتصال ماندگار بین سرویس و لود-بالانسر دیتابیس مفت نماند." },
+              { "t": "p", "x": "برای تراکنش چندمرحله‌ای از Tx استفاده کن و خطا را همیشه Rollback بده — با defer، چون بعد از Commit کردن، Rollback بی‌ضرر می‌شود و فراموش‌کردنش اتصال را قفل می‌کند." },
+              { "t": "code", "f": "tx.go", "x": "tx, err := db.BeginTx(ctx, nil)\nif err != nil {\n    return err\n}\ndefer tx.Rollback() // اگر Commit نشده باشد، امن است\n\n// چند عملیات...\nif _, err := tx.ExecContext(ctx,\n    \"UPDATE accounts SET balance = balance - $1 WHERE id = $2\", 100, 1,\n); err != nil {\n    return err\n}\nreturn tx.Commit()" },
+              { "t": "tip", "x": "همیشه مقدارها را با پارامتر (<b>$1</b> یا <b>?</b>) بگذران؛ چسباندن رشته‌ها برای ساخت SQL یعنی دعوت‌نامهٔ تزریق SQL." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "اتصال گو به دیتابیس", "q": "اتصال گولنگ به دیتابیس postgres فارسی" },
+                { "title": "کانکشن‌پول در database/sql", "q": "connection pool گولنگ فارسی" },
+                { "title": "تراکنش در گو", "q": "transaction گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "database/sql in practice", "q": "golang database/sql tutorial postgres" },
+                { "title": "Connection pool settings", "q": "golang db SetMaxOpenConns pooling" },
+                { "title": "Transactions with defer rollback", "q": "golang sql transaction rollback defer" }
+              ]
+            }
+          },
+          { "id": "auth", "t": "احراز هویت با JWT و middleware", "m": 40,
+            "sum": "الگوی رایج محافظت از API در تیم‌ها",
+            "body": [
+              { "t": "p", "x": "الگوی رایج: هنگام لاگین یک توکن امضاشده برمی‌گردانی، و یک middleware در ابتدای هر درخواست اعتبارش را چک می‌کند. با پکیج golang-jwt کل این چرخه یک روز کاری هم ندارد." },
+              { "t": "code", "f": "auth.go", "x": "func auth(next http.Handler) http.Handler {\n    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n        token := r.Header.Get(\"Authorization\")\n        if !valid(token) {\n            http.Error(w, \"دسترسی نداری\", http.StatusUnauthorized)\n            return\n        }\n        next.ServeHTTP(w, r) // تازه اجازه‌ی رد شدن\n    })\n}\n\nmux.Handle(\"/api/orders\", auth(http.HandlerFunc(ordersHandler)))" },
+              { "t": "p", "x": "در توکن JWT فقط ادعاهای لازم را بگذار (شناسهٔ کاربر، نقش، زمان انقضا) — توکن کدگذاری می‌شود نه رمزنگاری، پس هرگز چیزی محرمانه داخلش نگذار. کلید امضا را هم از متغیر محیطی بخوان، نه در کد." },
+              { "t": "p", "x": "برای رفرش توکن، الگوی دو توکنی را بچین: access کوتاه‌عمر (چند دقیقه) و refresh طولانی‌عمر که فقط روی endpoint تازه‌سازی پذیرفته می‌شود. انقضای کوتاه یعنی اگر توکن لو رفت، پنجرهٔ سوءاستفاده کوچک است." },
+              { "t": "tip", "x": "middleware در گو فقط تابعی است که handler می‌گیرد و handler برمی‌گرداند — همین یک الگو، کل اکوسیستم است. زنجیره‌شان را با هم ترکیب کن: auth(logging(rateLimit(h)))." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "JWT در گو", "q": "jwt در گولنگ فارسی" },
+                { "title": "ساخت middleware احراز هویت", "q": "middleware احراز هویت گولنگ فارسی" },
+                { "title": "رفرش توکن و امنیت API", "q": "refresh token api گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "JWT auth in Go", "q": "golang jwt authentication tutorial" },
+                { "title": "Middleware chains", "q": "golang middleware pattern http" },
+                { "title": "Access and refresh tokens", "q": "golang jwt access refresh token flow" }
+              ]
+            }
+          },
+          { "id": "config", "t": "کانفیگ و سکرت‌ها؛ بدون عدد جادویی", "m": 25,
+            "sum": "متغیرهای محیطی، فایل env و بارگذاری ساخت‌یافته",
+            "body": [
+              { "t": "p", "x": "قاعدهٔ ۱۲-فاکتور می‌گوید: کانفیگ در کد نیست، در محیط است. آدرس دیتابیس، کلیدها و سقف‌ها از متغیرهای محیطی خوانده می‌شوند تا یک باینری در همهٔ محیط‌ها (تست، استیجینگ، پروداکشن) بدون کامپایل مجدد کار کند." },
+              { "t": "code", "f": "config.go", "x": "type Config struct {\n    Addr        string\n    DatabaseURL string\n    LogJSON     bool\n}\n\nfunc load() Config {\n    return Config{\n        Addr:        getEnv(\"ADDR\", \":8080\"),\n        DatabaseURL: mustEnv(\"DATABASE_URL\"), // بدون آن، بالا نیا\n        LogJSON:     os.Getenv(\"LOG_JSON\") == \"true\",\n    }\n}\n\nfunc mustEnv(k string) string {\n    v := os.Getenv(k)\n    if v == \"\" {\n        panic(\"متغیر محیطی لازم:\", k)\n    }\n    return v\n}" },
+              { "t": "p", "x": "برای کانفیگ‌های پرشاخه، فایل yaml + پکیج viper رایج است؛ اما مراقب باش وابستگی سنگین نسازی. سکرت‌ها (کلید JWT، پسورد دیتابیس) هرگز در git نمی‌آیند: در محیط از متغیر یا secret manager می‌آیند و در توسعهٔ محلی از فایل .env که در .gitignore است." },
+              { "t": "tip", "x": "سرویس را طوری بساز که اگر کانفیگ لازم نداشت، بالا نیاید (fail fast) — سرویسی که با کانفیگ نصفه بالا می‌آید، سه ساعت بعد در پروداکشن می‌میرد." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "کانفیگ سرویس در گو", "q": "مدیریت کانفیگ گولنگ env فارسی" },
+                { "title": "متغیرهای محیطی و .env", "q": "env file گولنگ فارسی" },
+                { "title": "مدیریت سکرت‌ها", "q": "secret management گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Configuration in Go services", "q": "golang configuration environment variables best practices" },
+                { "title": "Viper for config files", "q": "golang viper config yaml tutorial" },
+                { "title": "Secrets management", "q": "golang secrets management 12 factor" }
+              ]
+            }
+          },
+          { "id": "slog", "t": "لاگ ساخت‌یافته با slog", "m": 25,
+            "sum": "خروجی JSON قابل جست‌وجو در ELK و Grafana",
+            "body": [
+              { "t": "p", "x": "slog از نسخهٔ 1.21 در کتابخانهٔ استاندارد است؛ خروجی JSON با کلید-مقدار می‌دهد که مستقیم در ELK یا Loki قابل جست‌وجوست — یعنی «به‌جای خواندن لاگ، کوئری زدن روی لاگ»." },
+              { "t": "code", "f": "log.go", "x": "logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))\n\nlogger.Info(\"کاربر ثبت‌نام کرد\",\n    \"email\", \"sara@example.com\",\n    \"plan\", \"pro\",\n    \"duration_ms\", 412,\n)\n\n// سطح‌ها: Debug, Info, Warn, Error\nlogger.Error(\"کوئری شکست خورد\", \"err\", err, \"table\", \"orders\")" },
+              { "t": "p", "x": "لاگ در محیط توسعه متنی و خوانا (TextHandler) و در پروداکشن JSON است — فقط با یک سوییچ کانفیگ. سطح لاگ را هم از کانفیگ بخوان: در پروداکشن Info، در دیباگ Debug." },
+              { "t": "p", "x": "لاگ شامل دادهٔ حساس (پسورد، توکن، شماره کارت) نشود. و برای ردیابی یک درخواست در همهٔ لاگ‌ها، request id را یک‌بار در middleware بساز، در context بگذار و در همهٔ لاگ‌های همان درخواست صادر کن." },
+              { "t": "tip", "x": "قرار دادن شناسه‌ی درخواست (request id) در context، مسیر کامل یک درخواست را در همهٔ لاگ‌ها قابل ردیابی می‌کند." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "لاگ ساخت‌یافته با slog", "q": "slog گولنگ فارسی لاگ" },
+                { "title": "لاگ JSON در پروداکشن", "q": "structured logging گولنگ فارسی" },
+                { "title": "ردیابی درخواست با request id", "q": "request id logging گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "slog tutorial", "q": "golang slog structured logging tutorial" },
+                { "title": "JSON logs for production", "q": "golang json logging production handler" },
+                { "title": "Request tracing with context", "q": "golang request id middleware context logging" }
+              ]
+            }
+          }
+        ]},
+        { "t": "پیشرفته", "chip": "a", "lessons": [
+          { "id": "grpc", "t": "میکروسرویس و gRPC", "m": 45,
+            "sum": "وقتی سرویس‌ها زیاد می‌شوند، قرارداد مشترک لازم است",
+            "body": [
+              { "t": "p", "x": "وقتی تعداد سرویس‌ها و تیم‌ها زیاد می‌شود، gRPC با protobuf سریع‌تر و تایپ-امن‌تر از JSON است: یک فایل proto به‌عنوان قرارداد بین تیم‌ها مشترک می‌شود و کد کلاینت/سرور برای زبان‌های مختلف تولید می‌شود." },
+              { "t": "code", "f": "orders.proto", "x": "syntax = \"proto3\";\n\nservice Orders {\n    rpc Get(OrderRequest) returns (OrderReply);\n}\n\nmessage OrderRequest {\n    int64 id = 1;\n}\n\nmessage OrderReply {\n    int64 id = 1;\n    string title = 2;\n}" },
+              { "t": "p", "x": "سرعت gRPC از HTTP/2 و فرمت باینری protobuf می‌آید؛ اما مزیت واقعی در تایپ-امنیتی است: تغییر قرارداد بدون هماهنگی، کامپایل را می‌شکند — یعنی خطا در CI گرفته می‌شود نه در پروداکشن ساعت ۲ نیمه‌شب." },
+              { "t": "p", "x": "gRPC چهار الگوی ارتباطی دارد: یک‌دستی ساده، streaming از سرور، streaming از کلاینت و دوطرفه — برای چت، اعلان زنده و انتقال دادهٔ حجیم بدون سردرد WebSocket." },
+              { "t": "tip", "x": "برای APIهای عمومی که از بیرون سازمان صدا زده می‌شوند، REST و JSON هنوز انتخاب امن‌تری است. ترکیب رایج تیم‌ها: gRPC بین سرویس‌های داخلی، REST برای بیرون." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "gRPC در گو", "q": "grpc گولنگ فارسی" },
+                { "title": "protobuf و قرارداد سرویس", "q": "protobuf گولنگ فارسی" },
+                { "title": "میکروسرویس با گو", "q": "میکروسرویس با گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "gRPC in Go crash course", "q": "golang grpc tutorial protobuf" },
+                { "title": "gRPC vs REST", "q": "grpc vs rest when to use" },
+                { "title": "gRPC streaming patterns", "q": "golang grpc streaming bidirectional" }
+              ]
+            }
+          },
+          { "id": "docker", "t": "داکر و استقرار؛ از لپ‌تاپ تا سرور", "m": 40,
+            "sum": "بیلد چندمرحله‌ای و imageهای چند-مگابایتی",
+            "body": [
+              { "t": "p", "x": "باینری گو می‌تواند کاملاً استاتیک باشد؛ یعنی image نهایی واقعاً می‌تواند scratch (خالی!) باشد — یک image چند مگابایتی که هر جا اجرا می‌شود. با multi-stage build، کامپایل در یک مرحله و اجرا در image خالی انجام می‌شود." },
+              { "t": "code", "f": "Dockerfile", "x": "FROM golang:1.22 AS build\nWORKDIR /src\nCOPY go.mod go.sum ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 go build -o /app ./cmd/server\n\nFROM scratch\nCOPY --from=build /app /app\nENTRYPOINT [\"/app\"]" },
+              { "t": "p", "x": "ترتیب لایه‌ها عمدی است: اول go.mod و go.sum کپی می‌شوند تا دانلود وابستگی‌ها کش شود و هر تغییر کد، دانلود مجدد را تریگر نکند. این یک ترفند کوچک است که زمان CI را چند برابر کم می‌کند." },
+              { "t": "p", "x": "در image نهایی نکات امنیتی رعایت کن: USER با کاربر غیر root، پورت‌های لازم فقط، و کانفیگ همه با متغیر محیطی. بعدش استقرار همان است: image را push کن، در سرور pull و اجرا — یا بده به کوبرنتیز که خودش مدیریت کند." },
+              { "t": "tip", "x": "<b>CGO_ENABLED=0</b> یعنی بدون وابستگی به glibc — شرط اصلی ساختن image اسکرچ. اگر CGO لازم شد، image نهایی را alpine بگیر." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "داکری‌کردن سرویس گو", "q": "داکر گولنگ فارسی dockerfile" },
+                { "title": "بیلد چندمرحله‌ای", "q": "multi stage build گولنگ فارسی" },
+                { "title": "استقرار سرویس گو", "q": "استقرار سرویس گو روی سرور فارسی" }
+              ],
+              "en": [
+                { "title": "Dockerize a Go app", "q": "golang dockerfile multi stage build scratch" },
+                { "title": "Tiny Go images", "q": "golang scratch image CGO_ENABLED=0" },
+                { "title": "Deploying Go services", "q": "golang deployment docker production best practices" }
+              ]
+            }
+          },
+          { "id": "clean", "t": "معماری تمیز؛ پروژه‌ای که بزرگ‌شدنش می‌سر است", "m": 45,
+            "sum": "لایه‌بندی، تزریق وابستگی و تست‌پذیری",
+            "body": [
+              { "t": "p", "x": "در پروژه‌های واقعی نجات‌دهنده لایه‌بندی است: handler فقط HTTP را می‌فهمد، دامنه منطق خالص را نگه می‌دارد و repository فقط قرارداد دیتابیس — و وابستگی‌ها همیشه به سمتِ داخل جریان دارند." },
+              { "t": "code", "f": "orders/service.go", "x": "type OrderRepo interface { // دامنه قرارداد را تعریف می‌کند\n    Save(o Order) error\n}\n\ntype OrderService struct {\n    repo OrderRepo // پیاده‌سازی از بیرون تزریق می‌شود\n}\n\nfunc (s *OrderService) Place(ctx context.Context, o Order) error {\n    if o.Total <= 0 {\n        return ErrInvalidTotal // خطای دامنه، نه خطای HTTP\n    }\n    return s.repo.Save(o)\n}" },
+              { "t": "p", "x": "پوشه‌بندی ساده و اثبات‌شده: cmd/server نقطهٔ ورود، internal/domain منطق خالص، internal/repo پیاده‌سازی دیتابیس و internal/http هندلرها. خطای دامنه در دامنه تعریف می‌شود و لایهٔ HTTP تصمیم می‌گیرد کد وضعیت چه باشد — نه برعکس." },
+              { "t": "p", "x": "پاداش این معماری در تست دیده می‌شود: سرویس با یک repo قلابی (map در حافظه) تست می‌شود بدون دیتابیس و بدون network — سریع، قطعی، و بی‌اعتنا به اینترنت." },
+              { "t": "code", "f": "orders/service_test.go", "x": "type fakeRepo struct{ saved []Order }\nfunc (f *fakeRepo) Save(o Order) error { f.saved = append(f.saved, o); return nil }\n\nfunc TestPlace(t *testing.T) {\n    f := &fakeRepo{}\n    s := &OrderService{repo: f}\n    err := s.Place(context.Background(), Order{Total: 100})\n    if err != nil || len(f.saved) != 1 {\n        t.Errorf(\"سفارش باید ذخیره می‌شد\")\n    }\n}" },
+              { "t": "tip", "x": "قاعدهٔ ساده: بستهٔ دامنه هیچ import از database یا http نداشته باشد — تست‌پذیری‌اش معجزه می‌کند." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "معماری تمیز در گو", "q": "clean architecture گولنگ فارسی" },
+                { "title": "لایه‌بندی پروژهٔ گو", "q": "لایه بندی پروژه گولنگ فارسی" },
+                { "title": "تزریق وابستگی در گو", "q": "dependency injection گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Clean architecture in Go", "q": "golang clean architecture tutorial" },
+                { "title": "Dependency injection without frameworks", "q": "golang dependency injection constructor" },
+                { "title": "Testing with fakes, not mocks", "q": "golang testing fake repository interface" }
+              ]
+            }
+          },
+          { "id": "otel", "t": "قابل‌مشاهده بودن؛ متریک و تریسینگ", "m": 35,
+            "sum": "بعد از لاگ: متریک‌های RED و تریس توزیع‌شده",
+            "body": [
+              { "t": "p", "x": "سرویس زنده است یا نه؟ سریع است یا نه؟ این سؤال‌ها را باید خود سرویس جواب بدهد. سه ستون قابل‌مشاهده بودن: لاگ (چه شد)، متریک (چقدر و با چه روندی) و تریس (مسیر یک درخواست در کدام سرویس‌ها کجا وقت خورد)." },
+              { "t": "p", "x": "با متریک‌های RED شروع کن برای هر endpoint: Rate (تعداد درخواست در ثانیه)، Errors (نرخ خطا) و Duration (تأخیر — به‌خصوص صدک‌های ۹۵ و ۹۹، نه فقط میانگین). میانگین دروغ می‌گوید؛ تجربهٔ بدِ ۵٪ کاربران را صدک ۹۵ نشان می‌دهد." },
+              { "t": "code", "f": "bash", "x": "# استاندارد باز برای متریک و تریس: OpenTelemetry\n# endpoint متریک برای اسکرپ توسط Prometheus:\n#   GET /metrics\n# تریس به جمع‌کنندهٔ OTLP ارسال می‌شود:\n#   OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317\n# نمونهٔ متریک کلیدی:\n#   http_request_duration_seconds{method=\"POST\",route=\"/api/orders\"}" },
+              { "t": "p", "x": "برای تریس توزیع‌شده، trace id از سرویس به سرویس در هدرها سفر می‌کند و در context گو منتقل می‌شود. وقتی درخواستی کند شد، از همان trace id کل مسیر را می‌بینی: کدام کوئری ۹۰۰ میلی‌ثانیه برد و کدام سرویس خارجی تعطیل بود." },
+              { "t": "tip", "x": "قبل از هر بهینه‌سازی، متریک بساز. سرویسی که قابل اندازه‌گیری نیست، قابل بهبود هم نیست — فقط قابل حدس است." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "متریک و مانیتورینگ سرویس گو", "q": "monitoring گولنگ فارسی prometheus" },
+                { "title": "تریس توزیع‌شده", "q": "distributed tracing گولنگ فارسی" },
+                { "title": "OpenTelemetry در گو", "q": "opentelemetry گولنگ فارسی" }
+              ],
+              "en": [
+                { "title": "Observability for Go services", "q": "golang observability metrics tracing tutorial" },
+                { "title": "Prometheus metrics in Go", "q": "golang prometheus metrics endpoint" },
+                { "title": "OpenTelemetry tracing", "q": "golang opentelemetry tracing otel" }
+              ]
+            }
+          }
+        ]}
+      ]
+    }
+  ]
+}

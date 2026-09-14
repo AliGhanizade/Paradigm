@@ -1,0 +1,824 @@
+{
+  "id": "k8s",
+  "title": "کوبرنتیز",
+  "tagline": "اجرای سرویس‌ها در مقیاس؛ از پاد تا استقرار پروداکشن",
+  "icon": "server",
+  "status": "active",
+  "overview": {
+    "summary": "کوبرنتیز سیستم‌عامل ابر و استاندارد واقعی اجرای کانتینرها در مقیاس است. در این دوره از مفاهیم پایهٔ خوشه و پاد شروع می‌کنیم و گام‌به‌گام تا استقرار پایدار در پروداکشن، GitOps، امنیت و مدیریت هزینه پیش می‌رویم. هر درس با مانیفست‌های واقعی و دستورهای قابل‌اجرا همراه است تا یادگیری به مهارت عملی تبدیل شود.",
+    "keyPoints": [
+      "کوبرنتیز چند ماشین را مثل یک رایانهٔ واحد مدیریت می‌کند",
+      "مانیفست‌های YAML منبع حقیقت استقرار شما هستند",
+      "Pod کوچک‌ترین واحد اجراست، نه کانتینر",
+      "Deployment به‌روزرسانی غلتان و بازگشت به عقب را خودکار می‌کند",
+      "Service و Ingress ترافیک را به‌شکل پایدار به پادها می‌رسانند",
+      "ConfigMap و Secret پیکربندی را از ایمیج جدا می‌کنند",
+      "Probe‌ها تعیین می‌کنند پاد کی آماده است و کی باید ری‌استارت شود",
+      "HPA مقیاس‌دهی افقی را بر پایهٔ متریک خودکار می‌کند",
+      "StatefulSet و PVC ابزار بارهای دارای حالت مثل دیتابیس‌ها هستند",
+      "RBAC و NetworkPolicy ستون‌های امنیت خوشه‌اند",
+      "Helm انتشار تکرارپذیر و بسته‌بندی نمودارها را ممکن می‌کند",
+      "GitOps یعنی مخزن گیت، منبع حقیقت پروداکشن باشد",
+      "right-sizing درخواست‌ها و محدودیت‌های منابع مستقیماً روی هزینه اثر می‌گذارد",
+      "چک‌لیست پروداکشن مانع اکثر حوادث قابل پیش‌بینی می‌شود"
+    ],
+    "cheatsheet": [
+      { "f": "cheatsheet.yaml", "x": "مانیفست‌های خلاصهٔ اصلی" }
+    ]
+  },
+  "tracks": [
+    {
+      "id": "academic",
+      "kind": "academic",
+      "title": "مسیر اکادمیک",
+      "icon": "cap",
+      "desc": "بر پایهٔ خودِ کوبرنتیز: معماری، منابع و اصول کار خوشه",
+      "levels": [
+        {
+          "t": "مقدماتی",
+          "chip": "b",
+          "lessons": [
+            {
+              "id": "containers-docker-10min",
+              "t": "کانتینر و داکر در ۱۰ دقیقه",
+              "sum": "پیش‌نیاز کوبرنتیز: تفاوت کانتینر با ماشین مجازی، ایمیج و لایه‌ها",
+              "m": 20,
+              "body": [
+                { "t": "p", "x": "قبل از کوبرنتیز باید بدانید کانتینر چیست. کانتینر یک فرایند ایزوله است که از هستهٔ همان سیستم‌عامل میزبان استفاده می‌کند، برخلاف ماشین مجازی که یک سیستم‌عامل کامل را همراه خود حمل می‌کند. نتیجه: شروع در حد میلی‌ثانیه، مصرف حافظهٔ کم و تراکم بسیار بالاتر روی هر سرور." },
+                { "t": "p", "x": "داکر محبوب‌ترین ابزار ساخت و اجرای کانتینر است. شما یک <b>Dockerfile</b> می‌نویسید، از آن یک <b>ایمیج</b> می‌سازید و ایمیج را در یک <b>رجیستری</b> منتشر می‌کنید. کوبرنتیز دقیقاً همین ایمیج‌ها را روی خوشه اجرا می‌کند." },
+                { "t": "code", "f": "Dockerfile", "x": "FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --omit=dev\nCOPY . .\nEXPOSE 3000\nUSER node\nCMD [\"node\", \"server.js\"]" },
+                { "t": "code", "f": "bash", "x": "docker build -t myapp:1.0.0 .\ndocker run -p 3000:3000 myapp:1.0.0\ndocker ps\ndocker exec -it <container-id> sh" },
+                { "t": "p", "x": "هر دستور در Dockerfile یک <b>لایه</b> می‌سازد. داکر لایه‌های تغییریافته را کش می‌کند؛ به همین دلیل بهتر است ابتدا فایل‌های وابستگی را کپی کنید و بعد کد منبع را، تا با هر تغییر کد، لایهٔ نصب وابستگی‌ها دوباره ساخته نشود." },
+                { "t": "tip", "x": "ایمیج‌های کوچک یعنی استقرار سریع‌تر و سطح حملهٔ کمتر. نسخه‌های alpine یا distroless معمولاً بهترین انتخاب‌اند.", "list": ["از تگ latest به‌عنوان نسخهٔ رسمی استفاده نکنید", "هر ایمیج فقط یک فرایند اصلی داشته باشد", "فایل dockerignore. برای کاهش زمینهٔ build لازم است"] },
+                { "t": "quiz", "q": "تفاوت اصلی کانتینر با ماشین مجازی چیست؟", "options": ["کانتینر سیستم‌عامل کامل را اجرا می‌کند ولی ماشین مجازی فقط فرایند", "کانتینر فرایندی ایزوله روی هستهٔ میزبان است، ماشین مجازی سیستم‌عامل کامل مجازی می‌کند", "کانتینر همیشه کندتر از ماشین مجازی است", "ماشین مجازی به رجیستری نیاز دارد ولی کانتینر نه"], "a": 1, "why": "کانتینرها مجازی‌سازی در سطح سیستم‌عامل هستند و از هستهٔ میزبان به‌اشتراک استفاده می‌کنند؛ ماشین مجازی هایپروایزر و سیستم‌عامل کامل دارد." },
+                { "t": "p", "x": "اما داکر به‌تنهایی پاسخ سؤال‌های بزرگ نیست: اگر ۵۰ کانتینر از یک سرویس داشته باشید، یکی خراب شد چه کسی آن را بالا می‌آورد؟ روی کدام سرور؟ لود‌بالانس کجاست؟ پاسخ همهٔ این‌ها کوبرنتیز است که در درس بعدی آشنا می‌شوید." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "کانتینر و داکر چیست - توضیح ساده", "q": "کانتینر و داکر چیست توضیح ساده" },
+                  { "title": "شروع کار با داکر فارسی", "q": "داکر فارسی Docker" },
+                  { "title": "نوشتن Dockerfile به‌صورت عملی", "q": "Dockerfile فارسی ساخت ایمیج" }
+                ],
+                "en": [
+                  { "title": "Docker Tutorial for Beginners - Full Course", "q": "Docker Tutorial for Beginners TechWorld with Nana" },
+                  { "title": "Docker in 100 Seconds", "q": "Docker in 100 Seconds Fireship" },
+                  { "title": "Docker Containers and Kubernetes Fundamentals", "q": "Docker containers explained" }
+                ]
+              }
+            },
+            {
+              "id": "cluster-architecture",
+              "t": "معماری خوشه: Control Plane و Node",
+              "sum": "اجزای کنترل‌پلین و نودهای کارگر و نقش هر کدام",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "خوشهٔ کوبرنتیز دو نوع نقش دارد: <b>Control Plane</b> که مغز تصمیم‌گیرنده است و <b>Node</b>هایی که واقعاً بار کاری را اجرا می‌کنند. کل سیستم یک حلقهٔ آشتی‌سازی (reconciliation) است: شما حالت مطلوب را اعلام می‌کنید، کنترل‌پلین دائماً تلاش می‌کند واقعیت را به آن نزدیک کند." },
+                { "t": "p", "x": "چهار جزء اصلی کنترل‌پلین: <b>API Server</b> تنها درگاه ورودی همهٔ درخواست‌ها، <b>etcd</b> پایگاه‌دادهٔ key-value که کل حالت خوشه را نگه می‌دارد، <b>Scheduler</b> که تصمیم می‌گیرد هر پاد روی کدام نود اجرا شود، و <b>Controller Manager</b> که حلقه‌های کنترلی مثل Deployment و Node را می‌گرداند." },
+                { "t": "p", "x": "روی هر نود کارگر سه چیز اجرا می‌شود: <b>kubelet</b> که با API Server صحبت می‌کند و کانتینرها را مدیریت می‌کند، <b>kube-proxy</b> که قوانین شبکه و مسیریابی سرویس‌ها را پیاده می‌کند، و <b>container runtime</b> مثل containerd که کانتینر را واقعاً اجرا می‌کند." },
+                { "t": "code", "f": "bash", "x": "kubectl cluster-info\nkubectl get nodes -o wide\nkubectl describe node <node-name> | head -40" },
+                { "t": "code", "f": "bash", "x": "# دیدن پادهای خود کنترل‌پلین\nkubectl get pods -n kube-system\n# نسخهٔ API و اجزای خوشه\nkubectl version\nkubectl api-resources | head -20" },
+                { "t": "tip", "x": "هر چیزی که می‌بینید و می‌نویسید در نهایت به یک آبجکت در etcd تبدیل می‌شود. API Server فقط یک API اعلانی (declarative) با ذخیره‌سازی پایدار است؛ همهٔ اجزای دیگر با watch کردن این API همگام می‌مانند." },
+                { "t": "quiz", "q": "کدام جزء، کل حالت خوشهٔ کوبرنتیز را ذخیره می‌کند؟", "options": ["kubelet", "etcd", "kube-proxy", "Scheduler"], "a": 1, "why": "etcd پایگاه‌دادهٔ key-value خوشه است و تنها منبع حقیقت برای همهٔ آبجکت‌ها؛ اگر etcd از دست برود، حالت خوشه از دست رفته است." },
+                { "t": "p", "x": "در پروداکشن کنترل‌پلین همیشه چند‌تایی (HA) است: معمولاً سه یا پنج مستر با یک لود‌بالانس جلوی API Server، و etcd به‌صورت کلاستر سه‌عضوی. در سرویس‌های مدیریت‌شده مثل EKS، GKE و AKS کنترل‌پلین را خودِ ارائه‌دهنده نگه می‌دارد و شما فقط نودهای کارگر را می‌پردازید." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "معماری کوبرنتیز به زبان ساده", "q": "معماری کوبرنتیز Kubernetes Architecture فارسی" },
+                  { "title": "کنترل‌پلین و نودهای کارگر", "q": "کوبرنتیز کنترل پلین و ورکر نود فارسی" },
+                  { "title": "خوشهٔ کوبرنتیز چطور کار می‌کند", "q": "خوشه کوبرنتیز چگونه کار میکند" }
+                ],
+                "en": [
+                  { "title": "Kubernetes Architecture Explained", "q": "Kubernetes architecture explained control plane" },
+                  { "title": "Kubernetes Components Deep Dive", "q": "kubernetes api server etcd scheduler components" },
+                  { "title": "Kubernetes Course - Full Beginners Tutorial", "vid": "X48VuDVv0do", "channel": "TechWorld with Nana", "dur": "4:12:00" }
+                ]
+              }
+            },
+            {
+              "id": "kubectl-manifests",
+              "t": "kubectl و مانیفست‌های YAML",
+              "sum": "کار با ابزار اصلی خط فرمان و مدل اعلانی منابع",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "<b>kubectl</b> کلاینت رسمی کوبرنتیز است و با API Server صحبت می‌کند. هر کاری که رابط گرافیکی یا ابزار دیگری انجام می‌دهد، در نهایت همین فراخوانی‌های API است. دو سبک کار دارید: دستوری (imperative) برای آزمایش سریع و اعلانی (declarative) با فایل‌های YAML که روش استاندارد کار جدی است." },
+                { "t": "code", "f": "bash", "x": "# سبک دستوری برای آزمایش سریع\nkubectl create deployment hello --image=nginx:alpine\nkubectl expose deployment hello --port=80 --type=NodePort\nkubectl scale deployment hello --replicas=3\n# پاک‌سازی\nkubectl delete deployment hello" },
+                { "t": "code", "f": "pod.yaml", "x": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: web\n  labels:\n    app: web\nspec:\n  containers:\n    - name: web\n      image: nginx:1.27-alpine\n      ports:\n        - containerPort: 80" },
+                { "t": "p", "x": "هر مانیفست چهار بخش اصلی دارد: <b>apiVersion</b> نسخهٔ API هر منبع، <b>kind</b> نوع منبع، <b>metadata</b> شامل نام و برچسب‌ها و namespace، و <b>spec</b> یعنی حالت مطلوب. فیلد <b>status</b> را همیشه خودِ خوشه می‌نویسد، نه شما." },
+                { "t": "code", "f": "bash", "x": "kubectl apply -f pod.yaml\nkubectl get pods -o wide\nkubectl describe pod web\nkubectl delete -f pod.yaml\n# خروجی YAML از هر منبع زنده\nkubectl get pod web -o yaml" },
+                { "t": "tip", "x": "قبل از نوشتن هر فیلد از حافظه، از خود خوشه بپرسید: <b>kubectl explain pod.spec</b>. این دستور مستندات دقیق نسخهٔ خوشهٔ خودتان را نشان می‌دهد و از خطاهای نسخه جلوگیری می‌کند." },
+                { "t": "code", "f": "bash", "x": "# تنظیم alias و completion برای سرعت عمل\nsource <(kubectl completion bash)\nalias k=kubectl\ncomplete -o default -F __start_kubectl k\n# تفاوت محلی با وضعیت زنده قبل از اعمال\nkubectl diff -f pod.yaml" },
+                { "t": "quiz", "q": "روش درست برای اعمال تغییرات در محیط جدی کدام است؟", "options": ["kubectl run با دستورهای دستی روی خوشه", "نگهداری مانیفست‌ها در گیت و اعمال با kubectl apply -f", "ویرایش مستقیم منابع با kubectl edit در پروداکشن", "اجرای کانتینر با docker run روی نودها"], "a": 1, "why": "مدل اعلانی با مانیفست‌های نسخه‌دار در گیت تکرارپذیری، بازبینی و بازگشت به عقب را ممکن می‌کند؛ تغییر دستی منابع زنده به‌سرعت باعث drift می‌شود." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "کار با kubectl فارسی", "q": "kubectl فارسی دستورات کوبرنتیز" },
+                  { "title": "نوشتن مانیفست YAML برای کوبرنتیز", "q": "مانیفست YAML کوبرنتیز فارسی" },
+                  { "title": "اولین استقرار روی کوبرنتیز", "q": "اولین استقرار کوبرنتیز minikube فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes YAML explained", "q": "kubernetes yaml manifest explained" },
+                  { "title": "kubectl commands every engineer needs", "q": "kubectl commands tutorial" },
+                  { "title": "Kubernetes setup with Minikube", "q": "minikube setup tutorial kubernetes" }
+                ]
+              }
+            },
+            {
+              "id": "pods-deep",
+              "t": "Pod: کوچک‌ترین واحد اجرا",
+              "sum": "ساختار پاد، کانتینرهای هم‌خانه و کار عملی با پادها",
+              "m": 25,
+              "body": [
+                { "t": "p", "x": "<b>Pod</b> کوچک‌ترین واحد زمان‌بندی در کوبرنتیز است. پاد یک کانتینر یا چند کانتینری است که <b>آدرس IP، فضای پورت و فایل‌سیستم اشتراکی</b> دارند؛ یعنی در همان پاد به هم با localhost می‌رسند. دو کانتینر در یک پاد را هم‌خانه (co-located) می‌نامند." },
+                { "t": "code", "f": "pod-multi.yaml", "x": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: app-with-sidecar\nspec:\n  containers:\n    - name: app\n      image: myapp:1.0.0\n      ports:\n        - containerPort: 3000\n    - name: log-shipper\n      image: busybox:1.36\n      command: [\"sh\", \"-c\", \"tail -f /var/log/app/*.log\"]\n      volumeMounts:\n        - name: logs\n          mountPath: /var/log/app\n  volumes:\n    - name: logs\n      emptyDir: {}" },
+                { "t": "p", "x": "الگوی بالا <b>sidecar</b> نام دارد: یک کانتینر کمکی در کنار کانتینر اصلی، مثل ارسال‌کنندهٔ لاگ یا پروکسی. هر پاد یک <b>IP شخصی</b> در شبکهٔ خوشه می‌گیرد، اما پادها بی‌ثبات‌اند؛ هر بازسازی پاد IP جدید می‌گیرد و به همین دلیل سرویس جداگانه لازم است." },
+                { "t": "code", "f": "bash", "x": "kubectl run tmp --image=busybox:1.36 --rm -it --restart=Never -- sh\n# ورود به کانتینر و دیدن لاگ‌ها\nkubectl exec -it app-with-sidecar -c app -- sh\nkubectl logs app-with-sidecar -c app -f\n# اجرای دستور بدون ورود\nkubectl exec app-with-sidecar -- wget -qO- localhost:3000" },
+                { "t": "tip", "x": "هرگز پاد را مستقیم نسازید؛ همیشه یک مدیریت‌کننده مثل Deployment یا StatefulSet داشته باشید. پاد تنها وقتی ویرایش metadata از بین می‌رود؛ قابلیت بازسازی خودکار فقط با مدیریت‌کننده ممکن است." },
+                { "t": "quiz", "q": "دو کانتینر درون یک پاد چگونه با هم ارتباط می‌گیرند؟", "options": ["از طریق ClusterIP سرویس", "از طریق localhost چون پورت و IP مشترک دارند", "از طریق آدرس IP نود میزبان", "فقط از طریق شبکهٔ خارجی"], "a": 1, "why": "کانتینرهای یک پاد یک network namespace مشترک دارند، پس همدیگر را روی localhost و پورت‌های آزاد می‌بینند." },
+                { "t": "p", "x": "چرخهٔ عمر پاد از حالت <b>Pending</b> (در انتظار زمان‌بندی یا ایمیج) به <b>Running</b> و در نهایت <b>Succeeded</b> یا <b>Failed</b> می‌رود. وقتی پادی حذف می‌شود، <b>grace period</b> پیش‌فرض ۳۰ ثانیه است؛ می‌توانید با terminationGracePeriodSeconds آن را تنظیم کنید تا فرایند فرصت بستن تمیز داشته باشد." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "پاد چیست و چگونه کار می‌کند", "q": "پاد Kubernetes Pod چیست فارسی" },
+                  { "title": "چرخهٔ عمر پاد در کوبرنتیز", "q": "چرخه عمر پاد کوبرنتیز" },
+                  { "title": "کانتینرهای sidecar در عمل", "q": "sidecar container کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes Pods explained", "q": "kubernetes pods explained" },
+                  { "title": "Pod vs Container - what is a Pod", "q": "kubernetes pod vs container" },
+                  { "title": "Multi-container Pods and Sidecar Pattern", "q": "kubernetes sidecar pattern multi container pod" }
+                ]
+              }
+            },
+            {
+              "id": "deployment-replicaset",
+              "t": "Deployment و ReplicaSet",
+              "sum": "استقرار پایدار، به‌روزرسانی غلتان و بازگشت به عقب",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "زنجیرهٔ مدیریت برنامه‌های بدون حالت این‌گونه است: <b>Deployment</b> نسخه‌های ایمیج را مدیریت می‌کند، هر نسخه یک <b>ReplicaSet</b> می‌سازد و ReplicaSet تعداد مشخصی پاد را زنده نگه می‌دارد. هر تغییر در الگوی پاد، ReplicaSet جدید می‌سازد و قبلی را به‌تدریج خالی می‌کند." },
+                { "t": "code", "f": "deployment.yaml", "x": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: web\n  labels:\n    app: web\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: web\n  strategy:\n    type: RollingUpdate\n    rollingUpdate:\n      maxSurge: 1\n      maxUnavailable: 0\n  template:\n    metadata:\n      labels:\n        app: web\n    spec:\n      containers:\n        - name: web\n          image: myapp:1.0.0\n          ports:\n            - containerPort: 3000" },
+                { "t": "p", "x": "دو نکتهٔ حیاتی: فیلد <b>selector</b> باید با برچسب‌های الگوی پاد مطابقت داشته باشد، وگرنه اعمال با خطا رد می‌شود. تنظیم <b>maxUnavailable: 0</b> یعنی هنگام انتشار هیچ ظرفیتی از دست نمی‌رود؛ اول پاد جدید بالا می‌آید، بعد قدیمی جمع می‌شود." },
+                { "t": "code", "f": "bash", "x": "kubectl apply -f deployment.yaml\nkubectl rollout status deployment/web\nkubectl rollout history deployment/web\n# انتشار نسخهٔ جدید\nkubectl set image deployment/web web=myapp:1.1.0\n# بازگشت به نسخهٔ قبلی\nkubectl rollout undo deployment/web" },
+                { "t": "p", "x": "اگر کانتینری مدام کرش کند، در خروجی <b>CrashLoopBackOff</b> می‌بینید؛ اگر ایمیج قابل دریافت نباشد <b>ImagePullBackOff</b>. این حالت‌ها با دستور describe و دیدن رویدادها قابل عیب‌یابی‌اند." },
+                { "t": "code", "f": "bash", "x": "kubectl get events --sort-by=.lastTimestamp | tail -10\nkubectl describe pod <pod-name> | sed -n '/Events/,$p'" },
+                { "t": "tip", "x": "تعداد نسخه‌های نگه‌داشته‌شدهٔ تاریخ انتشار با revisionHistoryLimit تنظیم می‌شود (پیش‌فرض ۱۰). برای بازگشت سریع به عقب، تصویر نسخه‌های قبلی باید در رجیستری باقی بماند." },
+                { "t": "quiz", "q": "وقتی ایمیج داخل Deployment را عوض می‌کنید چه اتفاقی می‌افتد؟", "options": ["همهٔ پادها همزمان حذف و بازسازی می‌شوند", "ReplicaSet جدید ساخته می‌شود و پادهای جدید به‌تدریج جایگزین می‌شوند", "فقط برچسب پادها تغییر می‌کند", "هیچ اتفاقی نمی‌افتد تا ری‌استارت دستی"], "a": 1, "why": "تغییر الگوی پاد Deployment باعث ایجاد ReplicaSet تازه و به‌روزرسانی غلتان می‌شود؛ پادهای قدیمی با احترام به maxSurge و maxUnavailable حذف می‌شوند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "Deployment در کوبرنتیز", "q": "Kubernetes Deployment فارسی" },
+                  { "title": "به‌روزرسانی غلتان و بازگشت به عقب", "q": "rolling update rollout undo کوبرنتیز" },
+                  { "title": "ReplicaSet چگونه پادها را مدیریت می‌کند", "q": "ReplicaSet کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes Deployments Tutorial", "q": "kubernetes deployment tutorial rolling update" },
+                  { "title": "Kubernetes Course - Full Beginners Tutorial", "vid": "X48VuDVv0do", "channel": "TechWorld with Nana", "dur": "4:12:00" },
+                  { "title": "Rollouts and Rollbacks in Kubernetes", "q": "kubernetes rollout rollback strategy" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "متوسط",
+          "chip": "m",
+          "lessons": [
+            {
+              "id": "services-networking",
+              "t": "Service و شبکهٔ سرویس",
+              "sum": "ClusterIP، NodePort، LoadBalancer و DNS داخلی خوشه",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "پادها متولد می‌میرند و IPشان تغییر می‌کند؛ پس کلاینت‌ها نباید مستقیم به IP پاد وابسته باشند. <b>Service</b> یک آدرس پایدار جلوی مجموعه‌ای از پادها می‌سازد و با <b>selector</b> برچسب‌محور هدف را پیدا می‌کند؛ هر پاد جدید خودکار به عضویت اضافه می‌شود." },
+                { "t": "code", "f": "service.yaml", "x": "apiVersion: v1\nkind: Service\nmetadata:\n  name: web\nspec:\n  type: ClusterIP\n  selector:\n    app: web\n  ports:\n    - name: http\n      port: 80\n      targetPort: 3000" },
+                { "t": "p", "x": "سه نوع اصلی سرویس: <b>ClusterIP</b> آدرس داخلی خوشه (پیش‌فرض)، <b>NodePort</b> باز کردن یک پورت روی همهٔ نودها برای آزمایش یا محیط داخلی، و <b>LoadBalancer</b> که با فراخوانی ارائه‌دهندهٔ ابر یک بیلنس‌ر واقعی خارجی می‌سازد. برای ترافیک HTTP عمومی معمولاً LoadBalancer جلوی Ingress می‌گذارند." },
+                { "t": "code", "f": "bash", "x": "kubectl get svc web\nkubectl get endpointslices -l kubernetes.io/service-name=web\n# تست از درون خوشه\nkubectl run curl --image=curlimages/curl:8.8.0 --rm -it --restart=Never -- curl -s http://web" },
+                { "t": "p", "x": "DNS داخلی خوشه (CoreDNS) برای هر سرویس یک نام ثابت می‌سازد با الگوی <b>&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local</b>. اگر هر دو سرویس در یک namespace باشند، فقط نام سرویس کافی است: http://web. این الگوی کشف سرویس جایگزین نگهداری دستی IPهاست." },
+                { "t": "tip", "x": "سرویس فقط از روی برچسب‌ها کار می‌کند. اگر پادی اصلاً در لیست endpoints ظاهر نشد، تقریباً همیشه مشکل ناهم‌خوانی selector و برچسب‌های پاد یا آماده نبودن readinessProbe است." },
+                { "t": "quiz", "q": "دو سرویس در یک namespace چگونه با هم ارتباط برقرار می‌کنند؟", "options": ["با آدرس IP نود", "با نام سرویس مثل http://orders چون CoreDNS آن را حل می‌کند", "با آدرس IP مستقیم پادها", "حتماً به NodePort نیاز دارند"], "a": 1, "why": "CoreDNS نام هر سرویس را در همان namespace به ClusterIP حل می‌کند، پس استفاده از نام کوتاه سرویس کافی است." },
+                { "t": "p", "x": "پشت صحنه، <b>kube-proxy</b> روی هر نود قوانین مسیریابی را می‌نویسد (معمولاً با iptables یا IPVS) تا ترافیک ورودی به ClusterIP به یکی از پادهای سالم توزیع شود. توجه کنید توزیع در سطح اتصال است، نه بسته؛ برای بار HTTP سنگین اگر پخش ناهم‌وار دیدید، تایم‌اوت keep-alive کلاینت‌ها را بررسی کنید." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "Service در کوبرنتیز چیست", "q": "Kubernetes Service فارسی ClusterIP NodePort" },
+                  { "title": "شبکهٔ داخلی کوبرنتیز و DNS", "q": "شبکه کوبرنتیز DNS فارسی" },
+                  { "title": "تفاوت انواع سرویس در عمل", "q": "انواع Service کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes Services Explained", "q": "kubernetes service clusterip nodeport loadbalancer explained" },
+                  { "title": "Kubernetes Networking Fundamentals", "q": "kubernetes networking fundamentals kube-proxy" },
+                  { "title": "Cluster Networking and DNS deep dive", "q": "kubernetes coredns service dns" }
+                ]
+              }
+            },
+            {
+              "id": "configmap-secret",
+              "t": "ConfigMap و Secret",
+              "sum": "جدا کردن پیکربندی از ایمیج و مدیریت مقادیر حساس",
+              "m": 25,
+              "body": [
+                { "t": "p", "x": "اصل دوازده‌فاکتوری می‌گوید پیکربندی باید بیرون از کد باشد. در کوبرنتیز مقادیر غیر حساس در <b>ConfigMap</b> و مقادیر حساس در <b>Secret</b> نگهداری می‌شوند و به پادها به دو شکل تزریق می‌شوند: متغیر محیطی یا فایل mounted. تغییر ConfigMap پاد را ری‌استارت نمی‌کند مگر خودتان چیدمان را به‌روز کنید." },
+                { "t": "code", "f": "configmap.yaml", "x": "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: app-config\ndata:\n  LOG_LEVEL: \"info\"\n  APP_MODE: \"production\"\n  nginx.conf: |\n    server {\n      listen 80;\n      location / { proxy_pass http://app:3000; }\n    }" },
+                { "t": "code", "f": "pod-config.yaml", "x": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: app\nspec:\n  containers:\n    - name: app\n      image: myapp:1.0.0\n      envFrom:\n        - configMapRef:\n            name: app-config\n      env:\n        - name: DB_PASSWORD\n          valueFrom:\n            secretKeyRef:\n              name: db-credentials\n              key: password\n      volumeMounts:\n        - name: nginx-conf\n          mountPath: /etc/nginx/conf.d\n  volumes:\n    - name: nginx-conf\n      configMap:\n        name: nginx-config" },
+                { "t": "p", "x": "داده‌های Secret به‌صورت <b>base64</b> ذخیره می‌شوند که فقط انکودینگ است، نه رمزنگاری. به‌صورت پیش‌فرض هر کسی که بتواند Secret را در namespace بخواند، مقدارش را می‌بیند؛ برای امنیت واقعی به رمزنگاری etcd در حالت rest و یا ابزار خارجی مثل Vault و Sealed Secrets نیاز دارید." },
+                { "t": "code", "f": "bash", "x": "kubectl create secret generic db-credentials \\\n  --from-literal=password='S3cr3t!'\nkubectl get secret db-credentials -o jsonpath='{.data.password}' | base64 -d\n# ساخت ConfigMap از فایل\nkubectl create configmap nginx-config --from-file=nginx.conf" },
+                { "t": "tip", "x": "دو سبک ساخت Secret دارید: در مانیفست‌های عمومی از stringData استفاده کنید تا مقدار با متن خام نوشته شود. در CI/CD بهتر است Secretها هرگز به گیت نروند و با ابزارهایی مثل External Secrets Operator از انبار رمز سینک شوند.", "list": ["stringData برای نوشتن مقدار خام", "immutable: true برای جلوگیری از تغییر تصادفی", "mountPath جدا برای هر فایل پیکربندی"] },
+                { "t": "quiz", "q": "کدام گزاره دربارهٔ Secret درست است؟", "options": ["Secretها به‌صورت پیش‌فرض به‌طور کامل رمزنگاری شده‌اند", "base64 انکودینگ است نه رمزنگاری، پس رمزنگاری etcd یا ابزار خارجی لازم است", "Secretها فقط به شکل متغیر محیطی قابل استفاده‌اند", "Secretها را نمی‌توان به‌عنوان فایل mount کرد"], "a": 1, "why": "Secret فقط base64 انکود می‌شود؛ بدون فعال‌سازی encryption at rest در etcd یا ابزارهایی مثل Vault، محتوا برای هر کسی که به API دسترسی دارد قابل خواندن است." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "ConfigMap و Secret در کوبرنتیز", "q": "ConfigMap Secret کوبرنتیز فارسی" },
+                  { "title": "مدیریت پیکربندی برنامه در خوشه", "q": "مدیریت پیکربندی کوبرنتیز فارسی" },
+                  { "title": "امنیت مقادیر حساس در خوشه", "q": "امنیت Secret کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes ConfigMaps and Secrets", "q": "kubernetes configmap secret tutorial" },
+                  { "title": "Secrets Management Best Practices", "q": "kubernetes secrets management best practices vault" },
+                  { "title": "ConfigMaps in practice", "q": "kubernetes configmap env from volume mount" }
+                ]
+              }
+            },
+            {
+              "id": "ingress-traffic",
+              "t": "Ingress و ترافیک ورودی",
+              "sum": "مسیریابی HTTP از بیرون خوشه، TLS و Ingress Controller",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "Ingress لایهٔ <b>مسیریابی HTTP(S)</b> خوشه است: بر اساس نام دامنه و مسیر درخواست را به سرویس مناسب می‌فرستد. خود Ingress فقط یک قانون است؛ برای اجرا به <b>Ingress Controller</b> نیاز دارید مثل ingress-nginx، Traefik یا HAProxy که معمولاً پشت یک LoadBalancer ابری قرار می‌گیرد." },
+                { "t": "code", "f": "ingress.yaml", "x": "apiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: main\n  annotations:\n    nginx.ingress.kubernetes.io/ssl-redirect: \"true\"\nspec:\n  ingressClassName: nginx\n  tls:\n    - hosts:\n        - app.example.com\n      secretName: app-tls\n  rules:\n    - host: app.example.com\n      http:\n        paths:\n          - path: /\n            pathType: Prefix\n            backend:\n              service:\n                name: web\n                port:\n                  number: 80\n          - path: /api\n            pathType: Prefix\n            backend:\n              service:\n                name: api\n                port:\n                  number: 8080" },
+                { "t": "p", "x": "در این مثال، درخواست‌های app.example.com/api به سرویس api و بقیه به سرویس web می‌روند. بخش tls گواهی را از Secret با نوع kubernetes.io/tls می‌خواند؛ برای صدور و تمدید خودکار گواهی، <b>cert-manager</b> با Let's Encrypt استاندارد واقعی است." },
+                { "t": "code", "f": "bash", "x": "# نصب کنترلر رسمی nginx\nhelm upgrade --install ingress-nginx ingress-nginx \\\n  --repo https://kubernetes.github.io/ingress-nginx \\\n  -n ingress-nginx --create-namespace\n# تست مسیرهای تعریف‌شده\ncurl -H 'Host: app.example.com' http://<lb-ip>/api/health" },
+                { "t": "tip", "x": "behavior of pathType: <b>Exact</b> فقط مسیر دقیق، <b>Prefix</b> پیشوند مسیر و <b>ImplementationSpecific</b> بسته به کنترلر. اکثر موارد Prefix کافی است ولی مرزهای /api و /api/v2 را با دقت بچینید.", "list": ["همیشه ingressClassName را صریح بگذارید", "annotations مخصوص کنترلر بین controllerها قابل انتقال نیستند", "برای HTTP/2 و gRPC از پیکربندی grpc backend کنترلر استفاده کنید"] },
+                { "t": "quiz", "q": "مانیفست Ingress به‌تنهایی ترافیک را مسیریابی می‌کند، درست است؟", "options": ["بله، خود API Server ترافیک را می‌فرستد", "خیر، بدون Ingress Controller هیچ قانونی اجرا نمی‌شود", "بله به شرطی که NodePort داشته باشیم", "فقط وقتی Service از نوع LoadBalancer باشد"], "a": 1, "why": "Ingress فقط منبع تعریف قانون است؛ یک کنترلر مثل ingress-nginx باید آن را بخواند و روی پروکسی واقعی پیاده کند." },
+                { "t": "p", "x": "نسل بعدی این حوزه <b>Gateway API</b> است که نقش‌های نگهبان زیرساخت و مالک برنامه را از هم جدا می‌کند و پورت‌های غیر HTTP مثل TCP و gRPC را به‌شکل استاندارد پوشش می‌دهد. برای پروژه‌های جدید ارزش بررسی دارد، هرچند Ingress هنوز فراگیرترین گزینه است." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "Ingress چیست و چطور کار می‌کند", "q": "Ingress کوبرنتیز فارسی" },
+                  { "title": "راه‌اندازی ingress-nginx در عمل", "q": "ingress nginx فارسی راه اندازی" },
+                  { "title": "گواهی TLS رایگان با cert-manager", "q": "cert-manager فارسی TLS کوبرنتیز" }
+                ],
+                "en": [
+                  { "title": "Kubernetes Ingress Tutorial", "q": "kubernetes ingress tutorial nginx controller" },
+                  { "title": "Ingress vs Gateway API", "q": "kubernetes gateway api vs ingress" },
+                  { "title": "cert-manager TLS automation", "q": "cert-manager lets encrypt kubernetes tutorial" }
+                ]
+              }
+            },
+            {
+              "id": "probes-health",
+              "t": "Probe و سلامت سرویس",
+              "sum": "liveness، readiness و startupProbe برای پایداری واقعی",
+              "m": 25,
+              "body": [
+                { "t": "p", "x": "کوبرنتیز نمی‌تواند حدس بزند برنامه‌تان سالم است؛ باید با <b>Probe</b> بپرسید. سه نوع اصلی: <b>livenessProbe</b> اگر شکست بخورد کانتینر ری‌استارت می‌شود، <b>readinessProbe</b> اگر شکست بخورد پاد از لیست سرویس حذف می‌شود ولی ری‌استارت نمی‌شود، و <b>startupProbe</b> که برای برنامه‌های کند در راه‌اندازی است و تا موفق نشود دو probe دیگر را تعطیل می‌کند." },
+                { "t": "code", "f": "deployment-probes.yaml", "x": "spec:\n  containers:\n    - name: api\n      image: myapi:2.1.0\n      startupProbe:\n        httpGet:\n          path: /healthz\n          port: 8080\n        failureThreshold: 30\n        periodSeconds: 2\n      readinessProbe:\n        httpGet:\n          path: /ready\n          port: 8080\n        initialDelaySeconds: 2\n        periodSeconds: 5\n      livenessProbe:\n        httpGet:\n          path: /healthz\n          port: 8080\n        initialDelaySeconds: 5\n        periodSeconds: 10\n        timeoutSeconds: 2" },
+                { "t": "p", "x": "قاعدهٔ طلایی: liveness باید به چیزهایی وابسته باشد که فقط با ری‌استارت درست می‌شوند (مثل ددلاک داخلی)، نه وابستگی‌های خارجی مثل دیتابیس؛ اگر دیتابیس قطع شود و liveness شکست بخورد، همهٔ پادها همزمان ری‌استارت می‌شوند و بحران بدتر می‌شود. readiness دقیقاً برای همین وابستگی‌هاست." },
+                { "t": "code", "f": "bash", "x": "kubectl get pods -w\n# دیدن وضعیت probeها و رویدادهای شکست\nkubectl describe pod <pod-name> | grep -A5 'Liveness\\|Readiness'\n# تست دستی endpoint از درون پاد\nkubectl exec -it <pod-name> -- wget -qO- localhost:8080/ready" },
+                { "t": "tip", "x": "سه خطای رایج: endpointهای سنگین برای probe (مثل کوئری دیتابیس در هر ثانیه)، absence of probe یعنی هیچ، و تنظیم failureThreshold خیلی کم که با هر مکث GC پاد را می‌کشد.", "list": ["healthz سبک و بدون وابستگی خارجی باشد", "ready وضعیت وابستگی‌های بحرانی را منعکس کند", "مقادیر preStop و grace period را با probe هماهنگ کنید"] },
+                { "t": "quiz", "q": "پادی که readinessProbe آن شکست می‌خورد چه می‌شود؟", "options": ["فوراً ری‌استارت می‌شود", "از توزیع ترافیک سرویس خارج می‌شود ولی اجرایش ادامه پیدا می‌کند", "پاک می‌شود و از نو ساخته می‌شود", "هیچ اتفاقی نمی‌افتد"], "a": 1, "why": "readiness فقط عضویت پاد در endpoints سرویس را کنترل می‌کند؛ حذف از گردش ترافیک بدون ری‌استارت، ابزار مدیریت بار در زمان وابستگی ناپایدار است." },
+                { "t": "p", "x": "علاوه بر httpGet، دو نوع probe دیگر دارید: <b>tcpSocket</b> فقط باز بودن پورت را می‌سنجد (سریع اما سطحی — سرور ممکن است پورت را باز کند ولی درخواست‌ها را پاسخ ندهد) و <b>exec</b> که یک دستور اجرا می‌کند و کد خروجی صفر یعنی سالم. برای gRPC، فیلد grpc با سرویس و پورت استاندارد health checking بهترین گزینه است." },
+                { "t": "tip", "x": "در حین حذف پاد، مکانیزم probe و termination با هم تداخل دارند: readiness فوراً شکست نمی‌خورد مگر preStop را بچینید. الگوی درست: preStop با sleep چند‌ثانیه‌ای تا لود‌بالانس‌ها پاد را از گردش بیرون ببرند، بعد بستن تمیز اتصال‌ها." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "Probeها در کوبرنتیز", "q": "liveness readiness probe کوبرنتیز فارسی" },
+                  { "title": "سلامت سرویس و ری‌استارت خودکار", "q": "سلامت سرویس کوبرنتیز health check فارسی" },
+                  { "title": "خطاهای رایج پیکربندی probe", "q": "کوبرنتیز CrashLoopBackOff عیب یابی فارسی" }
+                ],
+                "en": [
+                  { "title": "Liveness vs Readiness vs Startup Probes", "q": "kubernetes liveness readiness startup probe explained" },
+                  { "title": "Health checks done right", "q": "kubernetes health checks best practices" },
+                  { "title": "Debugging CrashLoopBackOff", "q": "debug crashloopbackoff kubernetes" }
+                ]
+              }
+            },
+            {
+              "id": "scaling-hpa",
+              "t": "مقیاس‌دهی و HPA",
+              "sum": "مقیاس دستی، HorizontalPodAutoscaler و متریک‌سرو",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "مقیاس‌دهی افقی یعنی تعداد پادها، عمودی یعنی منابع هر پاد. مقیاس دستی ساده است: kubectl scale. اما در بار متغیر واقعی، <b>HorizontalPodAutoscaler (HPA)</b> تعداد رپلیکا را بر اساس متریک مثل میانگین مصرف CPU یا متریک سفارشی خودکار تنظیم می‌کند." },
+                { "t": "code", "f": "hpa.yaml", "x": "apiVersion: autoscaling/v2\nkind: HorizontalPodAutoscaler\nmetadata:\n  name: web\nspec:\n  scaleTargetRef:\n    apiVersion: apps/v1\n    kind: Deployment\n    name: web\n  minReplicas: 3\n  maxReplicas: 20\n  metrics:\n    - type: Resource\n      resource:\n        name: cpu\n        target:\n          type: Utilization\n          averageUtilization: 70\n  behavior:\n    scaleDown:\n      stabilizationWindowSeconds: 300" },
+                { "t": "p", "x": "HPA برای محاسبهٔ درصد، مقادیر <b>requests</b> پاد را مبنای ۱۰۰٪ قرار می‌دهد؛ پس بدون تعریف درست requests در Deployment، مقیاس‌دهی خودکار اصلاً معنی ندارد. متریک از <b>metrics-server</b> می‌آید که در اکثر خوشه‌های مدیریت‌شده نصب است ولی در kind یا minikube معمولاً باید خودتان نصبش کنید." },
+                { "t": "code", "f": "bash", "x": "# نصب metrics-server در خوشهٔ محلی\nhelm upgrade --install metrics-server metrics-server \\\n  --repo https://kubernetes-sigs.github.io/metrics-server \\\n  -n kube-system\nkubectl top nodes\nkubectl top pods\n# مقیاس‌دهی دستی\nkubectl scale deployment web --replicas=5" },
+                { "t": "tip", "x": "فیلد <b>behavior</b> اجازه می‌دهد سرعت مقیاس‌شدن به بالا و پایین را جدا کنترل کنید. مقیاس‌شدن به پایین با پنجرهٔ پایداری ۳۰۰ ثانیه از فلیپ‌فلاپ در بار نوسانی جلوگیری می‌کند.", "list": ["minReplicas را حداقل ۲-۳ بگذارید تا از بین رفتن ظرفیت با یک پاد نداشته باشید", "برای متریک‌های سفارشی مثل صف یا تعداد درخواست، Prometheus Adapter لازم است", "اگر HPA فعال است، حذف replicas از مانیفست Deployment تا گیت با واقعیت بجنگد"] },
+                { "t": "quiz", "q": "پایهٔ محاسبهٔ averageUtilization در HPA چیست؟", "options": ["محدودیت (limit) CPU پاد", "درخواست (request) CPU تعریف‌شده برای کانتینر", "مصرف کل نود", "تعداد درخواست‌های HTTP بر ثانیه"], "a": 1, "why": "HPA درصد مصرف را نسبت به requests محاسبه می‌کند؛ بدون requests معتبر، HPA نمی‌تواند درصد معناداری بسازد و کار نمی‌کند." },
+                { "t": "p", "x": "مکمل HPA در سطح نود، <b>Cluster Autoscaler</b> یا Karpenter است: وقتی پادی نمی‌تواند زمان‌بندی شود نود اضافه می‌کنند و وقتی نودها کم‌بار شدند جمعش می‌کنند. این ترکیب یعنی مقیاس از دو لایهٔ پاد و نود به‌طور مستقل کار می‌کند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "مقیاس‌دهی خودکار با HPA", "q": "HPA autoscaling کوبرنتیز فارسی" },
+                  { "title": "requests و limits در عمل", "q": "requests limits کوبرنتیز فارسی" },
+                  { "title": "مقیاس‌دهی افقی و عمودی", "q": "مقیاس افقی کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Horizontal Pod Autoscaler explained", "q": "kubernetes hpa horizontal pod autoscaler tutorial" },
+                  { "title": "Kubernetes resource requests and limits", "q": "kubernetes requests limits explained" },
+                  { "title": "Autoscaling with Karpenter and Cluster Autoscaler", "q": "karpenter vs cluster autoscaler tutorial" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "پیشرفته",
+          "chip": "a",
+          "lessons": [
+            {
+              "id": "statefulset-volumes",
+              "t": "StatefulSet و حجم‌ها",
+              "sum": "بارهای دارای حالت: هویت پایدار، PV، PVC و StorageClass",
+              "m": 35,
+              "body": [
+                { "t": "p", "x": "Deployment برای پادهای بی‌ثبات و قابل تعویض ساخته شده؛ اما دیتابیس‌ها به <b>هویت پایدار</b> و <b>دیسک پایدار</b> نیاز دارند. <b>StatefulSet</b> برای هر رپلیکا نام ثابت (app-0، app-1 و...)، استقرار ترتیبی، و یک PVC اختصاصی با نام ثابت می‌سازد که حتی پس از حذف پاد باقی می‌ماند." },
+                { "t": "code", "f": "statefulset.yaml", "x": "apiVersion: apps/v1\nkind: StatefulSet\nmetadata:\n  name: postgres\nspec:\n  serviceName: postgres\n  replicas: 3\n  podManagementPolicy: OrderedReady\n  selector:\n    matchLabels:\n      app: postgres\n  template:\n    metadata:\n      labels:\n        app: postgres\n    spec:\n      containers:\n        - name: postgres\n          image: postgres:16\n          volumeMounts:\n            - name: data\n              mountPath: /var/lib/postgresql/data\n  volumeClaimTemplates:\n    - metadata:\n        name: data\n      spec:\n        accessModes: [\"ReadWriteOnce\"]\n        storageClassName: fast-ssd\n        resources:\n          requests:\n            storage: 20Gi" },
+                { "t": "p", "x": "زنجیرهٔ ذخیره‌سازی: <b>PV</b> (PersistentVolume) منبع واقعی دیسک است، <b>PVC</b> درخواست برنامه برای آن، و <b>StorageClass</b> پروفایل فراهم‌سازی (مثل ssd با حذف خودکار). با volumeClaimTemplates هر رپلیکای StatefulSet PVC خودش را می‌گیرد." },
+                { "t": "code", "f": "bash", "x": "kubectl get pvc,pv\nkubectl get statefulset postgres\n# رپلیکاها از درون با نام ثابت در دسترس‌اند\nkubectl run psql --rm -it --image=postgres:16 -- psql -h postgres-0.postgres.default.svc.cluster.local\n# کوچک‌کردن ترتیبی: از آخر به اول حذف می‌شود\nkubectl scale statefulset postgres --replicas=2" },
+                { "t": "tip", "x": "حالت‌های دسترسی: <b>RWO</b> یک نود همزمان، <b>ROX</b> خواندن چندنودی، <b>RWX</b> خواندن و نوشتن چندنودی (فایل‌سیستم شبکه مثل EFS یا NFS). بیشترِ بلاک‌استوریج‌های ابری فقط RWO می‌دهند.", "list": ["serviceName در StatefulSet باید headless service باشد (clusterIP: None)", "برای عملکرد بهتر دیتابیس از فایل‌سیستم شبکه پرهیز کنید", "قبل از حذف StatefulSet، سیاست حذف PVCها را بررسی کنید"] },
+                { "t": "quiz", "q": "تفاوت کلیدی StatefulSet با Deployment چیست؟", "options": ["StatefulSet سریع‌تر استقرار می‌کند", "پادهای StatefulSet نام ثابت، ترتیب استقرار و حجم پایدار اختصاصی دارند", "StatefulSet فقط برای اپ‌های بدون حالت است", "Deployment نمی‌تواند بیش از یک رپلیکا داشته باشد"], "a": 1, "why": "StatefulSet هویت شبکه و ذخیره‌سازی پایدار و استقرار/حذف ترتیبی می‌دهد که برای عضوهای خوشهٔ دیتابیس حیاتی است." },
+                { "t": "p", "x": "قبل از اینکه دیتابیس را خودتان روی خوشه بیاورید، این سؤال را بپرسید: چه کسی پشتیبان می‌گیرد؟ StatefulSet فقط هویت و دیسک را می‌دهد، نه بازیابی، نه failover و نه ارتقای نسخهٔ دیتابیس. ابزارهای <b>Operator</b> (مثل CloudNativePG یا Strimzi برای Kafka) همین دانش عملیاتی را کد کرده‌اند و انتخاب هوشمندانه‌تری از StatefulSet خام‌اند." },
+                { "t": "tip", "x": "پشتیبان حجم با snapshot دیسک ابری سریع است ولی برای دیتابیس‌ها به‌تنهایی کافی نیست؛ snapshot در لحظه ممکن است ناسازگار باشد. ترکیب درست: snapshot + WAL/backup منطقی برنامه‌محور و تست بازیابی دوره‌ای." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "StatefulSet در کوبرنتیز", "q": "StatefulSet کوبرنتیز فارسی" },
+                  { "title": "PersistentVolume و StorageClass", "q": "PersistentVolume PVC StorageClass فارسی" },
+                  { "title": "اجرای دیتابیس روی کوبرنتیز", "q": "اجرای دیتابیس کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes StatefulSets explained", "q": "kubernetes statefulset explained headless service" },
+                  { "title": "Persistent Volumes in depth", "q": "kubernetes persistent volume storageclass explained" },
+                  { "title": "Running databases on Kubernetes", "q": "running databases on kubernetes operators" }
+                ]
+              }
+            },
+            {
+              "id": "rbac-auth",
+              "t": "RBAC و کنترل دسترسی",
+              "sum": "ServiceAccount، Role، ClusterRole و اتصال‌ها با RoleBinding",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "<b>RBAC</b> تعیین می‌کند چه کسی (Subject) چه عملی (verb) روی چه منبعی دارد. چهار آبجکت اصلی: <b>Role</b> (مجوزها در یک namespace)، <b>ClusterRole</b> (کل خوشه یا قابل استفاده در همهٔ namespaceها)، و <b>RoleBinding / ClusterRoleBinding</b> که Subjectها را به مجوزها وصل می‌کنند. کوبرنتیز اجازهٔ جمع اضافی نمی‌دهد؛ فقط deny ضمنی و allow صریح دارید." },
+                { "t": "code", "f": "rbac.yaml", "x": "apiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: ci-deployer\n  namespace: prod\n---\napiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  name: deploy-role\n  namespace: prod\nrules:\n  - apiGroups: [\"apps\"]\n    resources: [\"deployments\"]\n    verbs: [\"get\", \"list\", \"watch\", \"patch\", \"update\"]\n  - apiGroups: [\"\"]\n    resources: [\"pods\", \"pods/log\", \"services\", \"configmaps\"]\n    verbs: [\"get\", \"list\", \"watch\"]\n---\napiVersion: rbac.authorization.k8s.io/v1\nkind: RoleBinding\nmetadata:\n  name: ci-deployer-binding\n  namespace: prod\nsubjects:\n  - kind: ServiceAccount\n    name: ci-deployer\n    namespace: prod\nroleRef:\n  kind: Role\n  name: deploy-role\n  apiGroup: rbac.authorization.k8s.io" },
+                { "t": "p", "x": "این نمونهٔ مینیمال برای ربات CI است: فقط می‌تواند Deploymentهای namespace پروداکشن را به‌روز کند و وضعیت را ببیند — نه حذف منابع، نه دسترسی به Secretها. اصل <b>حداقل امتیاز</b> را برای انسان‌ها و ربات‌ها به یک اندازه جدی بگیرید." },
+                { "t": "code", "f": "bash", "x": "# آزمودن دسترسی‌ها\nkubectl auth can-i delete pods -n prod --as=system:serviceaccount:prod:ci-deployer\nkubectl auth can-i '*' '*' -n prod\n# توکن یک‌بارمصرف برای پاد\nkubectl create token ci-deployer -n prod --duration=1h\n# لیست Roleها و Bindingها\nkubectl get roles,rolebindings -A" },
+                { "t": "tip", "x": "گروه‌بندی منابع با apiGroups مهم است: منابع هسته مثل pod و service گروه خالی دارند و apps برای deployment و statefulset است. در ClusterRole می‌توانید از aggregateToClusterRole برای ترکیب مجوزهای چند منبع استفاده کنید.", "list": ["هرگز default service account را با دسترسی بالا ببندید", "automountServiceAccountToken را وقتی لازم نیست false بگذارید", "برای چند تیم، namespace مرز اصلی ایزوله است نه ClusterRole"] },
+                { "t": "quiz", "q": "تفاوت Role و ClusterRole چیست؟", "options": ["Role برای انسان و ClusterRole برای ربات است", "Role مجوزها را در یک namespace اعمال می‌کند و ClusterRole در سطح خوشه", "ClusterRole فقط برای خواندن است", "Role جدیدتر است و جایگزین ClusterRole شده"], "a": 1, "why": "دسترسی Role محدود به یک namespace است؛ ClusterRole در سطح خوشه اعمال می‌شود یا با RoleBinding در چند namespace قابل استفاده مجدد است." },
+                { "t": "p", "x": "لایه‌های احراز هویت و مجوزدهی را نباید با هم اشتباه گرفت: RBAC فقط مجوزدهی است و نمی‌گوید چه کسی هستید. هویت انسان‌ها معمولاً با ادغام OIDC (مثل Dex یا SSO سازمانی) به API Server داده می‌شود و هویت ربات‌ها ServiceAccount است؛ بعد از تعیین هویت، RBAC تصمیم می‌گیرد چه اجازه‌ای دارید." },
+                { "t": "tip", "x": "هر چند وقت یک‌بار خوشه را حسابرسی کنید: دستور <b>kubectl get clusterrolebindings</b> را مرور کنید و دنبال bindingهایی با roleRef به cluster-admin بگردید — هر عضو اضافی در این لیست یک ریسک واقعی است." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "RBAC در کوبرنتیز", "q": "RBAC کوبرنتیز فارسی" },
+                  { "title": "ServiceAccount و کنترل دسترسی", "q": "ServiceAccount کوبرنتیز فارسی" },
+                  { "title": "اصل حداقل امتیاز در خوشه", "q": "امنیت دسترسی کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes RBAC explained", "q": "kubernetes rbac role clusterrole rolebinding explained" },
+                  { "title": "Service Accounts and authentication", "q": "kubernetes serviceaccount token authentication" },
+                  { "title": "kubectl auth can-i in practice", "q": "kubectl auth can-i rbac audit" }
+                ]
+              }
+            },
+            {
+              "id": "helm-packages",
+              "t": "Helm و بسته‌بندی نمودارها",
+              "sum": "نصب، ارتقا، values و الگوهای templating",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "<b>Helm</b> مدیر بستهٔ کوبرنتیز است: مجموعه‌ای از مانیفست‌ها با متغیرها را <b>Chart</b> می‌نامد که با دستور واحد نصب و ارتقا می‌شود. بیشتر پروژه‌های شناخته‌شده (ingress-nginx، cert-manager، prometheus) راه رسمی نصبشان یک دستور helm است." },
+                { "t": "code", "f": "bash", "x": "helm repo add bitnami https://charts.bitnami.com/bitnami\nhelm search repo postgresql --versions\nhelm install mydb bitnami/postgresql -n db --create-namespace\nhelm list -A\nhelm upgrade --install mydb bitnami/postgresql -n db -f values-prod.yaml\nhelm rollback mydb 1 -n db" },
+                { "t": "p", "x": "هر نصب یک <b>release</b> نام‌گذاری‌شده است و هر ارتقا نسخهٔ جدیدی می‌سازد که با rollback قابل بازگشت است. فایل <b>values.yaml</b> تمام مقادیر قابل تغییر را از قالب‌ها جدا می‌کند؛ همین جداسازی پایهٔ اجرای یک چارت با پیکربندی‌های متفاوت در dev و prod است." },
+                { "t": "code", "f": "values-prod.yaml", "x": "primary:\n  replicaCount: 2\n  resources:\n    requests:\n      cpu: 500m\n      memory: 1Gi\n    limits:\n      memory: 2Gi\nauth:\n  existingSecret: postgres-credentials\nmetrics:\n  enabled: true" },
+                { "t": "code", "f": "chart-template.yaml", "x": "# templates/deployment.yaml (قطعه‌ای)\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ include \"myapp.fullname\" . }}\nspec:\n  replicas: {{ .Values.replicaCount | default 2 }}\n  template:\n    spec:\n      containers:\n        - name: {{ .Chart.Name }}\n          image: \"{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}\"\n          {{- with .Values.resources }}\n          resources:\n            {{- toYaml . | nindent 12 }}\n          {{- end }}" },
+                { "t": "tip", "x": "قبل از اعمال، خروجی رندرشده را ببینید: <b>helm template</b> یا <b>helm diff upgrade</b> از پلاگین diff. تست چارت خودتان را با <b>helm lint</b> و <b>helm test</b> انجام دهید.", "list": ["نسخه‌های چارت را در گیت پین کنید، نه latest", "Subcharts برای ترکیب اجزای وابسته", "helm get values <release> برای بازبینی مقادیر فعلی"] },
+                { "t": "quiz", "q": "دستور helm upgrade --install چه کاری می‌کند؟", "options": ["چارت را دو بار نصب می‌کند", "اگر release موجود نباشد نصب و اگر باشد ارتقا می‌کند", "فایل values را حذف می‌کند", "خوشه را به نسخهٔ جدید ارتقا می‌دهد"], "a": 1, "why": "این ترکیب (یا helm upgrade با پرچم install) برای خطوط CI/CD استاندارد است چون در هر دو وضعیت اولیه و تکراری کار می‌کند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "Helm چیست و چرا لازم است", "q": "Helm کوبرنتیز فارسی" },
+                  { "title": "ساخت Chart شخصی", "q": "ساخت helm chart فارسی" },
+                  { "title": "مدیریت values در محیط‌های مختلف", "q": "helm values محیط‌های مختلف فارسی" }
+                ],
+                "en": [
+                  { "title": "Helm Tutorial for Beginners", "q": "helm tutorial for beginners chart" },
+                  { "title": "Writing production Helm charts", "q": "helm chart best practices production" },
+                  { "title": "Helm templating deep dive", "q": "helm template functions deep dive" }
+                ]
+              }
+            },
+            {
+              "id": "scheduling-taints",
+              "t": "زمان‌بندی، Taint و Affinity",
+              "sum": "کنترل اینکه پادها کجا اجرا می‌شوند: selector، affinity و toleration",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "<b>Scheduler</b> برای هر پاد دو مرحله دارد: فیلتر (نودهای غیرممکن حذف می‌شوند: منابع کم، taint ناسازگار، ناهم‌خوانی نودSelector) و امتیازدهی (بهترین نود از میان باقی‌مانده‌ها انتخاب می‌شود). وقتی پادی در Pending می‌ماند، پیام رویدادش دقیقاً می‌گوید کدام شرط برآورده نشده." },
+                { "t": "code", "f": "scheduling.yaml", "x": "spec:\n  template:\n    spec:\n      nodeSelector:\n        nodepool: gpu\n      affinity:\n        nodeAffinity:\n          requiredDuringSchedulingIgnoredDuringExecution:\n            nodeSelectorTerms:\n              - matchExpressions:\n                  - key: kubernetes.io/arch\n                    operator: In\n                    values: [\"amd64\"]\n        podAntiAffinity:\n          preferredDuringSchedulingIgnoredDuringExecution:\n            - weight: 80\n              podAffinityTerm:\n                topologyKey: kubernetes.io/hostname\n                labelSelector:\n                  matchLabels:\n                    app: web\n      tolerations:\n        - key: \"workload\"\n          operator: \"Equal\"\n          value: \"batch\"\n          effect: \"NoSchedule\"" },
+                { "t": "p", "x": "<b>Taint</b> روی نود می‌گذارند تا پادهای عادی را دور کند و <b>toleration</b> روی پاد اجازهٔ نشستن روی نود آلوده را می‌دهد. کاربرد کلاسیک: نودهای GPU یا استخر مخصوص بارهای دسته‌ای. <b>podAntiAffinity</b> هم رپلیکاهای یک سرویس را روی نودهای مختلف پخش می‌کند تا خرابی یک نود کل سرویس را نیندازد." },
+                { "t": "code", "f": "bash", "x": "kubectl taint nodes node1 workload=batch:NoSchedule\nkubectl taint nodes node1 workload=batch:NoSchedule-\nkubectl label nodes node1 nodepool=gpu\n# چرا پاد در Pending است؟\nkubectl describe pod <pending-pod> | sed -n '/Events/,$p'\nkubectl get events --field-selector reason=FailedScheduling" },
+                { "t": "tip", "x": "دو سطح affinity دارید: <b>required</b> سخت‌گیرانه (اگر برآورده نشود پاد زمان‌بندی نمی‌شود) و <b>preferred</b> نرم (امتیاز ترجیحی). برای پخش بار، <b>topologySpreadConstraints</b> جایگزین مدرن‌تر anti-affinity است.", "list": ["با NoExecute پادهای موجود هم تخلیه می‌شوند، با احتیاط استفاده کنید", "affinity در سطح پاد ممکن است مقیاس‌پذیری scheduler را کم کند", "برای نودهای spot از taint + toleration جدا استفاده کنید"] },
+                { "t": "quiz", "q": "taint با effect از نوع NoSchedule چه اثری دارد؟", "options": ["هیچ پادی روی نود نمی‌تواند اجرا شود به هیچ عنوان", "پادهای جدید بدون toleration مناسب روی آن زمان‌بندی نمی‌شوند ولی پادهای موجود می‌مانند", "پادهای موجود فوراً تخلیه می‌شوند", "نود از خوشه حذف می‌شود"], "a": 1, "why": "NoSchedule فقط زمان‌بندی جدید را می‌بندد؛ برای تخلیهٔ پادهای موجود از NoExecute استفاده می‌شود." },
+                { "t": "p", "x": "فراموش نکنید زمان‌بندی فقط یک‌بار در ابتدای عمر پاد اتفاق می‌افتد. اگر نودی تعمیر بخواهد، باید آن را با <b>kubectl cordon</b> از گردش خارج و پادهایش را با drain تخلیه کنید؛ بعد از تعمیر، uncordon دوباره زمان‌بندی را باز می‌کند. ابزارهایی مثل Karpenter و Cluster Autoscaler همین چرخه را خودکار کرده‌اند." },
+                { "t": "tip", "x": "برای پخش ترافیک بین ناحیه‌ها (zone) در خوشه‌های چندمنطقه‌ای، <b>topologySpreadConstraints</b> با topologyKey برابر kubernetes.io/topology/zone رپلیکاها را متوازن نگه می‌دارد و مانع خوابیدن کل سرویس با قطع یک zone می‌شود." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "زمان‌بندی پادها چگونه انجام می‌شود", "q": "scheduler کوبرنتیز فارسی" },
+                  { "title": "Taint و Toleration در عمل", "q": "taint toleration کوبرنتیز فارسی" },
+                  { "title": "توزیع رپلیکاها روی نودها", "q": "pod anti affinity کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes Scheduler deep dive", "q": "kubernetes scheduler deep dive scheduling" },
+                  { "title": "Taints and Tolerations explained", "q": "kubernetes taints tolerations explained" },
+                  { "title": "Pod Affinity and Topology Spread", "q": "kubernetes pod affinity topology spread constraints" }
+                ]
+              }
+            },
+            {
+              "id": "api-internals-etcd",
+              "t": "درون API Server و etcd",
+              "sum": "مدل اعلانی، watch، informer و پشتیبان‌گیری از etcd",
+              "m": 35,
+              "body": [
+                { "t": "p", "x": "هر تغییر در خوشه از یک مسیر می‌گذرد: درخواست به <b>API Server</b>، احراز هویت، مجوزدهی RBAC، اعتبارسنجی admission (مثل Pod Security)، سپس ثبت در <b>etcd</b>. همهٔ کنترلرها به‌جای polling، با <b>watch</b> روی API به رویدادها گوش می‌دهند — همین الگو پایهٔ نوشتن <b>operator</b>هاست." },
+                { "t": "code", "f": "bash", "x": "# رفتن مستقیم زیر پوست API\nkubectl proxy --port=8001 &\ncurl -s localhost:8001/apis/apps/v1 | jq '.resources[].name'\ncurl -s localhost:8001/api/v1/namespaces/default/pods?watch=true | head -5\n# تفاوت apply با اعمال سمت سرور\nkubectl apply --server-side -f deployment.yaml" },
+                { "t": "p", "x": "الگوی کنترلر به این شکل است: یک <b>informer</b> لیست اولیهٔ آبجکت‌ها را در حافظهٔ کش می‌کند (چون etcd را مستقیم نمی‌خوانند) و سپس با watch همگام می‌ماند؛ وقتی حالت فعلی با spec تفاوت دارد، کنترلر عمل اصلاحی انجام می‌دهد. همین حلقهٔ ساده کل رفتار خودکار خوشه را می‌سازد." },
+                { "t": "code", "f": "bash", "x": "# پشتیبان‌گیری از etcd (روی مستر)\nETCDCTL_API=3 etcdctl snapshot save /backup/etcd-$(date +%F).db \\\n  --endpoints=https://127.0.0.1:2379 \\\n  --cacert=/etc/kubernetes/pki/etcd/ca.crt \\\n  --cert=/etc/kubernetes/pki/etcd/server.crt \\\n  --key=/etc/kubernetes/pki/etcd/server.key\netcdctl snapshot status /backup/etcd-*.db --write-table" },
+                { "t": "tip", "x": "etcd به‌شدت به دیسک سریع حساس است: تأخیر بالای fsync مستقیماً روی پاسخ‌دهی API اثر می‌گذارد. برای خوشهٔ جدی، dd و fio را روی دیسک etcd بسنجید و فقط NVMe یا معادل ابریِ پرسرعت بگذارید.", "list": ["همیشه snapshot منظم با زمان‌بندی خودکار + تست بازیابی", "compaction و defrag دوره‌ای etcd", "quota backend محدود است؛ آبجکت‌های حجیم مثل ConfigMapهای بزرگ را در etcd نریزید"] },
+                { "t": "quiz", "q": "کنترلرهای کوبرنتیز چگونه از تغییرات آبجکت‌ها باخبر می‌شوند؟", "options": ["هر ثانیه etcd را مستقیم می‌خوانند", "با watch روی API Server و کش درون‌حافظه‌ای informer", "از طریق syslog نودها", "با پیام‌رسانی میان صف‌ها مثل Kafka"], "a": 1, "why": "کنترلرها فقط با API Server کار می‌کنند؛ الگوی list-and-watch با informer هزینهٔ خواندن را کم و واکنش را فوری می‌کند." },
+                { "t": "p", "x": "دانستن این لایه، عیب‌یابی را متحول می‌کند: وقتی kubectl apply خطای validation می‌دهد، وقتی webhook آهسته استقرار را قفل می‌کند، یا وقتی API Server در فشار است، حالا می‌دانید دقیقاً کدام مرحله از خط لولهٔ درخواست مقصر است." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "درون API Server کوبرنتیز", "q": "API Server کوبرنتیز عمیق فارسی" },
+                  { "title": "etcd و نگهداری خوشه", "q": "etcd کوبرنتیز پشتیبان گیری فارسی" },
+                  { "title": "الگوی کنترلر و اپراتور", "q": "operator pattern کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "How the Kubernetes API works", "q": "kubernetes api server internals watch informer" },
+                  { "title": "etcd backup and restore", "q": "etcd snapshot backup restore kubernetes" },
+                  { "title": "Writing Kubernetes Operators", "q": "kubernetes operator pattern controller runtime" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "business",
+      "kind": "business",
+      "title": "مسیر حرفه‌ای و بیزینسی",
+      "icon": "brief",
+      "desc": "کوبرنتیز در تیم‌های واقعی: CI/CD، امنیت، هزینه و پایداری",
+      "levels": [
+        {
+          "t": "مبتدی",
+          "chip": "b",
+          "lessons": [
+            {
+              "id": "why-k8s-teams",
+              "t": "چرا کوبرنتیز برای تیم‌ها",
+              "sum": "ارزش تجاری، هزینهٔ واقعی و تصمیم درست برای انتخاب",
+              "m": 25,
+              "body": [
+                { "t": "p", "x": "کوبرنتیز یک محصول است، نه یک هدف. ارزش واقعی‌اش برای تیم‌ها سه چیز است: <b>قابلیت اطمینان</b> (بازسازی خودکار پادها و انتشار بی‌وقفه)، <b>سرعت تحویل</b> (استانداردسازی استقرار برای همهٔ سرویس‌ها)، و <b>قابلیت حمل</b> (همان مانیفست‌ها روی هر ابری و on-premise کار می‌کنند). اگر تیم‌تان یک یا دو سرویس ساده دارد، ممکن است PaaS یا serverless ارزان‌تر باشد." },
+                { "t": "p", "x": "هزینهٔ پنهان را جدی بگیرید: یادگیری منحنی‌دار است، نگهداری خوشه تخصص می‌خواهد و بدترین حالت، خوشه‌ای است که هیچ‌کس کاملاً نفهمیده باشد. قاعدهٔ سرانگشتی: وقتی تعداد سرویس‌ها از حدود ده گذشته و تیم‌های متعدد با وابستگی‌های مشترک مستقر می‌شوند، صرفهٔ استفاده از کوبرنتیز از هزینه‌اش جلو می‌زند." },
+                { "t": "tip", "x": "برای شروع، سرویس مدیریت‌شده (EKS، GKE، AKS یا دیتاسنترهای داخلی) انتخاب معمول است؛ کنترل‌پلین را ارائه‌دهنده نگه می‌دارد و تیم شما فقط بار کاری را می‌بیند.", "list": ["شروع با خوشهٔ مدیریت‌شده به‌جای خود‌میزبانی", "اول استانداردسازی استقرار، بعد بهینه‌سازی هزینه", "هر ابزار جدید باید هزینهٔ هماهنگی تیم را توجیه کند"] },
+                { "t": "p", "x": "کوبرنتیز در عمل یک قرارداد استاندارد بین تیم‌ها می‌سازد: هر سرویس فارغ از زبان و فریم‌ورک، همان مانیفست، همان الگوی لاگ و همان روش مقیاس‌دهی را دارد. وقتی عضو جدیدی به تیم می‌پیوندد، خواندن ساختار یک سرویس برای فهمیدن بقیه کافی است — این کاهش هزینهٔ هماهنگی، استدلال اصلی استفاده از آن در سازمان‌های بزرگ است." },
+                { "t": "quiz", "q": "کدام حالت بیشترین کاندیدای منطقی برای کوبرنتیز است؟", "options": ["یک وب‌سایت ایستا با چند صفحه", "ده‌ها میکروسرویس با چند تیم مستقل و نیاز به انتشار مکرر", "یک اسکریپت شبانهٔ کارآمد", "یک اپلیکیشن موبایل"], "a": 1, "why": "کوبرنتیز در پیچیدگی چند‌سرویسی، چند‌تیمی و انتشار مکرر بازده می‌دهد؛ برای بارهای کوچک و ساده گزینه‌های سبک‌تر منطقی‌ترند." },
+                { "t": "p", "x": "در این مسیر حرفه‌ای، درس‌ها را از نگاه تیم واقعی پیش می‌بریم: چطور استقرار را خودکار کنیم، چطور هزینه را کنترل کنیم، چطور حوادث را مدیریت کنیم و چطور خوشه‌ای بسازیم که ماه‌ها بدون نگهداری شبانه پایدار بماند." },
+                { "t": "tip", "x": "پیش از خرید ابزار و زیرساخت، سه پرسش را پاسخ دهید: چند سرویس مستقل داریم؟ چند بار در هفته منتشر می‌کنیم؟ چند تیم باید هم‌زمان روی خوشه مستقر شوند؟ اگر جواب‌ها کم هستند، ساده‌ترین گزینه‌ای که دو سال بعد هم کافی باشد انتخاب بهتری از کوبرنتیز است." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "چرا شرکت‌ها کوبرنتیز می‌خرند", "q": "چرا کوبرنتیز فارسی ارزش کسب و کار" },
+                  { "title": "کوبرنتیز در مقابل گزینه‌های ساده‌تر", "q": "کوبرنتیز یا serverless مقایسه فارسی" },
+                  { "title": "واقعیت تیم‌های کوبرنتیز", "q": "تجربه کوبرنتیز در پروداکشن فارسی" }
+                ],
+                "en": [
+                  { "title": "Should your team use Kubernetes?", "q": "when to use kubernetes vs simpler alternatives" },
+                  { "title": "Kubernetes for product teams", "q": "kubernetes business value engineering teams" },
+                  { "title": "The real cost of Kubernetes", "q": "kubernetes operational cost reality" }
+                ]
+              }
+            },
+            {
+              "id": "local-to-cluster",
+              "t": "از لپ‌تاپ تا خوشه: اولین استقرار",
+              "sum": "راه‌اندازی خوشهٔ محلی و اولین سرویس کامل با دیسک و اینگرس",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "برای یادگیری و آزمایش، خوشهٔ محلی با <b>kind</b> (Kubernetes in Docker) یا minikube بهترین گزینه است: چند‌ثانیه‌ای بالا می‌آید، قابل بازسازی است و همان API خوشهٔ واقعی را دارد. تفاوت اصلی این است که LoadBalancer و Ingress در محلی شبیه‌سازی می‌شوند نه واقعی." },
+                { "t": "code", "f": "bash", "x": "# kind: خوشهٔ محلی روی داکر\nkind create cluster --name dev\nkubectl cluster-info\nkubectl get nodes\n# پاک‌سازی کامل\nkind delete cluster --name dev" },
+                { "t": "code", "f": "app-stack.yaml", "x": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: api\nspec:\n  replicas: 2\n  selector:\n    matchLabels: { app: api }\n  template:\n    metadata:\n      labels: { app: api }\n    spec:\n      containers:\n        - name: api\n          image: myapi:0.1.0\n          resources:\n            requests:\n              cpu: 100m\n              memory: 128Mi\n          ports:\n            - containerPort: 8080\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: api\nspec:\n  selector: { app: api }\n  ports:\n    - port: 80\n      targetPort: 8080" },
+                { "t": "p", "x": "در یک فایل می‌توانید چند منبع را با جداکنندهٔ --- بگذارید؛ kubectl apply همه را با هم اعمال می‌کند. چیدمان پروژهٔ معمول: پوشهٔ k8s یا deploy در ریشهٔ مخزن، به تفکیک محیط، و همیشه همین ساختار بین سرویس‌ها تا هر عضو تیم بتواند سرویس دیگری را بخواند." },
+                { "t": "tip", "x": "سه چیز را از روز اول درست کنید حتی در dev: نسخهٔ مشخص ایمیج (نه latest)، منابع requests تعریف‌شده، و لاگ استاندارد stdout. عادت‌های dev عیناً به پروداکشن منتقل می‌شوند.", "list": ["kubectl port-forward svc/api 8080:80 برای تست سریع", "kubectl logs -f deployment/api برای دنبال کردن لاگ", "برای خوشه‌های چند‌تایی، در کانتکست kubectl دقت کنید"] },
+                { "t": "quiz", "q": "کدام کار از روز اول عادت خوبی است؟", "options": ["استفاده از تگ latest برای ایمیج‌ها", "تعریف requests منابع و تگ نسخهٔ مشخص از ابتدا", "اجرای همه چیز در namespace پیش‌فرض", "غیرفعال کردن probeها برای سادگی"], "a": 1, "why": "عادت‌های محیط dev مستقیم به پروداکشن می‌روند؛ تعریف منابع و نسخه‌های مشخص از ابتدا هزینهٔ اصلاح بعدی را حذف می‌کند." },
+                { "t": "p", "x": "نکتهٔ مهم خوشه‌های محلی: منابع واقعی ندارند. وقتی خوشهٔ واقعی رفتید، رفتار زمان‌بندی، محدودیت منابع و تفاوت‌های شبکه جدی‌تر می‌شود. تمرین خوب این است که هر چیزی که در dev نوشتید از همان مسیر CI به یک خوشهٔ آزمایشی واقعی هم برود تا تفاوت‌ها زود آشکار شوند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "راه‌اندازی خوشهٔ محلی با kind", "q": "kind kubernetes فارسی خوشه محلی" },
+                  { "title": "اولین سرویس کامل روی کوبرنتیز", "q": "استقرار اولین اپ کوبرنتیز فارسی" },
+                  { "title": "port-forward و تست سریع", "q": "kubectl port forward فارسی" }
+                ],
+                "en": [
+                  { "title": "Local Kubernetes with kind", "q": "kind kubernetes local cluster tutorial" },
+                  { "title": "Minikube vs kind vs k3s", "q": "minikube vs kind vs k3s comparison" },
+                  { "title": "Deploy your first app end to end", "q": "deploy first app kubernetes step by step" }
+                ]
+              }
+            },
+            {
+              "id": "ci-cd-deploy",
+              "t": "استقرار با CI/CD",
+              "sum": "خط لولهٔ ساخت و انتشار خودکار روی کوبرنتیز",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "استقرار دستی روی خوشه همان‌قدر که سریع شروع می‌شود سریع انسانی می‌شود. هدف خط لولهٔ استاندارد: <b>build ایمیج</b>، <b>تست</b>، <b>انتشار به رجیستری با تگ یکتا</b> (تگ گیت یا digest)، و <b>به‌روزرسانی مانیفست</b> در خوشه. کلید حافظهٔ تکرارپذیر: هر commit یک ایمیج یکتا و هر ایمیج یکتا یک انتشار قابل بازگشت." },
+                { "t": "code", "f": ".github/workflows/deploy.yml", "x": "name: deploy\non:\n  push:\n    tags: [\"v*\"]\njobs:\n  build-and-deploy:\n    runs-on: ubuntu-latest\n    permissions:\n      contents: read\n    steps:\n      - uses: actions/checkout@v4\n      - name: Build and push\n        run: |\n          docker build -t registry.example.com/app:${{ github.ref_name }} .\n          docker push registry.example.com/app:${{ github.ref_name }}\n      - name: Deploy\n        run: |\n          kubectl set image deployment/api api=registry.example.com/app:${{ github.ref_name }}\n          kubectl rollout status deployment/api --timeout=120s" },
+                { "t": "p", "x": "دو نکتهٔ مهم در خط لولهٔ واقعی: <b>ک credential هرگز در کد</b> — از OIDC یا secret store پلتفرم CI استفاده کنید؛ و بعد از اعمال، <b>rollout status</b> را صبر کنید تا انتشار شکست‌خورده فوراً مشخص شود و پایپ‌لاین قرمز شود، نه سه روز بعد در لاگ." },
+                { "t": "code", "f": "bash", "x": "# تغییر مانیفست در گیت به‌جای دستور مستقیم (الگوی GitOps)\nyq -i '.spec.template.spec.containers[0].image = strenv(IMAGE)' k8s/deployment.yaml\ngit commit -am \"release: ${IMAGE}\" && git push\n# اعمال امن با wait\nkubectl apply -f k8s/\nkubectl rollout status deployment/api --timeout=180s" },
+                { "t": "tip", "x": "به‌جای بیلد داکر روی هر بار، از کش لایه‌ها و بیلد چند‌مرحله‌ای استفاده کنید؛ زمان CI مستقیم روی هزینه و سرعت انتشار تیم اثر می‌گذارد.", "list": ["تگ digest ایمیج برای انتشار اتمیک", "دو محیط کوتاه: staging و prod با پروموشن یکتا", "همیشه قابلیت rollback یک‌دستوری را در CI داشته باشید"] },
+                { "t": "quiz", "q": "چرا تگ latest برای انتشار پروداکشن خطرناک است؟", "options": ["latest نامعتبر است و رجیستری آن را رد می‌کند", "معنایش آن در گذر زمان تغییر می‌کند و بازگشت به عقب و ردیابی غیرممکن می‌شود", "کوبرنتیز تگ latest را نمی‌کشد", "فقط سرعت pull را کم می‌کند"], "a": 1, "why": "تگ latest همیشه به آخرین بیلد اشاره می‌کند؛ بدون تگ یکتا نمی‌دانید دقیقاً چه کدی در پروداکشن است و rollback قابل اعتماد ندارید." },
+                { "t": "p", "x": "برای انتشارهای پرریسک، step بعدی در بلوغ خط لوله <b>انتشار پیشرونده</b> است: ابتدا فقط چند درصد ترافیک به نسخهٔ جدید (canary)، بررسی متریک‌های خطا و تأخیر، و بعد افزایش تدریجی. ابزارهایی مثل Argo Rollouts و Flagger همین منطق را با مقایسهٔ خودکار متریک‌ها بین نسخه‌ها پیاده می‌کنند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "خط لولهٔ CI/CD برای کوبرنتیز", "q": "CI CD کوبرنتیز فارسی" },
+                  { "title": "انتشار خودکار ایمیج‌ها", "q": "انتشار خودکار ایمیج داکر کوبرنتیز فارسی" },
+                  { "title": "اتصال GitHub Actions به خوشه", "q": "GitHub Actions کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "CI/CD pipelines for Kubernetes", "q": "kubernetes ci cd pipeline github actions" },
+                  { "title": "Docker build multi-stage in CI", "q": "docker multi stage build ci cache" },
+                  { "title": "Zero-downtime deploys with rollouts", "q": "zero downtime deployment kubernetes rollout" }
+                ]
+              }
+            },
+            {
+              "id": "environments-strategy",
+              "t": "مدیریت محیط‌ها: dev، staging، prod",
+              "sum": "چیدمان مانیفست‌ها بین محیط‌ها با overlay و kustomize",
+              "m": 25,
+              "body": [
+                { "t": "p", "x": "وقتی سه محیط دارید، کپی کردن مانیفست‌ها برای هرکدام فاجعهٔ نگهداری است. دو راه استاندارد: <b>Kustomize</b> که با پایهٔ مشترک و overlayهای محیطی کار می‌کند و داخل kubectl خودتان است؛ و Helm با فایل‌های values جدا برای هر محیط." },
+                { "t": "code", "f": "kustomization", "x": "# base/kustomization.yaml\napiVersion: kustomize.config.k8s.io/v1beta1\nkind: Kustomization\nresources:\n  - deployment.yaml\n  - service.yaml\n---\n# overlays/prod/kustomization.yaml\napiVersion: kustomize.config.k8s.io/v1beta1\nkind: Kustomization\nresources:\n  - ../../base\nnamespace: prod\nreplicas:\n  - name: api\n    count: 6\nimages:\n  - name: myapi\n    newTag: v1.4.2\npatches:\n  - path: resources.yaml" },
+                { "t": "p", "x": "اعمال محیط خاص با kubectl apply -k overlays/prod. تفکیک حیاتی: آنچه بین محیط‌ها ثابت است در base، آنچه متغیر است (تعداد رپلیکا، منابع، دامنه، تگ ایمیج) در overlay. قاعدهٔ ساده: اگر برای dev و prod فایل جدا ننویسید، همیشه دو محیط با هم drift می‌کنند." },
+                { "t": "code", "f": "bash", "x": "# دیدن خروجی نهایی هر محیط قبل از اعمال\nkubectl kustomize overlays/staging | less\nkubectl apply -k overlays/prod --dry-run=client\n# مقایسه دو محیط\ndiff <(kubectl kustomize overlays/dev) <(kubectl kustomize overlays/prod)" },
+                { "t": "tip", "x": "قاعدهٔ پروموشن: staging و prod باید تفاوت‌های کنترل‌شده و کم داشته باشند — فقط تعداد رپلیکا، منابع و دامنه. هرچه تفاوت بیشتر باشد، تست staging ارزشش کمتر است.", "list": ["namespace جدا برای هر محیط در همان خوشه یا خوشهٔ جدا برای prod", "استفاده از labels مشترک مثل env برای فیلتر و گزارش", "تگ ایمیج را با ابزار (yq یا kustomize edit) عوض کنید نه با دست"] },
+                { "t": "quiz", "q": "در ساختار Kustomize چه چیزی معمولاً در base قرار می‌گیرد؟", "options": ["تعداد رپلیکا و دامنهٔ هر محیط", "مانیفست‌های مشترک بین همهٔ محیط‌ها", "مقادیر Secretها", "تگ ایمیج پروداکشن"], "a": 1, "why": "base تعریف مشترک منابع است؛ هر متغیر محیطی مثل رپلیکا، تگ و دامنه در overlayها می‌رود." },
+                { "t": "p", "x": "سؤال کلاسیک: خوشهٔ جدا برای prod یا namespace جدا در همان خوشه؟ پاسخ عملی: اگر جدایی کامل دامنهٔ شکست، هزینه و دسترسی ارزشش را دارد (که در سازمان‌های بزرگ معمولاً دارد)، خوشهٔ جدا بگیرید. برای تیم‌های کوچک‌تر، دو خوشه (stage و prod) نقطهٔ تعادل خوبی است — یک خوشهٔ آزمایشی ارزان‌قیمت و یک خوشهٔ پروداکشن با کنترل دسترسی سخت‌گیرانه." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "Kustomize در عمل", "q": "Kustomize فارسی overlay base" },
+                  { "title": "مدیریت محیط‌های چندگانه", "q": "مدیریت محیط dev staging prod کوبرنتیز" },
+                  { "title": "مقایسهٔ Kustomize و Helm", "q": "Kustomize و Helm مقایسه فارسی" }
+                ],
+                "en": [
+                  { "title": "Kustomize basics and overlays", "q": "kustomize overlays base environments tutorial" },
+                  { "title": "Kustomize vs Helm", "q": "kustomize vs helm comparison" },
+                  { "title": "Managing environments on Kubernetes", "q": "kubernetes multi environment management strategy" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "متوسط",
+          "chip": "m",
+          "lessons": [
+            {
+              "id": "cost-right-sizing",
+              "t": "مدیریت هزینه و right-sizing",
+              "sum": "requests و limits، نودهای اسپات و رصد مصرف واقعی",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "بزرگ‌ترین خطای هزینه در کوبرنتیز ساده است: requests دست‌کم‌گرفته‌شده باعث ازدحام و ناپایداری می‌شود و requests اغراق‌شده باعث خرید ظرفیت بی‌استفاده. <b>right-sizing</b> یعنی مطابقت requests با مصرف واقعی p95 — نه با ترس تیم." },
+                { "t": "code", "f": "bash", "x": "# مصرف فعلی در مقایسه با requests\nkubectl top pods --sort-by=cpu -A\n# گزارش نسبتی: مصرف در برابر درخواست\nkubectl get pods -A -o custom-columns=\\\n  'NS:.metadata.namespace,NAME:.metadata.name,REQ_CPU:.spec.containers[*].resources.requests.cpu,ACTUAL:.status.containerStatuses[0].state'" },
+                { "t": "p", "x": "ابزارهای استاندارد این حوزه: <b>Kubecost / OpenCost</b> برای تفکیک هزینه به‌ازای هر namespace و سرویس، <b>VPA</b> در حالت پیشنهاد برای پیشنهاد requests خودکار، و داشبورد Promethus با کوئری‌های درصدی مصرف. رکن قانونی: requests باید نزدیک p95 مصرف باشد و limit حافظه برابر با حدود p99." },
+                { "t": "code", "f": "resources.yaml", "x": "resources:\n  requests:\n    cpu: 250m\n    memory: 512Mi\n  limits:\n    memory: 1Gi   # بدون CPU limit؛ فقط memory limit" },
+                { "t": "tip", "x": "نکتهٔ بحث‌برانگیز اما رایج در تیم‌های بزرگ: <b>CPU limit نگذارید</b>. CPU قابل تراکم است (فرایند کند می‌شود نه اینکه کشته شود) و limitهای تهاجمی باعث CPU throttling و تأخیرهای عجیب می‌شوند؛ حافظه را limit بگذارید چون OOM کشتنی است.", "list": ["نودهای Spot/Preemptible برای بارهای بی‌حالتیت تا ۷۰٪ صرفه", "autoscaling در سطح نود (Karpenter) با ترکیب خانوادهٔ ماشین‌ها", "پاک‌سازی namespaceهای فراموش‌شده و ایمیج‌های بزرگ در رجیستری"] },
+                { "t": "quiz", "q": "کدام حالت requests و limits برای سرویس HTTP معمول‌تر است؟", "options": ["requests و limits هر دو بسیار بالا برای اطمینان", "requests نزدیک مصرف واقعی p95 و memory limit منطقی، بدون CPU limit تهاجمی", "بدون هیچ requests تا scheduler آزاد باشد", "requests صفر و limits فوق‌العاده کم"], "a": 1, "why": "requests واقع‌بینانه زمان‌بندی درست و هزینهٔ عادلانه می‌دهد؛ limit حافظه از OOM نود جلوگیری می‌کند ولی CPU limit تهاجمی throttle ایجاد می‌کند." },
+                { "t": "p", "x": "دو لایهٔ هزینه را جدا کنید: <b>هزینهٔ ثابت</b> (نودهای پایه که همیشه روشن‌اند) و <b>هزینهٔ متغیر</b> (مقیاس‌شدن‌های ساعتی). اشتباه رایج، بهینه‌سازی هزینهٔ متغیرِ کم در حالی است که نودهای کم‌بارِ دائمی بخش عمدهٔ فاکتور را می‌سازند. گزارش ماهانهٔ نرخ بهره‌وری (utilization) هر nodepool، تصویر واقعی را نشان می‌دهد." },
+                { "t": "tip", "x": "با تیم هم‌زبان شوید: تفکیک هزینه به‌ازای هر سرویس با برچسب‌های cost-center یا team و ابزارهایی مثل OpenCost، مذاکرهٔ فنی را به تصمیم مالکان محصول می‌برد — وقتی مالک سرویس هزینهٔ خودش را می‌بیند، right-sizing خودجوش می‌شود." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "کاهش هزینهٔ خوشهٔ کوبرنتیز", "q": "کاهش هزینه کوبرنتیز فارسی" },
+                  { "title": "right-sizing منابع در عمل", "q": "right sizing کوبرنتیز requests limits فارسی" },
+                  { "title": "نودهای اسپوت و صرفه‌جویی", "q": "spot instance کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes cost optimization", "q": "kubernetes cost optimization right sizing" },
+                  { "title": "OpenCost and Kubecost overview", "q": "opencost kubecost kubernetes showback" },
+                  { "title": "CPU throttling and limits explained", "q": "kubernetes cpu limits throttling explained" }
+                ]
+              }
+            },
+            {
+              "id": "security-basics",
+              "t": "امنیت پایه: NetworkPolicy و SecurityContext",
+              "sum": "ایزوله‌سازی شبکه، اجرای غیرroot و اسکن ایمیج‌ها",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "به‌صورت پیش‌فرض <b>هر پاد با هر پاد دیگری در خوشه می‌تواند صحبت کند</b>. برای تیم‌های چند‌سرویسی این یعنی نفوذ به یک سرویس ضعیف، دسترسی به همهٔ سرویس‌ها. <b>NetworkPolicy</b> این را تغییر می‌دهد: فقط ترافیک مجاز از مبدأ مشخص به مقصد مشخص." },
+                { "t": "code", "f": "network-policy.yaml", "x": "apiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: api-default-deny\n  namespace: prod\nspec:\n  podSelector: {}            # همهٔ پادهای namespace\n  policyTypes: [Ingress, Egress]\n---\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: api-allow\n  namespace: prod\nspec:\n  podSelector:\n    matchLabels: { app: api }\n  policyTypes: [Ingress, Egress]\n  ingress:\n    - from:\n        - podSelector:\n            matchLabels: { app: gateway }\n      ports:\n        - port: 8080\n  egress:\n    - to:\n        - namespaceSelector:\n            matchLabels: { kubernetes.io/metadata.name: kube-system }\n      ports:\n        - port: 53\n          protocol: UDP" },
+                { "t": "p", "x": "دو شرط عملی: به یک CNI با پشتیبانی NetworkPolicy نیاز دارید (Calico یا Cilium) و DNS معمولاً قربانی اول egress سخت‌گیرانه است — پورت ۵۳ را باز کنید. استراتژی رایج: اول default-deny در namespaceهای حساس، بعد باز کردن‌های هدفمند با تست." },
+                { "t": "code", "f": "security-context.yaml", "x": "spec:\n  securityContext:\n    runAsNonRoot: true\n    runAsUser: 10001\n    fsGroup: 10001\n  containers:\n    - name: api\n      image: myapi@sha256:abc123...\n      securityContext:\n        allowPrivilegeEscalation: false\n        readOnlyRootFilesystem: true\n        capabilities:\n          drop: [\"ALL\"]" },
+                { "t": "tip", "x": "سه لایهٔ سریع امنیت: اجرای غیرroot و فایل‌سیستم فقط‌خواندنی (SecurityContext)، اسکن ایمیج‌ها در CI با Trivy، و فعال‌سازی Pod Security Standards در سطح namespace.", "list": ["Pod Security admission در حالت restricted", "کاهش سطح حملهٔ ایمیج: distroless", "mote‌کردن توکن service account هر پاد"] },
+                { "t": "quiz", "q": "NetworkPolicy را اعمال کردید ولی هیچ اثری ندارد. محتمل‌ترین علت؟", "options": ["CNI خوشه از NetworkPolicy پشتیبانی نمی‌کند", "پادها در namespace اشتباه‌اند", "کوبرنتیز NetworkPolicy را منسوخ کرده", "باید kubelet ری‌استارت شود"], "a": 0, "why": "بدون CNI سازگار مثل Calico یا Cilium، مانیفست‌های NetworkPolicy پذیرفته می‌شوند ولی هیچ‌وقت اجرا نمی‌شوند." },
+                { "t": "p", "x": "دسترسی‌های بیرونی را هم فراموش نکنید: egress پیش‌فرضِ بسته، اتصال به APIهای بیرونی، رجیستری ایمیج و DNS را قطع می‌کند. چیدمان ترتیبی درست این است: egress برای DNS، بعد برای رجیستری و وابستگی‌های شناخته‌شده باز شود، و برای مقاصد ناشناخته یک خروجی کنترل‌شده (proxy) بگذارید تا سرویس‌ها بی‌صدا نشکنند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "NetworkPolicy در عمل", "q": "NetworkPolicy کوبرنتیز فارسی" },
+                  { "title": "اجرای امن کانتینرها", "q": "securityContext کوبرنتیز فارسی" },
+                  { "title": "امنیت پایهٔ خوشه برای تیم‌ها", "q": "امنیت کوبرنتیز فارسی تیم" }
+                ],
+                "en": [
+                  { "title": "Kubernetes NetworkPolicy tutorial", "q": "kubernetes network policy calico cilium tutorial" },
+                  { "title": "Pod Security Standards", "q": "kubernetes pod security standards restricted" },
+                  { "title": "Container image scanning with Trivy", "q": "trivy container image scanning ci" }
+                ]
+              }
+            },
+            {
+              "id": "monitoring-logging",
+              "t": "مانیتورینگ و لاگ",
+              "sum": "Prometheus، Grafana، جمع‌آوری لاگ و متریک‌های طلایی",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "استاندارد واقعی مانیتورینگ کوبرنتیز <b>Prometheus + Grafana</b> است: Prometheus متریک‌ها را از endpointهای /metrics جمع می‌کند و Grafana داشبورد و آلارم می‌سازد. kube-state-metrics وضعیت آبجکت‌ها (پاد، deployment) را می‌دهد و node-exporter متریک‌های نود را." },
+                { "t": "code", "f": "bash", "x": "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts\nhelm upgrade --install monitoring prometheus \\\n  --repo https://prometheus-community.github.io/helm-charts \\\n  -n monitoring --create-namespace\n# دیدن لاگ خوشه‌ای\nkubectl logs -l app=api --all-containers --since=15m\nkubectl logs deployment/api --previous | tail -50" },
+                { "t": "p", "x": "چهار متریک طلایی سرویس‌ها که هر داشبورد سرویس باید داشته باشد: <b>نرخ خطا</b>، <b>تأخیر</b> (p50 و p99)، <b>ترافیک</b> و <b>اشباع</b> (صف‌ها، مصرف منابع). متریک خوشه (CPU پاد) علت مشکلات را نشان می‌دهد؛ متریک سرویس (نرخ خطا و تأخیر) اثر کاربر را — هر دو لازم‌اند." },
+                { "t": "code", "f": "servicemonitor.yaml", "x": "apiVersion: monitoring.coreos.com/v1\nkind: ServiceMonitor\nmetadata:\n  name: api\n  namespace: monitoring\n  labels:\n    release: monitoring\nspec:\n  selector:\n    matchLabels: { app: api }\n  endpoints:\n    - port: http-metrics\n      interval: 30s\n      path: /metrics" },
+                { "t": "tip", "x": "لاگ پاد موقت است؛ هر بازسازی پاد لاگش می‌پرد. برای پروداکشن، لاگ‌ها را با Fluent Bit یا Vector به Loki یا Elasticsearch بفرستید و همیشه شناسهٔ درخواست (trace id) در لاگ بگذارید تا بتوانید یک درخواست را بین سرویس‌ها دنبال کنید.", "list": ["آلارم روی علائم کاربر‌محور، نه روی ری‌استارت پاد", "Grafana Loki ارزان‌تر از ایندکس کامل لاگ است", "برای دنبال کردن درخواست بین سرویس‌ها، OpenTelemetry را اضافه کنید"] },
+                { "t": "quiz", "q": "چرا متریک CPU پاد به‌تنهایی برای آلارم کافی نیست؟", "options": ["چون Prometheus آن را نمی‌خواند", "چون CPU بالا لزوماً یعنی تجربهٔ بد کاربر نیست و CPU پایین هم مانع خرابی نیست", "چون فقط در سطح نود معنا دارد", "چون HPA آن را کنترل می‌کند"], "a": 1, "why": "متریک‌های سرویس‌محور مثل نرخ خطا و تأخیر p99 مستقیماً تجربهٔ کاربر را نشان می‌دهند؛ مصرف منابع فقط علت احتمالی است." },
+                { "t": "p", "x": "بودجهٔ نگهداری متریک‌ها را هم حساب کنید: هر متریک و هر کارت زمان سری ارزش دارد. پایهٔ کمینهٔ سالم برای هر سرویس: یک داشبورد، سه تا پنج آلارم واقعاً عملیاتی (مواردی که بیدار شدن برایشان ارزش دارد) و حفظ متریک‌های تاریخچه برای مقایسه با هفتهٔ قبل. آلارم بیش از حد، همان بی‌اعتنایی به هیچ آلارمی را می‌سازد." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "نصب Prometheus و Grafana روی خوشه", "q": "Prometheus Grafana کوبرنتیز فارسی" },
+                  { "title": "جمع‌آوری لاگ متمرکز", "q": "لاگ متمرکز کوبرنتیز فارسی" },
+                  { "title": "داشبورد و هشدارها برای سرویس‌ها", "q": "متریک طلایی سرویس کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Prometheus and Grafana on Kubernetes", "q": "prometheus grafana kubernetes helm tutorial" },
+                  { "title": "Centralized logging with Loki", "q": "kubernetes logging loki fluent bit" },
+                  { "title": "The four golden signals", "q": "four golden signals monitoring sre" }
+                ]
+              }
+            },
+            {
+              "id": "incident-debugging",
+              "t": "عیب‌یابی حوادث در پروداکشن",
+              "sum": "چرخهٔ عملی عیب‌یابی: پاد، شبکه، منابع و برگرداندن سریع",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "وقتی سرویس پایین است، ترتیب عملیات سیستماتیک: ۱) آیا پادها همهٔ Running و Ready هستند؟ ۲) اگر هست، آیا readiness آن‌ها به سرویس وصل است (endpoints خالی؟)؟ ۳) آیا از بیرون به داخل می‌رسیم (Ingress و DNS)؟ ۴) تغییر اخیری بوده که rollback کنیم؟ غالب حوادث یا یک تغییر اخیر است یا یک وابستگی خارجی." },
+                { "t": "code", "f": "bash", "x": "# نمای کلی فوری\nkubectl get pods -A --field-selector=status.phase!=Running\nkubectl get events -A --sort-by=.lastTimestamp | tail -20\n# زنجیرهٔ شبکه: پاد تا ingress\nkubectl get endpoints <svc>\nkubectl get ingress,svc -A | grep <name>\n# کرش کانتینر و لاگ قبلی\nkubectl describe pod <pod>\nkubectl logs <pod> --previous" },
+                { "t": "p", "x": "ابزار کلاسیک شبکهٔ پادها یک pod عیب‌یاب مشترک است: با kubectl debug یا ایمیج netshoot وارد شبکهٔ همان namespace می‌شوید و DNS، پورت‌ها و مسیرها را می‌آزمایید. در نسخه‌های جدید kubectl debug مستقیماً به کانتینر در حال اجرا هم کانتینر اضافه می‌کند." },
+                { "t": "code", "f": "bash", "x": "# پاد عیب‌یاب شبکه\nkubectl run netshoot --rm -it --image=nicolaka/netshoot -- bash\n# داخلش:\nnslookup api.prod.svc.cluster.local\ncurl -sv http://api:8080/healthz\n# دیباگ روی پاد موجود\nkubectl debug -it <pod> --image=busybox:1.36 --target=api" },
+                { "t": "tip", "x": "قانون شمارهٔ یک حادثه: <b>اول سرویس را برگردانید، بعد عیب‌یابی کنید</b>. اگر انتشار اخیری بوده، همان لحظه rollout undo بزنید و بعد با آرامش ریشه‌یابی کنید. عیب‌یابی زندهٔ پروداکشن با کاربران داخلش، اغلب هزینهٔ بیشتر از downtime اولیه دارد.", "list": ["همیشه rollout undo و آخرین نسخهٔ خوب را در دسترس نگه دارید", "حادثهٔ بدون یادداشت زمانی، قابل بازسازی نیست؛ لاگ زمانی بنویسید", "بعد از حادثه: برگهٔ postmortem بدون سرزنش"] },
+                { "t": "quiz", "q": "سرویس از بیرون جواب نمی‌دهد ولی پادها همهٔ Ready هستند. اولین بررسی منطقی؟", "options": ["ری‌استارت همهٔ نودها", "endpoints سرویس و پیکربندی Ingress", "حذف پادها برای بازسازی", "ارتقای نسخهٔ کوبرنتیز"], "a": 1, "why": "پادهای Ready اما endpoints خالی یعنی ناهم‌خوانی selector یا مشکل probe؛ سپس قوانین Ingress و مسیر ترافیک ورودی را چک می‌کنید." },
+                { "t": "p", "x": "بعد از پایدارشدن سرویس، مرحلهٔ ریشه‌یابی را با سه سؤال شروع کنید: چه چیزی تغییر کرد (استقرار، پیکربندی، ترافیک)؟ آیا مشکل فقط از بیرون دیده می‌شود یا از درون خوشه هم (مقایسهٔ تست از داخل و خارج)؟ و آیا وابستگی خارجی سالم است؟ پاسخ همین سه سؤال، فضای جستجو را بیش از نیمه کوچک می‌کند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "عیب‌یابی پادها و سرویس‌ها", "q": "عیب یابی کوبرنتیز فارسی" },
+                  { "title": "دیباگ شبکهٔ خوشه", "q": "شبکه کوبرنتیز دیباگ فارسی" },
+                  { "title": "مدیریت حادثهٔ پروداکشن", "q": "مدیریت حادثه پروداکشن فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes debugging masterclass", "q": "kubernetes debugging troubleshooting masterclass" },
+                  { "title": "kubectl debug in practice", "q": "kubectl debug ephemeral containers tutorial" },
+                  { "title": "Incident response for engineers", "q": "incident response postmortem engineering" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "پیشرفته",
+          "chip": "a",
+          "lessons": [
+            {
+              "id": "production-checklist",
+              "t": "چک‌لیست پروداکشن",
+              "sum": "هر چیزی که قبل از ترافیک واقعی باید تأیید شود",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "تفاوت خوشهٔ دمو و پروداکشن یک چک‌لیست است. پیش از ترافیک واقعی این موارد را تک‌تیک تأیید کنید. <b>پایداری</b>: requests و limits همهٔ کانتینرها، probeهای سه‌گانه درست، PodDisruptionBudget و پاد ضدافینیتی برای سرویس‌های بحرانی، و حداقل دو رپلیکا در نودهای مختلف." },
+                { "t": "code", "f": "pdb.yaml", "x": "apiVersion: policy/v1\nkind: PodDisruptionBudget\nmetadata:\n  name: api-pdb\nspec:\n  minAvailable: 2\n  selector:\n    matchLabels: { app: api }" },
+                { "t": "p", "x": "<b>امنیت</b>: default-deny شبکه، اجرای غیرroot، اسکن ایمیج در CI، RBAC حداقلی برای انسان‌ها و ربات‌ها، و رمزنگاری Secretها. <b>بازیابی</b>: پشتیبان دوره‌ای etcd یا خوشهٔ جدید از مانیفست‌ها در کمتر از یک ساعت، و تست واقعی بازیابی — پشتیبان بدون تست، پشتیبان نیست." },
+                { "t": "p", "x": "<b>مشاهده‌پذیری</b>: داشبورد هر سرویس با چهار متریک طلایی، آلارم‌های عملیاتی (نه سرریز هشدار)، و ردیابی توزیع‌شده اگر معماری میکروسرویس دارید. <b>فرایند</b>: کسی که تلفن‌اش برای on-call روشن است، برگهٔ runbook برای سناریوهای شناخته‌شده، و تمرین قحطی‌سنجی (game day) دوره‌ای." },
+                { "t": "code", "f": "bash", "x": "# تست تخلیهٔ نود قبل از ترافیک واقعی\nkubectl drain <node> --ignore-daemonsets --delete-emptydir-data\n# اطمینان: سرویس همچنان سالم بماند\nkubectl get pods -l app=api -w\n# برگرداندن نود به گردش\nkubectl uncordon <node>" },
+                { "t": "tip", "x": "بهترین ابزار اعتبارسنجی، آشوب است: یک نود را عمداً حذف کنید، یک پاد را بکشید، شبکه را بین دو سرویس قطع کنید — در ساعتی که کاربران نیستند، نه ساعت سه بامداد.", "list": ["PDB برای همهٔ سرویس‌های پرترافیک", "حداکثر یک نود ناتمام در تعمیر همزمان", "تست بازیابی از پشتیبان هر فصل یک‌بار"] },
+                { "t": "quiz", "q": "PodDisruptionBudget چه چیزی را تضمین می‌کند؟", "options": ["پادها هرگز کرش نمی‌کنند", "در حین تخلیهٔ برنامه‌ریزی‌شده (مثل drain نود) حداقل تعداد مشخصی پاد سالم باقی می‌ماند", "خودکار مقیاس می‌دهد", "ترافیک بین نودها توزیع می‌شود"], "a": 1, "why": "PDB محدودیت حذف همزمان پادها در حین اختلالات برنامه‌ریزی‌شده است و ترکیبش با drain نود، تعمیر بدون قطعی را ممکن می‌کند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "چک‌لیست رفتن به پروداکشن", "q": "چک لیست پروداکشن کوبرنتیز فارسی" },
+                  { "title": "PodDisruptionBudget و پایداری", "q": "PodDisruptionBudget فارسی" },
+                  { "title": "تمرین آشوب روی خوشه", "q": "chaos engineering کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes production checklist", "q": "kubernetes production readiness checklist" },
+                  { "title": "PodDisruptionBudgets explained", "q": "kubernetes pod disruption budget explained" },
+                  { "title": "Chaos engineering on Kubernetes", "q": "chaos engineering kubernetes litmus" }
+                ]
+              }
+            },
+            {
+              "id": "gitops",
+              "t": "GitOps با Argo CD",
+              "sum": "گیت به‌عنوان منبع حقیقت، همگام‌سازی خودکار و انتشار پیشرونده",
+              "m": 35,
+              "body": [
+                { "t": "p", "x": "<b>GitOps</b> یعنی حالت مطلوب خوشه در گیت است و یک عامل داخلی خوشه دائماً واقعیت را با آن مقایسه و هم‌تراز می‌کند. <b>Argo CD</b> محبوب‌ترین ابزار این الگوست: مخزن مانیفست‌ها را watch می‌کند، تفاوت (drift) را نشان می‌دهد و خودکار یا با تأیید انسان sync می‌کند." },
+                { "t": "code", "f": "argocd-app.yaml", "x": "apiVersion: argoproj.io/v1alpha1\nkind: Application\nmetadata:\n  name: api-prod\n  namespace: argocd\nspec:\n  project: default\n  source:\n    repoURL: https://git.example.com/platform/deploy.git\n    targetRevision: main\n    path: apps/api/overlays/prod\n  destination:\n    server: https://kubernetes.default.svc\n    namespace: prod\n  syncPolicy:\n    automated:\n      prune: true\n      selfHeal: true\n    syncOptions:\n      - CreateNamespace=true" },
+                { "t": "p", "x": "مزیت‌های واقعی برای تیم: <b>selfHeal</b> تغییر دستی پروداکشن را خودکار برمی‌گرداند (پایان drift)، <b>prune</b> منابع حذف‌شده از گیت را از خوشه هم پاک می‌کند، و کل تاریخ استقرار با git log قابل مرور است. انتشار جدید یعنی یک merge request روی مخزن deploy — نه دستور روی لپ‌تاپ کسی." },
+                { "t": "code", "f": "bash", "x": "argocd login argocd.example.com\nargocd app list\nargocd app diff api-prod\nargocd app sync api-prod\n# برگرداندن استقرار با گیت، نه با دستور\nargocd app history api-prod\nargocd app rollback api-prod 3" },
+                { "t": "tip", "x": "دو مخزن نگه دارید: مخزن کد (که CI ایمیج می‌سازد) و مخزن deploy (که Argo از آن می‌خواند). خط لولهٔ CI فقط تگ ایمیج را در مخزن deploy به‌روز می‌کند؛ این جداسازی چرخهٔ انتشار را قابل audit می‌کند.", "list": ["الگوی app-of-apps برای مدیریت ده‌ها اپلیکیشن", "پروموشن بین محیط‌ها با PR بین شاخه‌ها یا overlayها", "استراتژی canary با Argo Rollouts برای انتشار پیشرونده"] },
+                { "t": "quiz", "q": "در الگوی GitOps دو مخزنی، مسئولیت CI در مخزن کد چیست؟", "options": ["اعمال مستقیم مانیفست روی خوشه", "ساخت و انتشار ایمیج و به‌روزرسانی تگ ایمیج در مخزن deploy", "اجرای Argo CD", "مدیریت گواهی‌های TLS"], "a": 1, "why": "در GitOps خوشه فقط از مخزن deploy سینک می‌شود؛ CI فقط ایمیج می‌سازد و مرجع مطلوب را در گیت به‌روز می‌کند." },
+                { "t": "p", "x": "الگوی <b>app-of-apps</b> برای مقیاس Argo است: یک اپلیکیشن ریشه در Argo که خودش یک پوشهٔ اپلیکیشن‌های دیگر را تعریف می‌کند؛ افزودن سرویس جدید یعنی یک PR به آن پوشه. برای صدور مجوز انتشار، sync windowها و دسترسی‌های پروژه اجازه می‌دهند مثلاً انتشار به prod فقط در ساعات کاری و فقط با تأیید مالک انجام شود." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "GitOps چیست و چرا مهم است", "q": "GitOps فارسی" },
+                  { "title": "نصب و کار با Argo CD", "q": "Argo CD کوبرنتیز فارسی" },
+                  { "title": "انتشار Canary با Argo Rollouts", "q": "Argo Rollouts canary فارسی" }
+                ],
+                "en": [
+                  { "title": "Argo CD GitOps full tutorial", "q": "argo cd gitops tutorial kubernetes" },
+                  { "title": "GitOps vs traditional CI/CD", "q": "gitops vs ci cd comparison" },
+                  { "title": "Progressive delivery with Argo Rollouts", "q": "argo rollouts canary progressive delivery" }
+                ]
+              }
+            },
+            {
+              "id": "multi-tenancy",
+              "t": "چند‌اجارگی و ایزوله‌سازی تیم‌ها",
+              "sum": "namespace، کوئوتا، اولویت و مرزهای امنیتی بین تیم‌ها",
+              "m": 30,
+              "body": [
+                { "t": "p", "x": "وقتی چند تیم روی یک خوشه کار می‌کنند، namespace مرز سازمان‌دهی است اما به‌تنهایی کافی نیست. ابزارهای ایزوله: <b>ResourceQuota</b> سقف مصرف منابع هر namespace، <b>LimitRange</b> مقادیر پیش‌فرض requests و limits برای هر پاد، <b>PriorityClass</b> اولویت زمان‌بندی سرویس‌های حیاتی در کمبود منابع، و RBAC جدا برای هر تیم." },
+                { "t": "code", "f": "quota.yaml", "x": "apiVersion: v1\nkind: ResourceQuota\nmetadata:\n  name: team-a-quota\n  namespace: team-a\nspec:\n  hard:\n    requests.cpu: \"20\"\n    requests.memory: 40Gi\n    limits.memory: 60Gi\n    pods: \"100\"\n    services.loadbalancers: \"1\"\n---\napiVersion: v1\nkind: LimitRange\nmetadata:\n  name: defaults\n  namespace: team-a\nspec:\n  limits:\n    - type: Container\n      default:\n        memory: 512Mi\n      defaultRequest:\n        memory: 256Mi\n        cpu: 100m" },
+                { "t": "p", "x": "دو مدل رایج معماری: <b>خوشهٔ مشترک با namespaceهای جدا</b> (ارزان‌تر، نیاز به انضباط سیاست‌ها) و <b>خوشهٔ جدا برای تیم‌های حساس</b> (ایزوله کامل، گران‌تر). اکثر سازمان‌ها ترکیبی دارند: خوشهٔ پروداکشن مشترک با کوئوتا و policy سخت‌گیرانه، و خوشه‌های آزمایشی آزاد." },
+                { "t": "code", "f": "priority.yaml", "x": "apiVersion: scheduling.k8s.io/v1\nkind: PriorityClass\nmetadata:\n  name: critical-services\nvalue: 100000\npreemptionPolicy: PreemptLowerPriority\nglobalDefault: false\n---\n# استفاده در پاد سرویس حیاتی\nspec:\n  priorityClassName: critical-services" },
+                { "t": "tip", "x": "Policy-as-code با <b>OPA Gatekeeper</b> یا Kyverno، قراردادهای تیمی را اجباری می‌کند: برچسب اجباری owner، ممنوعیت ایمیج بدون تگ دیجست، منع پاد بدون requests — همه به‌شکل قانون قابل اجرا نه سند فراموش‌شده.", "list": ["برچسب استاندارد owner و cost-center روی همهٔ namespaceها", "networkpolicy پیش‌فرض هنگام ساخت namespace", "review دوره‌ای کوئوتاها در برابر مصرف واقعی"] },
+                { "t": "quiz", "q": "ResourceQuota چه چیزی را محدود می‌کند؟", "options": ["سرعت شبکهٔ namespace", "مجموع منابع و آبجکت‌های مجاز در یک namespace", "تعداد کاربران تیم", "حجم لاگ‌ها"], "a": 1, "why": "ResourceQuota سقف تجمیعی requests/limits و تعداد آبجکت‌ها (پاد، سرویس، PVC و...) در یک namespace تعیین می‌کند." },
+                { "t": "p", "x": "در خوشهٔ مشترک، حوادث هم مشترک می‌شوند: یک استقرار بد در namespace تیم الف می‌تواند از طریق اشباع نودها روی تیم ب اثر بگذارد. همین است که کوئوتا و priority را از «سند تشریفات» به ابزار بقای خوشه تبدیل می‌کند؛ سرویس‌های پرداخت مشتری، PriorityClass بالاتری می‌گیرند تا در فشار منابع آخرین‌ها باشند که قربانی شوند." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "خوشهٔ مشترک برای چند تیم", "q": "چند اجارگی کوبرنتیز فارسی" },
+                  { "title": "کوئوتا و LimitRange", "q": "ResourceQuota LimitRange کوبرنتیز فارسی" },
+                  { "title": "قانون‌گذاری با Kyverno", "q": "Kyverno policy کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "Kubernetes multi-tenancy patterns", "q": "kubernetes multi tenancy patterns namespaces" },
+                  { "title": "Resource quotas and LimitRanges", "q": "kubernetes resource quota limitrange tutorial" },
+                  { "title": "Policy as code with Kyverno", "q": "kyverno policy as code kubernetes" }
+                ]
+              }
+            },
+            {
+              "id": "platform-sre",
+              "t": "پلتفرم‌سازی و SRE",
+              "sum": "SLO، بودجهٔ خطا، سلف‌سرویس تیم‌ها و پایداری بلند‌مدت",
+              "m": 35,
+              "body": [
+                { "t": "p", "x": "در مقیاس، هدف تیم پلتفرم تبدیل کوبرنتیز به <b>محصول داخلی</b> است: تیم‌های محصول استقرار را به‌شکل سلف‌سرویس انجام می‌دهند (یک قالب Helm یا نمودار از پیش‌تأییدشده) و تیم پلتفرم مالک زیرساخت مشترک است. معیار موفقیت پلتفرم، سرعت و اطمینان تیم‌های مشتری است، نه پیچیدگی فنی خودش." },
+                { "t": "p", "x": "<b>SLO</b> هدف‌گذاری قابل اندازه‌گیری است: مثلاً ۹۹.۹٪ درخواست‌های سرویس در ۳۰۰ms جواب بگیرند. <b>بودجهٔ خطا</b> (error budget) یعنی مقدار مجاز نقص در بازهٔ زمانی: تا وقتی بودجه باقی است، سرعت انتشار آزاد است؛ وقتی تمام شد، اولویت از قابلیت جدید به پایداری می‌چرخد. این قرارداد بین تیم‌های توسعه و عملیات، مشاجره را به عدد تبدیل می‌کند." },
+                { "t": "code", "f": "slo-example.yaml", "x": "# نمونهٔ قاعدهٔ هشدار برای SLO در Prometheus\ngroups:\n  - name: api-slo\n    rules:\n      - alert: ApiErrorBudgetBurn\n        expr: |\n          (\n            sum(rate(http_requests_total{job=\"api\",code=~\"5..\"}[5m]))\n            / sum(rate(http_requests_total{job=\"api\"}[5m]))\n          ) > 0.01\n        for: 5m\n        labels:\n          severity: critical\n        annotations:\n          summary: \"API error rate above 1% (SLO burn)\"" },
+                { "t": "p", "x": "پایداری بلند‌مدت خوشه نیازمند روال است، نه قهرمانی: ارتقای منظم نسخهٔ کوبرنتیز (هر سه ماه یک نسخهٔ جدید منتشر می‌شود)، چرخش نودها با استراتژی تخلیهٔ امن، و پاک‌سازی مداوم منابع متروک. قاعدهٔ عملی: هر خوشه باید طی یک روز از صفر با مانیفست‌ها و اتوماسیون بازسازی شود؛ اگر نشود، هنوز Infrastructure as Code واقعی ندارید." },
+                { "t": "tip", "x": "مسیر بلوغ رایج تیم‌ها: ابتدا خوشهٔ مدیریت‌شده + Helm، سپس GitOps با Argo، بعد سیاست‌ها با Kyverno، در نهایت سلف‌سرویس با قالب‌های داخلی یا ابزارهایی مثل Crossplane و Backstage. هر مرحله را فقط وقتی بروید که مرحلهٔ قبلی عادت شده باشد.", "list": ["SLO برای سرویس‌های سطح کاربر، نه هر Cron job", "on-call چرخشی با runbook برای هر آلارم", "پروژه‌های داخلی پلتفرم را مثل محصول، با بازخورد تیم‌ها اداره کنید"] },
+                { "t": "quiz", "q": "وقتی بودجهٔ خطای یک سرویس برای این ماه تمام شده، اقدام استاندارد SRE چیست؟", "options": ["افزودن قابلیت جدید برای جبران", "توقف انتشار قابلیت و تمرکز روی پایداری و رفع نقص", "افزودن دو برابر رپلیکاها", "خاموش کردن آلارم‌ها تا پایان ماه"], "a": 1, "why": "منطق error budget این است: کیفیت کافی تضمین شده ولی نه کامل؛ تمام‌شدن بودجه یعنی اولویت به پایداری منتقل شود تا ریسک به سطح قرارداد برگردد." },
+                { "t": "p", "x": "سنجش موفقیت پلتفرم را از خود زیرساخت به تجربهٔ مشتری داخلی منتقل کنید: مدت‌زمان از commit تا استقرار سالم در prod، نرخ شکست انتشارها، و زمان بازیابی حادثه (MTTR). این سه عدد، گزارش واقعی ارزش تیم پلتفرم به مدیریت است — نه تعداد سرورها یا پیچیدگی نمودارها." }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "SLO و بودجهٔ خطا به زبان ساده", "q": "SLO error budget فارسی" },
+                  { "title": "ساخت پلتفرم داخلی برای تیم‌ها", "q": "platform engineering کوبرنتیز فارسی" },
+                  { "title": "نگهداری بلندمدت خوشه", "q": "ارتقا و نگهداری خوشه کوبرنتیز فارسی" }
+                ],
+                "en": [
+                  { "title": "SLOs and error budgets explained", "q": "slo error budget explained sre" },
+                  { "title": "Platform engineering on Kubernetes", "q": "internal developer platform kubernetes backstage" },
+                  { "title": "Kubernetes cluster upgrades in practice", "q": "kubernetes cluster upgrade strategy production" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

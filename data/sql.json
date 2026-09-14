@@ -1,0 +1,1224 @@
+{
+  "id": "sql",
+  "title": "SQL",
+  "tagline": "از SELECT ساده تا کوئری‌های تحلیلی و ایندکس‌گذاری",
+  "icon": "db",
+  "status": "active",
+  "overview": {
+    "summary": "این دورهٔ جامع، شما را از سینتکس پایهٔ SELECT تا کوئری‌های تحلیلی پیچیده، توابع پنجره‌ای، ایندکس‌گذاری و بهینه‌سازی همراهی می‌کند. مسیر اکادمیک روی خودِ زبان SQL و مدل رابطه‌ای تمرکز دارد و مسیر بیزینسی نشان می‌دهد دادهٔ واقعی محصول چطور به متریک، گزارش و تصمیم تبدیل می‌شود. تمام مثال‌ها با PostgreSQL سازگار هستند و نکات اختلافی MySQL و SQLite هم ذکر می‌شود.",
+    "keyPoints": [
+      "SQL زبان استاندارد پایگاه‌های دادهٔ رابطه‌ای است و در PostgreSQL، MySQL، SQLite و حتی انبارهای دادهٔ مدرن مشترک است.",
+      "ترتیب اجرای منطقی کوئری از FROM و JOIN، سپس WHERE، سپس GROUP BY و HAVING و در نهایت SELECT و ORDER BY است.",
+      "INNER JOIN فقط ردیف‌های منطبق را می‌آورد؛ LEFT JOIN همهٔ ردیف‌های جدول چپ را حتی بدون تطابق نگه می‌دارد.",
+      "WHERE قبل از تجمیع فیلتر می‌کند و HAVING بعد از آن؛ تفکیک این دو از رایج‌ترین منابع خطاست.",
+      "توابع پنجره‌ای مانند ROW_NUMBER و LAG بدون جمع‌شدن ردیف‌ها، رتبه‌بندی و مقایسهٔ دوره‌ای را ممکن می‌کنند.",
+      "CTE با WITH کوئری‌های پیچیده را مرحله‌به‌مرحله و خوانا می‌کند و نسخهٔ RECURSIVE آن پیمایش سلسله‌مراتبی را حل می‌کند.",
+      "NULL یعنی «نامعلوم»، نه صفر و نه رشتهٔ خالی؛ هر مقایسه‌ای با NULL نتیجهٔ UNKNOWN می‌دهد.",
+      "نرمال‌سازی داده را سالم نگه می‌دارد، اما بار خواندنی سنگین گاهی جدول دنورمال‌شده یا ستون محاسبه‌شده می‌خواهد.",
+      "ایندکس سرعت خواندن را بالا می‌برد اما هزینهٔ نوشتن و فضا دارد؛ ترتیب ستون‌ها در ایندکس ترکیبی حیاتی است.",
+      "تراکنش‌ها تضمین‌های ACID را فراهم می‌کنند و سطح ایزولاسیون رفتار خواندن‌های همزمان را تعیین می‌کند.",
+      "هرگز ورودی کاربر را با چسباندن رشته به کوئری نفرستید؛ همیشه از پارامترها یا Prepared Statement استفاده کنید.",
+      "EXPLAIN ANALYZE نشان می‌دهد موتور پایگاه داده چه برنامه‌ای برای کوئری دارد؛ بهینه‌سازی بدون دیدن برنامه کورکورانه است.",
+      "برای گزارش‌های بیزینسی معمولاً لایهٔ دادهٔ تحلیلی جداگانه‌ای کنار پایگاه دادهٔ تراکنشی می‌سازند."
+    ],
+    "cheatsheet": [
+      {
+        "f": "cheatsheet.sql",
+        "x": "-- SELECT پایه\nSELECT id, name, price\nFROM products\nWHERE price > 100 AND category = 'laptop'\nORDER BY price DESC\nLIMIT 10;\n\n-- تجمیع و گروه‌بندی\nSELECT category,\n       COUNT(*)          AS n,\n       AVG(price)::int   AS avg_price\nFROM products\nWHERE is_active = true\nGROUP BY category\nHAVING COUNT(*) > 5\nORDER BY n DESC;\n\n-- JOIN\nSELECT o.id, c.name, o.total\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nWHERE o.created_at >= '2024-01-01';\n\n-- توابع پنجره‌ای\nSELECT id, customer_id, total,\n       ROW_NUMBER() OVER (PARTITION BY customer_id\n                          ORDER BY total DESC)   AS rn,\n       SUM(total)  OVER (ORDER BY created_at)    AS running_total,\n       LAG(created_at) OVER (PARTITION BY customer_id\n                             ORDER BY created_at) AS prev_order\nFROM orders;\n\n-- CTE و زیرکوئری\nWITH monthly AS (\n  SELECT date_trunc('month', created_at) AS m,\n         SUM(total)                      AS revenue\n  FROM orders\n  GROUP BY 1\n)\nSELECT m, revenue,\n       revenue - LAG(revenue) OVER (ORDER BY m) AS delta\nFROM monthly\nORDER BY m;\n\n-- ایندکس\nCREATE INDEX idx_orders_cust_created\n  ON orders (customer_id, created_at DESC);\n\n-- تراکنش\nBEGIN;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;"
+      }
+    ]
+  },
+  "tracks": [
+    {
+      "id": "academic",
+      "kind": "academic",
+      "title": "مسیر اکادمیک",
+      "icon": "cap",
+      "desc": "بر پایهٔ خودِ SQL: از مدل رابطه‌ای تا کوئری‌های پیشرفته",
+      "levels": [
+        {
+          "t": "مقدماتی",
+          "chip": "b",
+          "lessons": [
+            {
+              "id": "relational-model-setup",
+              "t": "مدل رابطه‌ای و راه‌اندازی محیط",
+              "sum": "از جدول، سطر و ستون و کلیدها تا نصب PostgreSQL و اولین اتصال با psql",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "مدل رابطه‌ای را ادگار کاد در سال ۱۹۷۰ معرفی کرد و هنوز ستون فقرات تقریباً همهٔ سیستم‌های نرم‌افزاری است. در این مدل، داده در <b>جدول‌های دوبعدی</b> نگه داشته می‌شود: هر ردیف یک موجودیت (مثلاً یک مشتری) و هر ستون یک ویژگی آن است. هر جدول یک <b>کلید اصلی</b> (Primary Key) دارد که هر ردیف را یکتا می‌کند و جدول‌ها با <b>کلید خارجی</b> (Foreign Key) به هم پیوند می‌خورند."
+                },
+                {
+                  "t": "p",
+                  "x": "چند موتور پایگاه دادهٔ رابطه‌ای محبوب هستند: PostgreSQL برای استانداردبودن و امکانات پیشرفته، MySQL برای سادگی و فراگیربودن، و SQLite برای یک فایل بدون سرور. این دوره مثال‌ها را با PostgreSQL می‌نویسد، اما بیش از ۹۰٪ سینتکس در همهٔ موتورها یکسان است. SQL زبانی <b>اعلانی (declarative)</b> است: شما می‌گویید چه داده‌ای می‌خواهید، نه اینکه چطور آن را پیدا کند."
+                },
+                {
+                  "t": "code",
+                  "f": "setup.sql",
+                  "x": "-- ساخت پایگاه داده و جدول‌های نمونهٔ فروشگاه\nCREATE DATABASE shop;\n\\c shop\n\nCREATE TABLE customers (\n  id          BIGSERIAL    PRIMARY KEY,\n  name        TEXT         NOT NULL,\n  email       TEXT         UNIQUE,\n  city        TEXT,\n  created_at  TIMESTAMPTZ  NOT NULL DEFAULT now()\n);\n\nCREATE TABLE products (\n  id       BIGSERIAL       PRIMARY KEY,\n  title    TEXT            NOT NULL,\n  category TEXT            NOT NULL,\n  price    NUMERIC(12,2)   NOT NULL CHECK (price >= 0)\n);\n\nCREATE TABLE orders (\n  id          BIGSERIAL     PRIMARY KEY,\n  customer_id BIGINT        NOT NULL REFERENCES customers(id),\n  total       NUMERIC(12,2) NOT NULL CHECK (total >= 0),\n  created_at  TIMESTAMPTZ   NOT NULL DEFAULT now()\n);"
+                },
+                {
+                  "t": "tip",
+                  "x": "در SQLite به جای BIGSERIAL از INTEGER PRIMARY KEY استفاده می‌شود که به‌طور خودکار مقدار می‌گیرد. در MySQL معادل آن AUTO_INCREMENT است.",
+                  "list": [
+                    "نوع NUMERIC برای پول درست است؛ float خطای گردکردن ایجاد می‌کند.",
+                    "TIMESTAMPTZ لحظهٔ زمانی را با منطقهٔ زمانی ذخیره می‌کند و برای دادهٔ جهانی انتخاب امن‌تری است."
+                  ]
+                },
+                {
+                  "t": "code",
+                  "f": "psql-commands.txt",
+                  "x": "\\dt            -- فهرست جدول‌ها\n\\d orders      -- ساختار و قیود جدول orders\n\\dn            -- فهرست schemaها\n\\x             -- نمایش گستردهٔ ردیف‌ها (سطر به سطر)\n\\q             -- خروج"
+                },
+                {
+                  "t": "p",
+                  "x": "با چند ردیف نمونه پر کنید تا در درس‌های بعدی روی همین داده کوئری بزنیم. عادت خوب این است که دادهٔ آزمایشی را در یک فایل seed.sql نگه دارید و هر بار محیط را از نو بسازید."
+                },
+                {
+                  "t": "code",
+                  "f": "seed.sql",
+                  "x": "INSERT INTO customers (name, email, city) VALUES\n  ('Sara',  'sara@example.com',  'Tehran'),\n  ('Ali',   'ali@example.com',   'Isfahan'),\n  ('Maryam','maryam@example.com','Shiraz');\n\nINSERT INTO products (title, category, price) VALUES\n  ('Laptop 14',  'laptop', 45000.00),\n  ('Mouse Pro',  'gear',    120.50),\n  ('Keyboard X', 'gear',    210.00);\n\nINSERT INTO orders (customer_id, total, created_at) VALUES\n  (1, 45120.50, now() - interval '3 days'),\n  (1, 210.00,   now() - interval '1 day'),\n  (2, 120.50,   now());"
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام گزینه نقش کلید خارجی (FOREIGN KEY) را درست توصیف می‌کند؟",
+                  "options": [
+                    "هر ردیف را در همان جدول یکتا می‌کند",
+                    "یک ستون (یا ترکیب ستون‌ها) است که به کلید اصلی جدولی دیگر اشاره می‌کند و یکپارچگی ارجاعی را تضمین می‌کند",
+                    "فقط برای مرتب‌سازی سریع ردیف‌ها استفاده می‌شود",
+                    "مقدار پیش‌فرض ستون در زمان درج تعیین می‌کند"
+                  ],
+                  "a": 1,
+                  "why": "کلید اصلی یکتایی را در خود جدول تضمین می‌کند؛ کلید خارجی رابطهٔ بین جدول‌ها را و مانع درج سفارش برای مشتری ناموجود می‌شود."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "یادگیری SQL فارسی - مقدمه و مدل رابطه‌ای", "q": "یادگیری SQL فارسی مدل رابطه‌ای" },
+                  { "title": "نصب PostgreSQL و آشنایی با psql", "q": "نصب PostgreSQL در ویندوز فارسی" },
+                  { "title": "ساخت اولین جدول در پایگاه داده", "q": "ساخت جدول در SQL فارسی CREATE TABLE" }
+                ],
+                "en": [
+                  { "title": "Relational databases and SQL explained", "q": "relational database explained for beginners" },
+                  { "title": "Install PostgreSQL and connect with psql", "q": "install postgresql psql tutorial" },
+                  { "title": "CREATE TABLE and data types", "q": "sql create table primary key foreign key tutorial" },
+                  { "title": "PostgreSQL crash course", "q": "postgresql tutorial for beginners crash course" }
+                ]
+              }
+            },
+            {
+              "id": "select-where-order",
+              "t": "SELECT، WHERE و ORDER BY",
+              "sum": "خواندن دقیق داده: انتخاب ستون‌ها، فیلتر شرطی و مرتب‌سازی",
+              "m": 20,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "کوئری SELECT قلب SQL است. حداقلِ آن «چه ستون‌هایی، از کدام جدول» است و با WHERE داده را فیلتر، با ORDER BY مرتب و با LIMIT محدود می‌کنیم. مهم‌ترین عادت از همین ابتدا: هرگز SELECT * را در کد واقعی ننویسید؛ ستون‌های مورد نیاز را صریح ذکر کنید تا کوئری شفاف، سریع‌تر و مقاوم‌تر به تغییر اسکیما باشد."
+                },
+                {
+                  "t": "code",
+                  "f": "select-basics.sql",
+                  "x": "-- ستون‌های مشخص با نام مستعار\nSELECT id, title, price AS unit_price\nFROM products;\n\n-- فقط ردیف‌های خاص\nSELECT id, title, price\nFROM products\nWHERE price > 100;\n\n-- مرتب‌سازی چند سطحی و محدودکردن نتیجه\nSELECT title, price\nFROM products\nORDER BY price DESC, title ASC\nLIMIT 5;"
+                },
+                {
+                  "t": "p",
+                  "x": "ترتیب نوشتن بند (clause)ها در SQL ثابت است: SELECT، FROM، WHERE، GROUP BY، HAVING، ORDER BY، LIMIT. اما <b>ترتیب اجرا</b> فرق دارد: ابتدا FROM و JOIN اجرا می‌شود، بعد WHERE، بعد GROUP BY و HAVING، و در آخر SELECT و ORDER BY. به همین دلیل نمی‌توانید در WHERE به نام مستعارِ تعریف‌شده در SELECT اشاره کنید."
+                },
+                {
+                  "t": "code",
+                  "f": "select-patterns.sql",
+                  "x": "-- DISTINCT: حذف ردیف‌های تکراری نتیجه\nSELECT DISTINCT category\nFROM products;\n\n-- محاسبه روی ستون‌ها در زمان خواندن\nSELECT title, price, price * 1.09 AS price_with_tax\nFROM products\nWHERE price BETWEEN 100 AND 500\nORDER BY price;\n\n-- مقدار پیش‌فرض برای NULL با COALESCE\nSELECT name, COALESCE(city, 'unknown') AS city\nFROM customers;"
+                },
+                {
+                  "t": "tip",
+                  "x": "ORDER BY بدون تعیین جهت یعنی صعودی (ASC). برای مرتب‌سازی پایدار در صفحه‌بندی، همیشه یک معیار یکتا مثل id را به انتهای ORDER BY اضافه کنید تا صفحات تکراری یا جاافتاده نداشته باشید."
+                },
+                {
+                  "t": "quiz",
+                  "q": "استفاده از نام مستعار (alias) تعریف‌شده در SELECT داخل کدام بند مجاز است؟",
+                  "options": [
+                    "WHERE",
+                    "HAVING در همهٔ موتورها",
+                    "ORDER BY",
+                    "GROUP BY"
+                  ],
+                  "a": 2,
+                  "why": "ORDER BY پس از SELECT اجرا می‌شود پس alias آنجا شناخته می‌شود؛ WHERE و GROUP BY قبل از SELECT اجرا می‌شوند و alias را نمی‌بینند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "SELECT و WHERE در SQL به زبان فارسی", "q": "SELECT WHERE ORDER BY در sql فارسی" },
+                  { "title": "مرتب‌سازی و محدودکردن نتایج", "q": "ORDER BY LIMIT در sql فارسی" },
+                  { "title": "ترتیب اجرای بندهای کوئری", "q": "ترتیب اجرای کوئری sql فارسی" }
+                ],
+                "en": [
+                  { "title": "SQL SELECT statement deep dive", "q": "sql select where order by limit tutorial" },
+                  { "title": "Logical order of execution in SQL", "q": "sql logical query processing order of execution" },
+                  { "title": "DISTINCT, aliases and expressions", "q": "sql distinct alias expression tutorial" },
+                  { "title": "Common SELECT mistakes beginners make", "q": "sql select common mistakes best practices" }
+                ]
+              }
+            },
+            {
+              "id": "filtering-operators",
+              "t": "فیلتر با عملگرها و مدیریت NULL",
+              "sum": "LIKE، IN، BETWEEN، منطق ترکیبی و رفتار عجیب اما قابل پیش‌بینیِ NULL",
+              "m": 20,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "فیلتر دقیق یعنی ترکیب درست عملگرها: مقایسه‌ای (=، <>, <، >=)، بازه‌ای (BETWEEN)، عضویت (IN) و تطبیق الگو (LIKE). در PostgreSQL از ILIKE برای تطبیق بدون حساسیت به بزرگی حروف استفاده می‌شود."
+                },
+                {
+                  "t": "code",
+                  "f": "filters.sql",
+                  "x": "-- تطبیق الگو: % هر تعداد کاراکتر، _ یک کاراکتر\nSELECT title FROM products\nWHERE title ILIKE '%laptop%';\n\n-- عضویت در مجموعه\nSELECT name FROM customers\nWHERE city IN ('Tehran', 'Isfahan', 'Tabriz');\n\n-- بازهٔ بسته (شامل دو سر)\nSELECT title FROM products\nWHERE price BETWEEN 100 AND 300;\n\n-- ترکیب شرط‌ها با اولویت صریح\nSELECT title FROM products\nWHERE (category = 'gear' AND price < 200)\n   OR category = 'laptop';"
+                },
+                {
+                  "t": "p",
+                  "x": "<b>NULL مفهوم «نامعلوم» است</b>: نه صفر و نه رشتهٔ خالی. هر مقایسه‌ای با NULL نتیجهٔ UNKNOWN می‌دهد، پس price = NULL هرگز درست نیست و برای بررسی باید از IS NULL یا IS NOT NULL استفاده کنید. یک نتیجهٔ جانبی مهم: شرط NOT col در سطرهایی که col برابر NULL است هم رد می‌شوند، چون UNKNOWN جزو نتایج درست WHERE نیست."
+                },
+                {
+                  "t": "code",
+                  "f": "null-handling.sql",
+                  "x": "-- درست: بررسی NULL\nSELECT name FROM customers WHERE city IS NULL;\n\n-- نادرست: هیچ ردیفی برنمی‌گرداند\nSELECT name FROM customers WHERE city = NULL;\n\n-- نکتهٔ ظریف: این کوئری مشتریان بدون شهر\n-- و مشتریان شهرهای دیگر را «جدا» می‌دهد\nSELECT name FROM customers\nWHERE NOT (city = 'Tehran');   -- ردیف‌های city = NULL را هم حذف می‌کند\n\n-- جایگزین امن\nSELECT name FROM customers\nWHERE city IS DISTINCT FROM 'Tehran';  -- مخصوص PostgreSQL"
+                },
+                {
+                  "t": "tip",
+                  "x": "برای مقدار جایگزین NULL در خروجی یا محاسبات از COALESCE(x, default) استفاده کنید. در MySQL توابع IFNULL و NULLIF هم رایج‌اند.",
+                  "list": [
+                    "COUNT(*) تعداد همهٔ ردیف‌ها را می‌شمارد ولی COUNT(col) فقط مقدارهای غیر NULL را.",
+                    "در ایندکس‌گذاری، ستون‌های NULL-پذیر رفتار متفاوتی دارند؛ در درس ایندکس‌ها برمی‌گردیم."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام کوئری مشتریانی را برمی‌گرداند که شهرشان تهران نیست، شامل کسانی که شهرشان NULL است؟",
+                  "options": [
+                    "WHERE city <> 'Tehran'",
+                    "WHERE NOT city = 'Tehran'",
+                    "WHERE city IS DISTINCT FROM 'Tehran'",
+                    "WHERE city NOT IN ('Tehran')"
+                  ],
+                  "a": 2,
+                  "why": "سه گزینهٔ اول مقایسه با NULL نتیجهٔ UNKNOWN می‌دهد و ردیف حذف می‌شود؛ IS DISTINCT FROM دقیقاً برای مقایسهٔ امن با NULL طراحی شده است."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "عملگرهای فیلتر در SQL", "q": "LIKE IN BETWEEN در sql فارسی" },
+                  { "title": "NULL در SQL چیست و چگونه مدیریت می‌شود", "q": "مقدار null در sql فارسی" },
+                  { "title": "خطاهای رایج در فیلترکردن داده", "q": "خطاهای رایج sql فارسی" }
+                ],
+                "en": [
+                  { "title": "SQL WHERE clause: all operators", "q": "sql where clause operators like in between" },
+                  { "title": "How NULL really works in SQL", "q": "sql null three valued logic explained" },
+                  { "title": "COALESCE and NULL-safe comparisons", "q": "sql coalesce is null is distinct from" },
+                  { "title": "Pattern matching with LIKE and regex", "q": "sql like ilike pattern matching tutorial" }
+                ]
+              }
+            },
+            {
+              "id": "aggregate-groupby-having",
+              "t": "توابع تجمعی، GROUP BY و HAVING",
+              "sum": "خلاصه‌سازی داده: شمارش، میانگین، گروه‌بندی و فیلتر بعد از تجمیع",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "توابع تجمعی چند ردیف را به یک مقدار تبدیل می‌کنند: COUNT، SUM، AVG، MIN و MAX. وقتی کنار GROUP BY بیایند، خلاصهٔ هر گروه را جداگانه حساب می‌کنند. قاعدهٔ طلایی: هر ستونی که در SELECT آمده و داخل تابع تجمعی نیست، <b>باید</b> در GROUP BY ذکر شود؛ در غیر این صورت موتور پایگاه داده یا خطا می‌دهد یا رفتار نامشخصی دارد."
+                },
+                {
+                  "t": "code",
+                  "f": "aggregates.sql",
+                  "x": "-- خلاصهٔ کلی\nSELECT COUNT(*)        AS total_rows,\n       COUNT(email)    AS with_email,   -- بدون NULL\n       SUM(total)      AS revenue,\n       AVG(total)::int AS avg_order,\n       MAX(total)      AS biggest_order\nFROM orders;\n\n-- خلاصهٔ به تفکیک گروه\nSELECT category,\n       COUNT(*)        AS product_count,\n       AVG(price)::int AS avg_price\nFROM products\nGROUP BY category\nORDER BY product_count DESC;"
+                },
+                {
+                  "t": "p",
+                  "x": "تفاوت WHERE و HAVING را هرگز فراموش نکنید: WHERE <b>قبل</b> از گروه‌بندی روی ردیف‌های خام فیلتر می‌کند و HAVING <b>بعد</b> از آن روی نتیجهٔ تجمیع. فیلترهای عادی را همیشه در WHERE بگذارید تا حجم داده‌ای که گروه‌بندی می‌شود کمتر بماند؛ این یکی از ساده‌ترین بهینه‌سازی‌های واقعی است."
+                },
+                {
+                  "t": "code",
+                  "f": "groupby-having.sql",
+                  "x": "-- سفارش‌های بالای ۱۰۰ را گروه‌بندی کن،\n-- فقط گروه‌هایی را نگه دار که بیش از ۵ سفارش دارند\nSELECT customer_id,\n       COUNT(*)     AS orders_count,\n       SUM(total)   AS spent\nFROM orders\nWHERE total > 100            -- فیلتر ردیف‌های خام (قبل از تجمیع)\nGROUP BY customer_id\nHAVING COUNT(*) > 5          -- فیلتر گروه‌ها (بعد از تجمیع)\nORDER BY spent DESC;"
+                },
+                {
+                  "t": "p",
+                  "x": "دو امکان کاربردی دیگر: شمارهٔ ستون در GROUP BY (مثل GROUP BY 1 که به اولین ستون SELECT اشاره می‌کند و در کوئری‌های تحلیلی بسیار خواناست) و بند FILTER در PostgreSQL که شمارش‌های شرطی چندگانه را در یک پاس واحد انجام می‌دهد."
+                },
+                {
+                  "t": "code",
+                  "f": "conditional-aggregates.sql",
+                  "x": "-- شمارش شرطی با FILTER (PostgreSQL)\nSELECT customer_id,\n       COUNT(*) FILTER (WHERE total > 500)  AS big_orders,\n       COUNT(*) FILTER (WHERE total <= 500) AS small_orders\nFROM orders\nGROUP BY customer_id;\n\n-- نسخهٔ قابل‌حمل با CASE (همهٔ موتورها)\nSELECT customer_id,\n       SUM(CASE WHEN total > 500 THEN 1 ELSE 0 END) AS big_orders\nFROM orders\nGROUP BY customer_id;"
+                },
+                {
+                  "t": "tip",
+                  "x": "AVG روی ستون پولی با نوع NUMERIC دقت کامل می‌دهد، اما در برخی موتورها AVG روی اعداد صحیح خودش عدد صحیح می‌دهد؛ در صورت شک با CAST کنترل کنید."
+                },
+                {
+                  "t": "quiz",
+                  "q": "در کدام کوئری استفاده از HAVING به جای WHERE اشتباه است؟",
+                  "options": [
+                    "فیلترکردن گروه‌هایی که SUM(total) بزرگ‌تر از ۱۰۰۰ دارند",
+                    "فیلترکردن ردیف‌های ستون created_at قبل از گروه‌بندی",
+                    "شمارش گروه‌هایی که COUNT(*) بزرگ‌تر از ۳ دارند",
+                    "فیلترکردن میانگین گروه‌ها"
+                  ],
+                  "a": 1,
+                  "why": "WHERE پیش از GROUP BY اجرا می‌شود و برای فیلتر ردیف‌های خام است؛ HAVING فقط روی نتیجهٔ توابع تجمعی معنا دارد و برای فیلتر ردیف‌های خام ناکارآمد و نامعتبر است."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "GROUP BY و توابع تجمعی به فارسی", "q": "GROUP BY توابع تجمعی sql فارسی" },
+                  { "title": "تفاوت WHERE و HAVING با مثال واقعی", "q": "having و where تفاوت فارسی sql" },
+                  { "title": "گزارش‌سازی با COUNT و SUM", "q": "count sum avg در sql فارسی" }
+                ],
+                "en": [
+                  { "title": "GROUP BY and aggregates from scratch", "q": "sql group by aggregate functions tutorial" },
+                  { "title": "HAVING vs WHERE with real examples", "q": "sql having vs where explained" },
+                  { "title": "Conditional aggregation with CASE", "q": "sql conditional aggregation case filter" },
+                  { "title": "Aggregation mistakes that break queries", "q": "sql group by only_full_group_by common errors" }
+                ]
+              }
+            },
+            {
+              "id": "joins-fundamentals",
+              "t": "JOINها: پیوند جدول‌ها",
+              "sum": "INNER، LEFT، RIGHT و FULL؛ به‌علاوهٔ الگوی ضدپیوند و پیوند خودِ جدول با خودش",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "دادهٔ واقعی همیشه بین چند جدول پخش شده است و JOIN آن‌ها را کنار هم می‌آورد. <b>INNER JOIN</b> فقط ردیف‌هایی را می‌دهد که در هر دو طرف تطابق دارند. <b>LEFT JOIN</b> همهٔ ردیف‌های جدول چپ را نگه می‌دارد و برای ردیف‌های بدون تطابق مقدار NULL می‌گذارد. RIGHT و FULL تعمیم همین منطق‌اند؛ در عمل تقریباً همیشه با INNER و LEFT کار می‌کنید و RIGHT را می‌توان با جابه‌جایی ترتیب جدول‌ها بازنویسی کرد."
+                },
+                {
+                  "t": "code",
+                  "f": "joins.sql",
+                  "x": "-- INNER JOIN: فقط سفارش‌هایی که مشتری‌شان وجود دارد\nSELECT o.id AS order_id, c.name, o.total\nFROM orders o\nJOIN customers c ON c.id = o.customer_id;\n\n-- LEFT JOIN: همهٔ مشتری‌ها، حتی بدون هیچ سفارشی\nSELECT c.name, COUNT(o.id) AS orders_count\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nGROUP BY c.id, c.name\nORDER BY orders_count DESC;\n\n-- FULL OUTER JOIN: ترکیب دو جهان\nSELECT c.name, o.id\nFROM customers c\nFULL OUTER JOIN orders o ON o.customer_id = c.id;"
+                },
+                {
+                  "t": "p",
+                  "x": "دو الگوی کاربردی که هر تحلیلگری باید از حفظ باشد: <b>ضدپیوند (anti-join)</b> برای پیدا کردن ردیف‌های بدون تطابق، و <b>پیوند خودی (self join)</b> برای مقایسهٔ ردیف‌های یک جدول با هم، مثل پیدا کردن هم‌شهری‌ها یا ساختار سازمانی کارکنان."
+                },
+                {
+                  "t": "code",
+                  "f": "join-patterns.sql",
+                  "x": "-- ضدپیوند: مشتریانی که هرگز خرید نکرده‌اند\nSELECT c.id, c.name\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL;\n\n-- پیوند خودی: جفت مشتری‌های هم‌شهر\nSELECT a.name AS person_a, b.name AS person_b, a.city\nFROM customers a\nJOIN customers b\n  ON a.city = b.city AND a.id < b.id;"
+                },
+                {
+                  "t": "tip",
+                  "x": "فراموش‌کردن شرط JOIN دو جدول بزرگ ضرب دکارتی می‌سازد و پایگاه داده را از کار می‌اندازد. همیشه شرط ON را بنویسید و از سینتکس قدیمی JOIN در WHERE پرهیز کنید.",
+                  "list": [
+                    "هرگاه بعد از LEFT JOIN شمارش می‌کنید، COUNT(o.id) بنویسید نه COUNT(*)؛ در غیر این صورت ردیف‌های NULL هم شمرده می‌شوند.",
+                    "اگر بعد از LEFT JOIN شرطی در WHERE بگذارید که به جدول راست اشاره می‌کند، عملاً آن را به INNER JOIN تبدیل کرده‌اید؛ شرط مربوط به سمت راست را داخل ON بگذارید."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام کوئری تعداد سفارش‌های هر مشتری را درست می‌شمارد، به‌طوری که مشتری‌های بدون سفارش با عدد صفر دیده شوند؟",
+                  "options": [
+                    "SELECT c.name, COUNT(*) FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.name",
+                    "SELECT c.name, COUNT(o.id) FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.name",
+                    "SELECT c.name, COUNT(o.id) FROM customers c INNER JOIN orders o ON o.customer_id = c.id GROUP BY c.name",
+                    "SELECT c.name, SUM(o.id) FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.name"
+                  ],
+                  "a": 1,
+                  "why": "با COUNT(*) ردیف مشتریِ بدون سفارش که در آن o.id برابر NULL است هم شمرده می‌شود و ۱ نمایش داده می‌شود؛ COUNT(o.id) مقدارهای NULL را نادیده می‌گیرد. INNER JOIN هم اصلاً مشتری بدون سفارش را برنمی‌گرداند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "JOIN در SQL به زبان ساده", "q": "JOIN در sql فارسی inner left join" },
+                  { "title": "تفاوت انواع JOIN با نمودار", "q": "انواع join در sql فارسی" },
+                  { "title": "حل مسائل واقعی با JOIN چندجدولی", "q": "join چند جدول sql فارسی پروژه" }
+                ],
+                "en": [
+                  { "title": "Visual guide to SQL joins", "q": "sql joins explained visually inner left right full" },
+                  { "title": "Anti-join and self-join patterns", "q": "sql anti join left join is null self join pattern" },
+                  { "title": "Why your LEFT JOIN became an INNER JOIN", "q": "left join where clause makes inner join pitfall" },
+                  { "title": "Joining multiple tables in practice", "q": "sql join multiple tables practice exercises" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "متوسط",
+          "chip": "m",
+          "lessons": [
+            {
+              "id": "subqueries",
+              "t": "زیرکوئری‌ها",
+              "sum": "کوئری در دل کوئری: مقایسهٔ اسکالر، IN، EXISTS و زیرکوئری همبسته",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "زیرکوئری یک SELECT کامل داخل پرانتز است که می‌تواند در WHERE، FROM یا حتی SELECT ظاهر شود. انواع اصلی: <b>اسکالر</b> که یک مقدار واحد برمی‌گرداند، <b>مجموعه‌ای</b> که با IN مقایسه می‌شود، و <b>همبسته (correlated)</b> که به ستون‌های کوئری بیرونی ارجاع دارد و برای هر ردیف بیرونی یک‌بار ارزیابی می‌شود."
+                },
+                {
+                  "t": "code",
+                  "f": "subqueries.sql",
+                  "x": "-- زیرکوئری اسکالر: محصولات گران‌تر از میانگین\nSELECT title, price\nFROM products\nWHERE price > (SELECT AVG(price) FROM products);\n\n-- زیرکوئری مجموعه‌ای: مشتری‌های خریدار\nSELECT name\nFROM customers\nWHERE id IN (SELECT customer_id FROM orders);\n\n-- زیرکوئری در FROM (جدول مشتق)\nSELECT category, avg_price\nFROM (SELECT category, AVG(price) AS avg_price\n      FROM products GROUP BY category) AS t\nWHERE avg_price > 100;"
+                },
+                {
+                  "t": "p",
+                  "x": "برای بررسی وجود، <b>EXISTS</b> تقریباً همیشه بهتر از IN است: به محض پیدا شدن اولین تطابق متوقف می‌شود و با NULL مشکل ندارد. یادتان باشد NOT IN اگر زیرکوئری حتی یک NULL برگرداند، کل نتیجه خالی می‌شود؛ در چنین مواردی NOT EXISTS انتخاب امن است."
+                },
+                {
+                  "t": "code",
+                  "f": "exists-correlated.sql",
+                  "x": "-- زیرکوئری همبسته: آخرین سفارش هر مشتری\nSELECT c.name, o.total, o.created_at\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nWHERE o.created_at = (\n  SELECT MAX(o2.created_at)\n  FROM orders o2\n  WHERE o2.customer_id = o.customer_id\n);\n\n-- EXISTS به جای IN\nSELECT c.name\nFROM customers c\nWHERE EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.customer_id = c.id AND o.total > 1000\n);\n\n-- NOT EXISTS امن‌تر از NOT IN\nSELECT c.name\nFROM customers c\nWHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);"
+                },
+                {
+                  "t": "tip",
+                  "x": "بهینه‌سازهای مدرن اغلب IN و EXISTS را به یک برنامه اجرایی تبدیل می‌کنند، اما رفتارشان با NULL متفاوت است. برای خوانایی هم که شده، EXISTS را ترجیح دهید."
+                },
+                {
+                  "t": "quiz",
+                  "q": "کوئری WHERE id NOT IN (SELECT x FROM t) در چه حالتی نتیجهٔ خالی برمی‌گرداند حتی اگر دادهٔ منطبق وجود داشته باشد؟",
+                  "options": [
+                    "وقتی جدول t خالی باشد",
+                    "وقتی ستون x حداقل یک مقدار NULL داشته باشد",
+                    "وقتی تعداد ردیف‌های t از ۱۰۰ بیشتر باشد",
+                    "وقتی ستون x نوع عددی داشته باشد"
+                  ],
+                  "a": 1,
+                  "why": "مقایسهٔ id با NULL نتیجهٔ UNKNOWN می‌دهد و چون NOT IN باید همهٔ مقایسه‌ها را منفی ببیند، حضور یک NULL کل شرط را برآورده‌نشدنی می‌کند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "زیرکوئری در SQL به فارسی", "q": "زیرکوئری subquery در sql فارسی" },
+                  { "title": "EXISTS و تفاوت آن با IN", "q": "exists در sql فارسی" },
+                  { "title": "حل مسئلهٔ آخرین رکورد هر گروه", "q": "بزرگترین مقدار هر گروه sql فارسی" }
+                ],
+                "en": [
+                  { "title": "Subqueries: scalar, row and table", "q": "sql subquery in select from where tutorial" },
+                  { "title": "EXISTS vs IN vs JOIN", "q": "sql exists vs in vs join performance" },
+                  { "title": "Correlated subqueries explained", "q": "sql correlated subquery explained" },
+                  { "title": "The NOT IN NULL trap", "q": "sql not in null problem not exists" }
+                ]
+              }
+            },
+            {
+              "id": "ctes",
+              "t": "CTE و کوئری بازگشتی",
+              "sum": "WITH برای خوانایی، چند CTE زنجیره‌ای و RECURSIVE برای دادهٔ سلسله‌مراتبی",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "CTE (Common Table Expression) با کلیدواژهٔ WITH یک زیرکوئری نام‌دار موقت تعریف می‌کند که فقط در طول همان کوئری زندگی می‌کند. مزیت اصلی <b>خوانایی</b> است: کوئری‌های تحلیلی ده‌خطی را به مراحل منطقی و نام‌دار تقسیم می‌کند، درست مثل توابع در کد."
+                },
+                {
+                  "t": "code",
+                  "f": "cte-basic.sql",
+                  "x": "WITH recent_orders AS (\n  SELECT customer_id, total, created_at\n  FROM orders\n  WHERE created_at >= now() - interval '30 days'\n),\nspending AS (\n  SELECT customer_id, SUM(total) AS spent\n  FROM recent_orders\n  GROUP BY customer_id\n)\nSELECT c.name, s.spent\nFROM spending s\nJOIN customers c ON c.id = s.customer_id\nWHERE s.spent > 1000\nORDER BY s.spent DESC;"
+                },
+                {
+                  "t": "p",
+                  "x": "نسخهٔ <b>RECURSIVE</b> برای داده‌های سلسله‌مراتبی ساخته شده: ساختار سازمانی، دسته‌بندی درختی، مسیرهای گراف. مکانیزم آن دو بخش دارد: عضو اولیه (seed) و عضو بازگشتی که هر بار روی خروجی قبلی اجرا می‌شود تا دیگر ردیف جدیدی تولید نشود."
+                },
+                {
+                  "t": "code",
+                  "f": "cte-recursive.sql",
+                  "x": "-- پیمایش زنجیرهٔ مدیریتی از یک کارمند تا رئیس\nWITH RECURSIVE chain AS (\n  SELECT id, name, manager_id, 1 AS depth\n  FROM employees\n  WHERE id = 42            -- نقطهٔ شروع\n\n  UNION ALL\n\n  SELECT e.id, e.name, e.manager_id, c.depth + 1\n  FROM employees e\n  JOIN chain c ON e.id = c.manager_id\n)\nSELECT name, depth FROM chain ORDER BY depth;"
+                },
+                {
+                  "t": "tip",
+                  "x": "از PostgreSQL 12 به بعد، CTEها به‌طور پیش‌فرض inline می‌شوند و مثل زیرکوئری بهینه می‌شوند. کلیدواژهٔ MATERIALIZED رفتار قدیمی (اجرای یک‌بار و نگه‌داشتن موقت نتیجه) را اجباری می‌کند که گاهی برای محاسبات سنگین درست است.",
+                  "list": [
+                    "CTE فقط در همان کوئری معتبر است؛ برای استفادهٔ مکرر از view استفاده کنید.",
+                    "در کوئری‌های بازگشتی همیشه شرط توقف را کنترل کنید تا حلقهٔ بی‌نهایت ساخته نشود."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "مهم‌ترین مزیت CTE نسبت به زیرکوئری تودرتو چیست؟",
+                  "options": [
+                    "همیشه سریع‌تر اجرا می‌شود",
+                    "می‌تواند دائماً در پایگاه داده ذخیره شود",
+                    "کوئری را به مراحل نام‌دار و خوانا تقسیم می‌کند و امکان بازگشت (recursion) را می‌دهد",
+                    "فقط در PostgreSQL کار می‌کند"
+                  ],
+                  "a": 2,
+                  "why": "CTE از نظر کارایی معمولاً معادل زیرکوئری است؛ ارزش اصلی آن ساختارمندکردن منطق کوئری و پشتیبانی از WITH RECURSIVE برای دادهٔ درختی است. ذخیرهٔ دائمی کار view است، نه CTE."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "CTE با WITH در SQL فارسی", "q": "CTE WITH در sql فارسی" },
+                  { "title": "کوئری بازگشتی برای دادهٔ درختی", "q": "recursive query sql فارسی" },
+                  { "title": "تمیزنویسی کوئری‌های طولانی", "q": "نوشتن کوئری خوانا sql فارسی" }
+                ],
+                "en": [
+                  { "title": "CTEs make complex SQL readable", "q": "sql cte with clause tutorial" },
+                  { "title": "Recursive CTEs step by step", "q": "sql recursive cte explained org chart" },
+                  { "title": "CTE vs subquery vs temp table", "q": "sql cte vs subquery vs temp table performance" },
+                  { "title": "Traversing hierarchies in SQL", "q": "sql tree traversal adjacency list recursive cte" }
+                ]
+              }
+            },
+            {
+              "id": "window-functions",
+              "t": "توابع پنجره‌ای",
+              "sum": "رتبه‌بندی، LAG/LEAD، جمع‌های متحرک و چارچوب پنجره بدون از دست دادن ردیف‌ها",
+              "m": 35,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "توابع تجمعی با GROUP BY ردیف‌ها را جمع می‌کنند و جزئیات را از بین می‌برند؛ توابع پنجره‌ای همان محاسبات را <b>روی هر ردیف</b> انجام می‌دهند و ردیف را نگه می‌دارند. ترکیب کلیدی OVER است: PARTITION BY داده را به گروه‌های منطقی می‌شکند و ORDER BY داخل پنجره ترتیب محاسبه را تعیین می‌کند."
+                },
+                {
+                  "t": "code",
+                  "f": "window-basics.sql",
+                  "x": "-- رتبهٔ هر سفارش بین سفارش‌های همان مشتری\nSELECT id, customer_id, total,\n       ROW_NUMBER() OVER (PARTITION BY customer_id\n                          ORDER BY total DESC) AS rn,\n       RANK()       OVER (PARTITION BY customer_id\n                          ORDER BY total DESC) AS rnk,\n       DENSE_RANK() OVER (PARTITION BY customer_id\n                          ORDER BY total DESC) AS drnk\nFROM orders;"
+                },
+                {
+                  "t": "p",
+                  "x": "تفاوت سه رتبه‌ای مهم است: ROW_NUMBER شمارهٔ یکتا می‌دهد، RANK برای مقادیر برابر رتبهٔ برابر می‌دهد و بعد می‌پرد (۱، ۱، ۳) و DENSE_RANK بدون پرش (۱، ۱، ۲). برای انتخاب «مثلاً جدیدترین سفارش هر مشتری» ترکیب ROW_NUMBER با یک CTE رایج‌ترین الگوی صنعت است، چون GROUP BY نمی‌تواند مستقیماً ردیف مرتبط با MAX را برگرداند."
+                },
+                {
+                  "t": "code",
+                  "f": "window-topn.sql",
+                  "x": "-- سه سفارش بزرگ هر مشتری (الگوی top-N per group)\nWITH ranked AS (\n  SELECT id, customer_id, total,\n         ROW_NUMBER() OVER (PARTITION BY customer_id\n                            ORDER BY total DESC) AS rn\n  FROM orders\n)\nSELECT * FROM ranked WHERE rn <= 3;"
+                },
+                {
+                  "t": "p",
+                  "x": "دو خانوادهٔ دیگر: <b>LAG و LEAD</b> به ردیف قبلی/بعدی نگاه می‌کنند و ستون فقرات محاسبات دوره‌ای (رشد ماهانه، فاصلهٔ بین خریدها) هستند؛ و <b>جمع‌های چرخشی</b> مثل SUM OVER (ORDER BY ...) که با چارچوب (frame) کنترل می‌شوند. چارچوب پیش‌فرض همراه با ORDER BY یعنی از ابتدای پارتیشن تا ردیف جاری."
+                },
+                {
+                  "t": "code",
+                  "f": "window-frames.sql",
+                  "x": "-- مقایسه با ماه قبل و جمع چرخشی درآمد\nSELECT m,\n       revenue,\n       revenue - LAG(revenue) OVER (ORDER BY m) AS mom_delta,\n       SUM(revenue) OVER (ORDER BY m) AS running_total,\n       AVG(revenue) OVER (ORDER BY m\n         ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS ma_3m\nFROM monthly_revenue;\n\n-- تقسیم مشتریان به چهار گروهِ هم‌اندازه\nSELECT customer_id, spent,\n       NTILE(4) OVER (ORDER BY spent DESC) AS quartile\nFROM customer_spending;"
+                },
+                {
+                  "t": "tip",
+                  "x": "توابع پنجره‌ای در WHERE قابل استفاده نیستند، چون WHERE قبل از آن‌ها اجرا می‌شود؛ نتیجهٔ پنجره را در CTE یا زیرکوئری بسازید و در لایهٔ بیرونی فیلتر کنید."
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام تابع پنجره‌ای برای «فاصلهٔ روزهای بین دو خرید متوالی هر مشتری» مناسب‌ترین ابزار است؟",
+                  "options": [
+                    "ROW_NUMBER با PARTITION BY",
+                    "LAG روی تاریخ خرید با PARTITION BY مشتری و ORDER BY تاریخ",
+                    "SUM با چارچوب متحرک",
+                    "NTILE(2)"
+                  ],
+                  "a": 1,
+                  "why": "LAG مقدار ستون تاریخ را از ردیف قبلیِ همان پارتیشن می‌آورد و تفاضل دو تاریخ فاصلهٔ بین خریدها را می‌دهد؛ بقیهٔ گزینه‌ها فاصلهٔ زمانی را محاسبه نمی‌کنند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "توابع پنجره‌ای در SQL فارسی", "q": "توابع پنجره‌ای sql فارسی OVER PARTITION" },
+                  { "title": "رتبه‌بندی با ROW_NUMBER و RANK", "q": "row_number rank در sql فارسی" },
+                  { "title": "مقایسهٔ دوره‌ای با LAG", "q": "lag lead در sql فارسی" }
+                ],
+                "en": [
+                  { "title": "SQL window functions masterclass", "q": "sql window functions tutorial over partition by" },
+                  { "title": "ROW_NUMBER vs RANK vs DENSE_RANK", "q": "sql row_number rank dense_rank difference" },
+                  { "title": "Window frames: ROWS and RANGE", "q": "sql window frame rows between preceding" },
+                  { "title": "Time series analysis with LAG", "q": "sql lag lead time series month over month" }
+                ]
+              }
+            },
+            {
+              "id": "normalization",
+              "t": "طراحی جدول و نرمال‌سازی",
+              "sum": "از آشوب تک‌جدولی تا شکل سوم: حذف افزونگی و ناهنجاری‌های داده",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "نرمال‌سازی فرایند سازمان‌دهی جدول‌ها برای حذف افزونگی و ناهنجاری‌های درج، به‌روزرسانی و حذف است. تصور کنید آدرس مشتری را در هر سفارش تکرار کرده‌اید: با یک تغییر آدرس باید ده‌ها ردیف را به‌روز کنید و اگر یکی جا بماند داده متناقض می‌شود. به این <b>ناهنجاری به‌روزرسانی</b> می‌گویند و نرمال‌سازی دقیقاً همین‌ها را ریشه‌کن می‌کند."
+                },
+                {
+                  "t": "p",
+                  "x": "سه شکل کلاسیک: <b>1NF</b> هر سلول فقط یک مقدار اتمی داشته باشد و ردیف‌ها یکتا باشند؛ <b>2NF</b> علاوه بر 1NF، هیچ ستون غیرکلیدی به فقط بخشی از کلید ترکیبی وابسته نباشد؛ <b>3NF</b> هیچ ستون غیرکلیدی به ستون غیرکلیدی دیگر وابسته نباشد (وابستگی گذرا ممنوع). خلاصهٔ معروف: «هر دادهٔ غیرکلیدی به کلید، به کل کامل، و به هیچ‌چیز جز کلید وابسته باشد»."
+                },
+                {
+                  "t": "code",
+                  "f": "normalization.sql",
+                  "x": "-- غیرنرمال: همه چیز در یک جدول\n-- orders_raw(id, customer_name, customer_email, product_titles, city)\n-- product_titles = 'Laptop,Mouse'  <- نقض 1NF\n\n-- 3NF: جدول‌های جدا با روابط\nCREATE TABLE cities (\n  id   BIGSERIAL PRIMARY KEY,\n  name TEXT UNIQUE NOT NULL\n);\n\nCREATE TABLE customers (\n  id    BIGSERIAL PRIMARY KEY,\n  name  TEXT NOT NULL,\n  email TEXT UNIQUE NOT NULL,\n  city_id INT REFERENCES cities(id)\n);\n\nCREATE TABLE order_items (\n  order_id   BIGINT REFERENCES orders(id) ON DELETE CASCADE,\n  product_id BIGINT REFERENCES products(id),\n  quantity   INT NOT NULL CHECK (quantity > 0),\n  PRIMARY KEY (order_id, product_id)\n);"
+                },
+                {
+                  "t": "p",
+                  "x": "نرمال‌سازی کامل همیشه درست نیست. گزارش‌های تحلیلی و داشبوردها اغلب به ده‌ها JOIN نیاز دارند؛ در آن‌جا آگاهانه <b>دنورمال‌سازی</b> می‌کنیم: ستون محاسبه‌شده، جدول خلاصه، یا ویوی متریالایز. قاعدهٔ حرفه‌ای: سیستم تراکنشی (OLTP) را نرمال نگه دارید تا نوشتن سالم باشد و لایهٔ تحلیلی (OLAP) را دنورمال تا خواندن سریع باشد."
+                },
+                {
+                  "t": "tip",
+                  "x": "برای ارزش‌های مشتق مثل «مجموع سفارش» دو راه دارید: محاسبه در زمان خواندن (ساده و همیشه به‌روز) یا ستون نگه‌دارندهٔ به‌روزرسانی‌شده با تریگر (سریع‌تر اما مسئولیت سازگاری با شماست)."
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام مورد نقض شکل اول نرمال (1NF) است؟",
+                  "options": [
+                    "ستون price از نوع NUMERIC",
+                    "ستون tags حاوی 'red,blue,green' در یک سلول",
+                    "ستون ایمیل با قید UNIQUE",
+                    "کلید اصلی ترکیبی از دو ستون"
+                  ],
+                  "a": 1,
+                  "why": "1NF می‌خواهد هر سلول یک مقدار اتمی داشته باشد؛ ذخیرهٔ فهرست جدا شده با کاملاً باعث می‌شود جستجو و JOIN روی آن مقادیر شکننده و کند شود. راه‌حل، جدول رابطه‌ای جداگانه است."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "نرمال‌سازی پایگاه داده به فارسی", "q": "نرمال‌سازی پایگاه داده فارسی" },
+                  { "title": "شکل اول دوم و سوم نرمال", "q": "normalization 1nf 2nf 3nf فارسی" },
+                  { "title": "طراحی اسکیمای یک فروشگاه آنلاین", "q": "طراحی دیتابیس فروشگاه فارسی" }
+                ],
+                "en": [
+                  { "title": "Database normalization in 10 minutes", "q": "database normalization 1nf 2nf 3nf explained" },
+                  { "title": "Update anomalies with real examples", "q": "database update anomaly insertion deletion" },
+                  { "title": "When to denormalize on purpose", "q": "when to denormalize database read performance" },
+                  { "title": "Designing an e-commerce schema", "q": "design ecommerce database schema tutorial" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "پیشرفته",
+          "chip": "a",
+          "lessons": [
+            {
+              "id": "indexes",
+              "t": "ایندکس‌ها",
+              "sum": "B-tree، ایندکس ترکیبی، پوشاننده و جزئی؛ و هزینهٔ پنهان سرعت",
+              "m": 35,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "ایندکس ساختار دادهٔ جانبی (معمولاً درخت B) است که جستجو را از پویش کامل جدول به مسیر درختی چند مرحله‌ای تبدیل می‌کند. کلید اصلی به‌طور خودکار ایندکس می‌شود؛ بقیهٔ ستون‌های جستجو را باید خودتان ایندکس کنید. قانون ساده: هر ستونی که مکرراً در WHERE، JOIN یا ORDER BY ظاهر می‌شود کاندیدای ایندکس است."
+                },
+                {
+                  "t": "code",
+                  "f": "indexes.sql",
+                  "x": "-- ایندکس ساده\nCREATE INDEX idx_orders_customer_id ON orders (customer_id);\n\n-- ایندکس ترکیبی: ترتیب ستون‌ها حیاتی است\nCREATE INDEX idx_orders_cust_created\n  ON orders (customer_id, created_at DESC);\n\n-- ایندکس جزئی: کوچک‌تر و سریع‌تر برای یک زیرمجموعه\nCREATE INDEX idx_orders_pending\n  ON orders (created_at)\n  WHERE status = 'pending';\n\n-- ایندکس روی عبارت\nCREATE INDEX idx_orders_month\n  ON orders (date_trunc('month', created_at));"
+                },
+                {
+                  "t": "p",
+                  "x": "قاعدهٔ <b>چپ‌ترین پیشوند</b> را حفظ باشید: ایندکس ترکیبی (a, b, c) برای شرط‌های روی a، روی a و b، و روی a و b و c کار می‌کند، اما برای شرط فقط روی b عملاً بی‌فایده است. یک ایندکس <b>پوشاننده</b> که همهٔ ستون‌های کوئری را داشته باشد، پایگاه داده را از مراجعه به جدول بی‌نیاز می‌کند؛ در PostgreSQL با INCLUDE می‌توان ستون‌های اضافی را فقط برای پوشش افزود."
+                },
+                {
+                  "t": "code",
+                  "f": "covering-index.sql",
+                  "x": "-- کوئری هدف: آخرین سفارش‌های یک مشتری\nSELECT customer_id, created_at, total\nFROM orders\nWHERE customer_id = 42\nORDER BY created_at DESC\nLIMIT 10;\n\n-- ایندکس پوشاننده: پاسخ کامل از خود ایندکس\nCREATE INDEX idx_orders_cover\n  ON orders (customer_id, created_at DESC)\n  INCLUDE (total);"
+                },
+                {
+                  "t": "p",
+                  "x": "ایندکس مجانی نیست: هر ایندکس فضای دیسک اشغال می‌کند و هر INSERT، UPDATE یا DELETE باید همهٔ ایندکس‌های مرتبط را هم به‌روز کند. موتورهای پایگاه داده نیز گاهی از ایندکس استفاده نمی‌کنند: وقتی روی ستون ایندکس‌شده تابع اعمال کرده‌اید، وقتی از % در ابتدای الگوی LIKE استفاده کرده‌اید، یا وقتی بهینه‌ساز تخمین می‌زند انتخابیت پایین است و پویش کامل ارزان‌تر است."
+                },
+                {
+                  "t": "tip",
+                  "x": "انواع ایندکس فراتر از B-tree: GIN برای جستجوی داخل JSONB و آرایه‌ها، GiST برای دادهٔ مکانی و بازه‌ای، و BRIN برای جدول‌های عظیم ترتیب‌یافته بر اساس زمان که چند صد برابر کوچک‌تر از B-tree هستند.",
+                  "list": [
+                    "ایندکس یکتا (UNIQUE INDEX) هم قید یکتایی می‌دهد و هم جستجو را سریع می‌کند.",
+                    "ایندکس‌های بلااستفاده را پیدا و حذف کنید؛ در PostgreSQL از pg_stat_user_indexes."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "ایندکس ترکیبی ON orders (customer_id, created_at) برای کدام کوئری به‌خوبی استفاده می‌شود؟",
+                  "options": [
+                    "WHERE created_at > '2024-01-01' (فقط ستون دوم)",
+                    "WHERE customer_id = 42 AND created_at > '2024-01-01'",
+                    "WHERE total > 500",
+                    "هر سه مورد به‌یک‌اندازه"
+                  ],
+                  "a": 1,
+                  "why": "بخاطر قاعدهٔ چپ‌ترین پیشوند، ایندکس فقط وقتی مؤثر است که ستون اول (customer_id) در شرط حضور داشته باشد؛ شرط فقط روی ستون دوم از ایندکس بهره نمی‌برد."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "ایندکس در پایگاه داده فارسی", "q": "ایندکس index در sql فارسی" },
+                  { "title": "ایندکس ترکیبی و ترتیب ستون‌ها", "q": "composite index sql فارسی" },
+                  { "title": "زمانی که ایندکس کار نمی‌کند", "q": "ایندکس استفاده نمی‌شود sql فارسی" }
+                ],
+                "en": [
+                  { "title": "How B-tree indexes actually work", "q": "b-tree index explained database" },
+                  { "title": "Composite indexes and leftmost prefix", "q": "sql composite index column order leftmost prefix" },
+                  { "title": "Covering indexes with INCLUDE", "q": "postgres covering index include clause" },
+                  { "title": "Partial and expression indexes", "q": "postgres partial index expression index tutorial" }
+                ]
+              }
+            },
+            {
+              "id": "transactions-acid",
+              "t": "تراکنش و ACID",
+              "sum": "BEGIN/COMMIT/ROLLBACK، چهار تضمین ACID و سطوح ایزولاسیون",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "تراکنش واحد کاری است که یا کامل انجام می‌شود یا انگار هرگز شروع نشده. کلاسیک‌ترین مثال انتقال پول است: کم‌کردن از حساب الف و اضافه‌کردن به حساب ب باید <b>هر دو</b> انجام شوند؛ اگر بین دو دستور خطا رخ دهد، با ROLLBACK همهٔ تغییرات برمی‌گردد."
+                },
+                {
+                  "t": "code",
+                  "f": "transactions.sql",
+                  "x": "BEGIN;\n\nUPDATE accounts SET balance = balance - 100\nWHERE id = 1 AND balance >= 100;\n\nUPDATE accounts SET balance = balance + 100\nWHERE id = 2;\n\nCOMMIT;   -- یا ROLLBACK در مسیر خطا"
+                },
+                {
+                  "t": "p",
+                  "x": "چهار تضمین <b>ACID</b>: اتمیک بودن (همه یا هیچ)، سازگاری (پایگاه داده همیشه از یک حالت معتبر به حالت معتبر می‌رود و قیود هرگز نقض نمی‌شوند)، ایزولاسیون (تراکنش‌های همزمان روی هم اثر جانبی نمی‌گذارند) و دوام (بعد از COMMIT، تغییرات حتی با قطع برق باقی می‌ماند). ایزولاسیون در عمل طیفی دارد و توسط <b>سطوح ایزولاسیون</b> تنظیم می‌شود."
+                },
+                {
+                  "t": "code",
+                  "f": "isolation.sql",
+                  "x": "-- سطح پیش‌فرض PostgreSQL: READ COMMITTED\nSET TRANSACTION ISOLATION LEVEL REPEATABLE READ;\n\n-- سطح‌ها و خطاهایی که جلویشان را می‌گیرند:\n-- READ COMMITTED   : خواندن کثیف (dirty read) ندارد\n-- REPEATABLE READ  : + خواندن غیرتکراری (non-repeatable read) ندارد\n-- SERIALIZABLE     : + رخوت (phantom) و اعوجاج نوشتن ندارد\n\n-- قفل صریح روی ردیف برای جلوگیری از به‌روزرسانی گم‌شده\nSELECT * FROM inventory\nWHERE sku = 'ABC' FOR UPDATE;\nUPDATE inventory SET stock = stock - 1\nWHERE sku = 'ABC';"
+                },
+                {
+                  "t": "p",
+                  "x": "با قفل‌ها دو خطای کلاسیک می‌آید: <b>بن‌بست (deadlock)</b> وقتی دو تراکنش هرکدام قفلی دارند که دیگری منتظرش است؛ راه‌حل عملی، در دست گرفتن قفل‌ها همیشه با ترتیب یکسان است. و <b>رقابت (race condition)</b> وقتی دو تراکنش همزمان یک مقدار را می‌خوانند و بازنویسی می‌کنند؛ برای آن یا قفل ردیفی (FOR UPDATE) یا بند WHERE شرطی با بررسی تعداد سطرهای تغییرکرده استفاده کنید."
+                },
+                {
+                  "t": "tip",
+                  "x": "تراکنش‌ها را کوتاه نگه دارید: تعامل با کاربر، فراخوانی API خارجی یا محاسبهٔ سنگین وسط تراکنش، قفل‌ها را نگه می‌دارد و کل سیستم را کند می‌کند.",
+                  "list": [
+                    "در PostgreSQL هر دستورِ مستقل خودش یک تراکنش است و برخلاف MySQL، دستورات DDL هم تراکنشی و قابل ROLLBACK هستند.",
+                    "برای اطمینان از اعمال UPDATE، تعداد ردیف‌های تغییرکرده را در کد اپلیکیشن چک کنید."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "دو تراکنش همزمان هر دو موجودی را می‌خوانند، هر دو مقدار قدیمی را می‌بینند و بازنویسی می‌کنند؛ یکی از تغییرات گم می‌شود. این کدام خطای همزمانی است و راه‌حلش چیست؟",
+                  "options": [
+                    "خواندن کثیف؛ با READ UNCOMMITTED حل می‌شود",
+                    "به‌روزرسانی گم‌شده (lost update)؛ با قفل ردیفی FOR UPDATE یا سطح ایزولاسیون بالاتر حل می‌شود",
+                    "رخوت (phantom)؛ با شمارش ردیف‌ها حل می‌شود",
+                    "بن‌بست؛ با ترتیب قفل‌ها حل می‌شود"
+                  ],
+                  "a": 1,
+                  "why": "خواندن و بازنویسی همزمان همان مقدار، به‌روزرسانی گم‌شده می‌سازد. قفل صریح روی ردیف یا سطح ایزولاسیون بالاتر با تشخیص تعارض جلوی آن را می‌گیرد."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "تراکنش در پایگاه داده فارسی", "q": "transaction تراکنش sql فارسی" },
+                  { "title": "مفهوم ACID به زبان ساده", "q": "ACID در پایگاه داده فارسی" },
+                  { "title": "قفل‌ها و بن‌بست در پایگاه داده", "q": "deadlock قفل پایگاه داده فارسی" }
+                ],
+                "en": [
+                  { "title": "Transactions from the ground up", "q": "sql transactions begin commit rollback tutorial" },
+                  { "title": "ACID properties explained", "q": "acid properties database explained" },
+                  { "title": "Isolation levels and anomalies", "q": "sql isolation levels dirty read phantom read" },
+                  { "title": "Row locks with FOR UPDATE", "q": "sql select for update locking rows concurrency" }
+                ]
+              }
+            },
+            {
+              "id": "views-materialized",
+              "t": "ویو و ویوی متریالایز",
+              "sum": "کوئری‌های نام‌دار ذخیره‌شده؛ از ساده‌سازی دسترسی تا گزارش‌های از پیش محاسبه‌شده",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "View یک کوئری ذخیره‌شده با نام است که مثل جدول از آن SELECT می‌گیرید، اما داده‌ای ذخیره نمی‌کند؛ هر بار که از آن می‌خوانید، کوئری زیرین اجرا می‌شود. کاربردهای اصلی: پوشاندن پیچیدگی (JOIN چندجدولی پشت یک نام ساده)، اعمال منطق تجاری مشترک بین چند مصرف‌کننده، و <b>امنیت</b>: به کاربر روی ویو دسترسی بدهید نه روی جدول خام، تا فقط ستون‌ها و ردیف‌های مجاز را ببیند."
+                },
+                {
+                  "t": "code",
+                  "f": "views.sql",
+                  "x": "CREATE VIEW v_customer_orders AS\nSELECT c.id, c.name, o.id AS order_id, o.total, o.created_at\nFROM customers c\nJOIN orders o ON o.customer_id = c.id;\n\n-- استفاده مثل یک جدول\nSELECT name, SUM(total) AS lifetime_value\nFROM v_customer_orders\nGROUP BY id, name;\n\n-- ویو به‌عنوان لایهٔ امنیتی: بدون اطلاعات حساس\nCREATE VIEW v_orders_public AS\nSELECT order_id, total, created_at FROM v_customer_orders;\n\nGRANT SELECT ON v_orders_public TO analyst_role;"
+                },
+                {
+                  "t": "p",
+                  "x": "ویوی <b>متریالایز</b> نتیجهٔ کوئری را فیزیکی روی دیسک نگه می‌دارد و برای محاسبات سنگینی که به‌ندرت تغییر می‌کنند عالی است: خلاصه‌های روزانه، رتبه‌بندی‌ها، تجمیع‌های چند میلیونی. هزینه‌اش کهنه‌شدن داده است؛ باید با REFRESH به‌روز شود که در حالت پیش‌فرض کل نتیجه را بازمی‌سازد (در PostgreSQL با CONCURRENTLY می‌توان بدون قطع خوانندگان تازه‌سازی کرد، به شرط وجود ایندکس یکتا)."
+                },
+                {
+                  "t": "code",
+                  "f": "materialized.sql",
+                  "x": "CREATE MATERIALIZED VIEW mv_daily_revenue AS\nSELECT date_trunc('day', created_at) AS day,\n       COUNT(*)    AS orders_count,\n       SUM(total)  AS revenue\nFROM orders\nGROUP BY 1;\n\nCREATE UNIQUE INDEX ON mv_daily_revenue (day);\n\n-- تازه‌سازی بدون قطع خوانندگان\nREFRESH MATERIALIZED VIEW CONCURRENTLY mv_daily_revenue;"
+                },
+                {
+                  "t": "tip",
+                  "x": "قاعدهٔ انتخاب: اگر داده باید همیشه زنده باشد از ویوی ساده؛ اگر کوئری سنگین است و تأخیر چند دقیقه‌ای قابل قبول است از ویوی متریالایز با تازه‌سازی زمان‌بندی‌شده.",
+                  "list": [
+                    "ویوهای تودرتو زیاد، دیباگ را سخت می‌کنند؛ عمق منطقی را در CTE نگه دارید و ویو را مرز پایدار کنید.",
+                    "در MySQL ویوی متریالایز وجود ندارد؛ جایگزینش جدول خلاصه و رویداد زمان‌بندی‌شده (EVENT) است."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "تفاوت اصلی ویوی ساده و ویوی متریالایز چیست؟",
+                  "options": [
+                    "ویوی ساده فقط برای SELECT کار می‌کند و متریالایز برای UPDATE",
+                    "ویوی ساده هر بار کوئری زیرین را اجرا می‌کند ولی متریالایز نتیجه را فیزیکی ذخیره می‌کند و نیاز به REFRESH دارد",
+                    "ویوی متریالایز فقط در MySQL وجود دارد",
+                    "ویوی ساده همیشه سریع‌تر از متریالایز است"
+                  ],
+                  "a": 1,
+                  "why": "ویوی ساده فقط تعریف کوئری است و همیشه دادهٔ زنده می‌دهد؛ متریالایز عکس لحظه‌ای ذخیره‌شده است که سرعت خواندن بالایی دارد اما تا REFRESH بعدی کهنه می‌ماند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "View در پایگاه داده فارسی", "q": "view در sql فارسی" },
+                  { "title": "ویوی متریالایز در PostgreSQL", "q": "materialized view postgresql فارسی" },
+                  { "title": "کنترل دسترسی با ویو و GRANT", "q": "grant دسترسی sql فارسی" }
+                ],
+                "en": [
+                  { "title": "SQL views explained", "q": "sql views tutorial create view security" },
+                  { "title": "Materialized views in PostgreSQL", "q": "postgres materialized view refresh concurrently" },
+                  { "title": "Views as a security layer", "q": "sql view security row level column level" },
+                  { "title": "When to use materialized views", "q": "materialized view vs table vs view use cases" }
+                ]
+              }
+            },
+            {
+              "id": "query-optimization",
+              "t": "بهینه‌سازی کوئری و EXPLAIN",
+              "sum": "خواندن برنامهٔ اجرا، پویش‌ها، آمارها و اصلاح الگوهای کند رایج",
+              "m": 35,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "بهینه‌سازی بدون اندازه‌گیری حدس‌زدنی است. EXPLAIN برنامهٔ اجرایی که بهینه‌ساز انتخاب کرده را نشان می‌دهد و EXPLAIN ANALYZE آن را واقعاً اجرا کرده و زمان و تعداد ردیف‌های واقعی هر گام را گزارش می‌کند. مهم‌ترین مهارت: مقایسهٔ <b>تعداد ردیف تخمینی</b> و <b>واقعی</b> در هر گره؛ فاصلهٔ زیاد یعنی آمارهای جدول کهنه است و ANALYZE باید اجرا شود."
+                },
+                {
+                  "t": "code",
+                  "f": "explain.sql",
+                  "x": "EXPLAIN ANALYZE\nSELECT c.name, COUNT(*) AS orders\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= now() - interval '30 days'\nGROUP BY c.name\nORDER BY orders DESC;\n\n-- چیزی که باید ببینید:\n-- Index Scan using idx_orders_cust_created   (خوب)\n-- Seq Scan on orders  rows=5823132          (وقتی فیلتر انتخابی است، بد)\n-- Nested Loop یا Hash Join: بسته به اندازه و انتخابیت جدول‌ها"
+                },
+                {
+                  "t": "p",
+                  "x": "الگوهای کندِ بسیار رایج که اصلاحشان چند برابر بهبود می‌دهد: اعمال تابع روی ستون ایندکس‌شده که ایندکس را بی‌اثر می‌کند (به‌جایش بازهٔ تاریخ بنویسید)، SELECT * که ایندکس پوشاننده را از بین می‌برد، کوئری N+1 در کد اپلیکیشن که برای هر آیتم یک کوئری جدا می‌زند (راه‌حل: JOIN یا IN یک‌جا)، و فیلتر در HAVING که جای WHERE است."
+                },
+                {
+                  "t": "code",
+                  "f": "anti-patterns.sql",
+                  "x": "-- بد: تابع روی ستون، ایندکس created_at را دور می‌زند\nSELECT * FROM orders\nWHERE date(created_at) = '2024-06-01';\n\n-- خوب: بازه، قابل استفاده با ایندکس\nSELECT id, customer_id, total\nFROM orders\nWHERE created_at >= '2024-06-01'\n  AND created_at <  '2024-06-02';\n\n-- بد (N+1): در حلقهٔ اپلیکیشن\n-- for id in ids: SELECT * FROM users WHERE id = id\n-- خوب: یک کوئری\nSELECT * FROM users WHERE id = ANY($1);"
+                },
+                {
+                  "t": "p",
+                  "x": "سلسله‌مراتب اصلاح پیشنهادی: اول منطق کوئری را کم‌هزینه کنید (دادهٔ کمتر، فیلتر زودتر)، بعد ایندکس مناسب بسازید، بعد در صورت نیاز الگو را بازنویسی کنید (JOIN به‌جای زیرکوئری همبسته)، و آخرِ کار تنظیمات سرور. حداکثر بازده تقریباً همیشه در دو مرحلهٔ اول است."
+                },
+                {
+                  "t": "tip",
+                  "x": "پیش از ایندکس‌زدن با EXPLAIN تخمین بگیرید و بعد از ساختن دوباره بسنجید؛ ایندکسی که توسط هیچ کوئری استفاده نمی‌شود فقط هزینهٔ نوشتن است.",
+                  "list": [
+                    "در PostgreSQL ابزارهایی مثل explain.depesz.com خواندن خروجی را آسان می‌کنند.",
+                    "جدول‌هایی که زیاد UPDATE می‌شوند به مرور فضای مرده جمع می‌کنند؛ autovacuum را جدی بگیرید."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "کوئری WHERE UPPER(email) = 'ALI@EXAMPLE.COM' روی ستون email با ایندکس معمولی کند است. بهترین راه‌حل چیست؟",
+                  "options": [
+                    "حذف ایندکس چون به‌درد نمی‌خورد",
+                    "استفاده از SELECT * تا کوئری سریع‌تر شود",
+                    "ساختن ایندکس تابعی ON users (UPPER(email))",
+                    "تبدیل ستون به نوع TEXT"
+                  ],
+                  "a": 2,
+                  "why": "اعمال تابع روی ستون باعث می‌شود بهینه‌ساز از ایندکس ساده استفاده نکند؛ ایندکس تابعی دقیقاً روی نتیجهٔ همان عبارت ساخته می‌شود و جستجو را به B-tree برمی‌گرداند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "EXPLAIN و تحلیل کوئری فارسی", "q": "EXPLAIN ANALYZE sql فارسی" },
+                  { "title": "بهینه‌سازی کوئری‌های کند", "q": "بهینه سازی کوئری sql فارسی" },
+                  { "title": "الگوی N+1 و راه‌حل آن", "q": "مشکل n+1 در sql فارسی" }
+                ],
+                "en": [
+                  { "title": "Reading EXPLAIN ANALYZE output", "q": "postgres explain analyze tutorial read plan" },
+                  { "title": "How the query planner chooses a plan", "q": "postgres query planner statistics explained" },
+                  { "title": "Fixing the N+1 query problem", "q": "n+1 query problem fix join" },
+                  { "title": "Sargable predicates and index use", "q": "sql sargable queries index not used function" }
+                ]
+              }
+            },
+            {
+              "id": "advanced-patterns",
+              "t": "الگوهای پیشرفتهٔ SQL",
+              "sum": "gaps-and-islands، پیوت، UPSERT و RETURNING؛ ابزارهای مسائل واقعی",
+              "m": 35,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "مسئلهٔ کلاسیک <b>gaps and islands</b>: ردیف‌های متوالی را که یک ویژگی مشترک دارند به «جزیره» گروه کنید، مثل شمردن روزهای فعالیت متوالی هر کاربر (استریک). راه‌حل هوشمندانه با توابع پنجره‌ای است: تاریخ منهای رتبهٔ ردیف برای روزهای متوالی مقدار ثابتی می‌دهد."
+                },
+                {
+                  "t": "code",
+                  "f": "gaps-islands.sql",
+                  "x": "-- استریک روزهای فعالیت متوالی هر کاربر\nWITH d AS (\n  SELECT user_id, activity_date,\n         ROW_NUMBER() OVER (PARTITION BY user_id\n                            ORDER BY activity_date) AS rn\n  FROM (SELECT DISTINCT user_id, activity_date::date AS activity_date\n        FROM activity_events) t\n),\ngrped AS (\n  SELECT user_id, activity_date,\n         activity_date - rn AS grp\n  FROM d\n)\nSELECT user_id, COUNT(*) AS streak_days,\n       MIN(activity_date) AS started,\n       MAX(activity_date) AS ended\nFROM grped\nGROUP BY user_id, grp\nORDER BY streak_days DESC;"
+                },
+                {
+                  "t": "p",
+                  "x": "SQL به‌طور مستقیم دستور PIVOT ندارد (به‌جز چند موتور)، اما پیوت با CASE یا FILTER ساده است: هر ستون خروجی، یک شرط. برای <b>UPSERT</b> (درج یا به‌روزرسانی) در PostgreSQL از INSERT ... ON CONFLICT استفاده می‌شود و در MySQL از INSERT ... ON DUPLICATE KEY UPDATE. بند RETURNING هم پس از درج/به‌روزرسانی مقادیر را برمی‌گرداند و حذف کوئری دوم را ممکن می‌کند."
+                },
+                {
+                  "t": "code",
+                  "f": "pivot-upsert.sql",
+                  "x": "-- پیوت: تعداد سفارش هر وضعیت در ستون‌های جدا\nSELECT date_trunc('month', created_at) AS m,\n       COUNT(*) FILTER (WHERE status = 'paid')   AS paid,\n       COUNT(*) FILTER (WHERE status = 'failed') AS failed\nFROM orders\nGROUP BY 1 ORDER BY 1;\n\n-- UPSERT: درج کن؛ اگر وجود داشت به‌روزرسانی کن\nINSERT INTO daily_stats (day, revenue, updated_at)\nVALUES (CURRENT_DATE, 1500, now())\nON CONFLICT (day)\n  DO UPDATE SET revenue    = daily_stats.revenue + EXCLUDED.revenue,\n                updated_at = now()\nRETURNING day, revenue;"
+                },
+                {
+                  "t": "tip",
+                  "x": "الگوی دیگر که در مصاحبه‌ها و پروژه‌ها زیاد می‌آید: «مجموع تجمعی با نسبت درصد» — جمع چرخشی SUM OVER تقسیم بر SUM کل، برای سهم درآمد هر دسته (تحلیل پارتو)."
+                },
+                {
+                  "t": "quiz",
+                  "q": "در الگوی استریک، عبارت activity_date - rn چه ویژگی‌ای دارد که گروه‌بندی جزیره‌ها را ممکن می‌کند؟",
+                  "options": [
+                    "برای همهٔ ردیف‌های جدول مقدار یکسانی می‌دهد",
+                    "برای روزهای متوالیِ هر کاربر مقدار ثابتی می‌دهد چون تاریخ با گام روز و رتبه با گام یک جلو می‌روند",
+                    "تعداد روزهای فاصله را برمی‌گرداند",
+                    "هرگز تکرار نمی‌شود"
+                  ],
+                  "a": 1,
+                  "why": "برای دو روز متوالی، تاریخ یک روز جلو می‌رود و رتبه هم یکی؛ تفاضلشان ثابت می‌ماند. با شکست توالی (روز جاافتاده) تاریخ جهش می‌کند ولی رتبه نه، پس مقدار تفاضل عوض می‌شود و جزیرهٔ جدید می‌سازد."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "حل مسئلهٔ گپ و جزیره در SQL", "q": "gaps and islands sql فارسی" },
+                  { "title": "پیوت داده با CASE", "q": "پیوت در sql فارسی" },
+                  { "title": "UPSERT و ON CONFLICT", "q": "upsert on conflict sql فارسی" }
+                ],
+                "en": [
+                  { "title": "Gaps and islands problems solved", "q": "sql gaps and islands problem window functions" },
+                  { "title": "Pivoting data without PIVOT", "q": "sql pivot with case when cross tab" },
+                  { "title": "INSERT ON CONFLICT upsert patterns", "q": "postgres insert on conflict upsert returning" },
+                  { "title": "Advanced SQL interview problems", "q": "advanced sql interview questions window functions" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "business",
+      "kind": "business",
+      "title": "مسیر حرفه‌ای و بیزینسی",
+      "icon": "brief",
+      "desc": "داده در خدمت محصول: تحلیل، گزارش و الگوهای واقعی تیم‌ها",
+      "levels": [
+        {
+          "t": "مبتدی",
+          "chip": "b",
+          "lessons": [
+            {
+              "id": "business-sql-mindset",
+              "t": "نگاه تحلیلگر: شناخت جداول کسب‌وکار",
+              "sum": "قبل از نوشتن کوئری، مدل ذهنی داده‌های محصول: کاربر، سفارش، رویداد",
+              "m": 20,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "تحلیلگر خوب قبل از نوشتن هر کوئری، مدل ذهنی داده را می‌سازد: چه موجودیت‌هایی داریم (کاربر، سفارش، محصول، رویداد)، چه جدولی مرجع حقیقت هر متریک است و روابط بین آن‌ها چیست. اکثر گزارش‌های اشتباه ریشه در سوءفهم اسکیما دارند، نه در سینتکس SQL."
+                },
+                {
+                  "t": "p",
+                  "x": "اولین کار با هر پایگاه دادهٔ جدید، <b>کاوش اسکیما</b> است: فهرست جدول‌ها، ساختار آن‌ها، تعداد ردیف‌ها و بازهٔ زمانی داده. سه چک سریع کیفیت داده که قبل از هر گزارش باید بزنید: ردیف‌های تکراری، نسبت NULL در ستون‌های کلیدی، و مقادیر خارج از محدودهٔ منطقی (تاریخ آینده، مبلغ منفی)."
+                },
+                {
+                  "t": "code",
+                  "f": "schema-discovery.sql",
+                  "x": "-- جدول‌های موجود و اندازهٔ تقریبی هرکدام\nSELECT relname AS table_name, n_live_tup AS approx_rows\nFROM pg_stat_user_tables\nORDER BY n_live_tup DESC;\n\n-- چک کیفیت: تکراری‌ها\nSELECT email, COUNT(*)\nFROM customers\nGROUP BY email\nHAVING COUNT(*) > 1;\n\n-- چک کیفیت: مقادیر مشکوک\nSELECT COUNT(*) AS future_orders\nFROM orders WHERE created_at > now();\n\n-- چک کیفیت: نسبت NULL در ستون کلیدی\nSELECT COUNT(*) FILTER (WHERE city IS NULL)::float\n       / COUNT(*) AS null_city_ratio\nFROM customers;"
+                },
+                {
+                  "t": "tip",
+                  "x": "از همان ابتدا دیکشنری داده بسازید: برای هر جدول و متریک، تعریف دقیق بنویسید. «کاربر فعال» بدون تعریف کتبی، در هر گزارش یک معنا پیدا می‌کند و جلسات را به جدل می‌کشاند.",
+                  "list": [
+                    "هر عددی که ارائه می‌کنید باید سه چیز روشن داشته باشد: بازهٔ زمانی، فیلترها و تعریف متریک.",
+                    "ناسازگاری اعداد بین دو تیم معمولاً از تعریف متفاوت متریک می‌آید، نه از خطای محاسبه."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "گزارش شما تعداد کاربران را با عدد تیم مالی نمی‌خواند. محتمل‌ترین علت چیست؟",
+                  "options": [
+                    "خطای سینتکس در یکی از کوئری‌ها",
+                    "تعریف متفاوت «کاربر» یا بازهٔ زمانی متفاوت بین دو گزارش",
+                    "سرعت پایگاه داده",
+                    "نسخهٔ متفاوت SQL"
+                  ],
+                  "a": 1,
+                  "why": "در اکثر پروژه‌های واقعی ناسازگاری اعداد از تعریف ناهمگون متریک (کاربر ثبت‌نام‌شده، فعال، پرداخت‌کننده) یا بازهٔ زمانی و فیلترهای متفاوت می‌آید؛ راه‌حل، دیکشنری متریک مشترک است."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "شروع تحلیل داده با SQL فارسی", "q": "تحلیل داده با sql فارسی" },
+                  { "title": "آشنایی با اسکیمای یک پروژهٔ واقعی", "q": "بررسی اسکیمای دیتابیس فارسی" },
+                  { "title": "کنترل کیفیت داده قبل از گزارش", "q": "کیفیت داده data quality فارسی" }
+                ],
+                "en": [
+                  { "title": "Exploring a database like an analyst", "q": "sql data exploration analyst first steps" },
+                  { "title": "Data quality checks in SQL", "q": "sql data quality checks nulls duplicates" },
+                  { "title": "Metric definitions that prevent disputes", "q": "defining product metrics data dictionary" },
+                  { "title": "Analyst workflow: questions before queries", "q": "business analyst sql workflow best practices" }
+                ]
+              }
+            },
+            {
+              "id": "revenue-metrics",
+              "t": "کوئری‌های درآمد و فروش",
+              "sum": "درآمد ماهانه، ارزش سفارش میانگین، پرفروش‌ترین محصولات و سهم هر دسته",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "چهار کوئری پایهٔ هر کسب‌وکار تجاری: درآمد به تفکیک زمان، ارزش سفارش میانگین (AOV)، پرفروش‌ترین محصولات و سهم هر دسته. نکتهٔ ظریف: تعریف «درآمد» را از قبل قطعی کنید — مبلغ ناخالص سفارش، پس از تخفیف، یا پس از مرجوعی؟ هر سه را می‌توان محاسبه کرد ولی باید بدانید کدام را گزارش می‌کنید."
+                },
+                {
+                  "t": "code",
+                  "f": "revenue-basic.sql",
+                  "x": "-- درآمد ماهانه و تعداد سفارش\nSELECT date_trunc('month', created_at) AS month,\n       SUM(total)   AS revenue,\n       COUNT(*)     AS orders,\n       SUM(total) / COUNT(*) AS avg_order_value\nFROM orders\nWHERE status = 'paid'\nGROUP BY 1\nORDER BY 1;"
+                },
+                {
+                  "t": "p",
+                  "x": "برای پرفروش‌ها به جدول اقلام سفارش (order_items) نیاز دارید چون یک سفارش چند محصول دارد. همین‌جا یک اشتباه رایج را ببینید: اگر مجموع فروش را در سطح سفارش و روی جدول اشتباهی حساب کنید، اقلام چندبار شمرده می‌شوند؛ تجمیع باید در سطح درستِ دانه‌بندی (grain) انجام شود."
+                },
+                {
+                  "t": "code",
+                  "f": "top-products.sql",
+                  "x": "-- پرفروش‌ترین محصولات به تفکیک درآمد\nSELECT p.title,\n       SUM(oi.quantity)                 AS units_sold,\n       SUM(oi.quantity * oi.unit_price) AS revenue\nFROM order_items oi\nJOIN products p ON p.id = oi.product_id\nJOIN orders o   ON o.id = oi.order_id\nWHERE o.status = 'paid'\nGROUP BY p.id, p.title\nORDER BY revenue DESC\nLIMIT 10;\n\n-- سهم هر دسته از کل درآمد\nSELECT p.category,\n       SUM(oi.quantity * oi.unit_price) AS revenue,\n       ROUND(100.0 * SUM(oi.quantity * oi.unit_price)\n             / SUM(SUM(oi.quantity * oi.unit_price)) OVER (), 1) AS pct\nFROM order_items oi\nJOIN products p ON p.id = oi.product_id\nGROUP BY p.category\nORDER BY revenue DESC;"
+                },
+                {
+                  "t": "tip",
+                  "x": "همیشه به‌جای 100 * ... از 100.0 * ... استفاده کنید تا تقسیم صحیح (integer division) نتیجه را صفر نکند؛ در موتورهایی مثل SQLite و SQL Server این خطا شایع است."
+                },
+                {
+                  "t": "quiz",
+                  "q": "چرا برای محاسبهٔ درآمد هر محصول از order_items شروع می‌کنیم و نه از orders؟",
+                  "options": [
+                    "چون جدول orders آهسته‌تر است",
+                    "چون هر سفارش چند قلم دارد و دانه‌بندی درست برای محاسبهٔ محصول‌محور، سطح قلم سفارش است",
+                    "چون orders ستون قیمت ندارد",
+                    "چون JOIN با products ممکن نیست"
+                  ],
+                  "a": 1,
+                  "why": "هر جدول دانه‌بندی (grain) دارد: orders به ازای هر سفارش است و order_items به ازای هر قلم. تجمیع محصول‌محور باید روی دانه‌بندی قلم انجام شود وگرنه مقادیر چندبار شمرده یا گم می‌شوند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "گزارش درآمد با SQL فارسی", "q": "گزارش فروش sql فارسی" },
+                  { "title": "محاسبهٔ میانگین و سهم از کل", "q": "درصد از کل در sql فارسی" },
+                  { "title": "پرفروش‌ترین محصولات با JOIN", "q": "top products sql فارسی" }
+                ],
+                "en": [
+                  { "title": "Revenue reporting queries", "q": "sql revenue report query monthly breakdown" },
+                  { "title": "Percent of total with window functions", "q": "sql percent of total window function" },
+                  { "title": "Understanding data grain in aggregation", "q": "sql data grain aggregation mistakes" },
+                  { "title": "Top-N per category queries", "q": "sql top selling products query practice" }
+                ]
+              }
+            },
+            {
+              "id": "funnel-analysis",
+              "t": "تحلیل قیف تبدیل",
+              "sum": "از بازدید تا خرید: شمارش کاربران هر مرحله و نرخ گذار بین مراحل",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "قیف محصول مراحل مسیر کاربر را نشان می‌دهد: بازدید، ثبت‌نام، افزودن به سبد، پرداخت. متریک اصلی، <b>نرخ گذار</b> هر مرحله و نرخ تبدیل کل است. کوئری قیف معمولاً با CTE نوشته می‌شود: هر مرحله یک CTE که کاربرانِ رسیده به آن مرحله را برمی‌گرداند؛ JOIN زنجیره‌ای تضمین می‌کند هر مرحله فقط کاربرانی را بشمارد که از مرحلهٔ قبل گذشته‌اند."
+                },
+                {
+                  "t": "code",
+                  "f": "funnel.sql",
+                  "x": "WITH visited AS (\n  SELECT DISTINCT user_id FROM events\n  WHERE name = 'page_view'\n    AND occurred_at >= now() - interval '30 days'\n),\nsigned_up AS (\n  SELECT DISTINCT e.user_id\n  FROM events e\n  JOIN visited v ON v.user_id = e.user_id\n  WHERE e.name = 'signup'\n),\nadded_to_cart AS (\n  SELECT DISTINCT e.user_id\n  FROM events e\n  JOIN signed_up s ON s.user_id = e.user_id\n  WHERE e.name = 'add_to_cart'\n),\npurchased AS (\n  SELECT DISTINCT e.user_id\n  FROM events e\n  JOIN added_to_cart a ON a.user_id = e.user_id\n  WHERE e.name = 'purchase'\n)\nSELECT\n  (SELECT COUNT(*) FROM visited)       AS visited,\n  (SELECT COUNT(*) FROM signed_up)     AS signed_up,\n  (SELECT COUNT(*) FROM added_to_cart) AS added_to_cart,\n  (SELECT COUNT(*) FROM purchased)     AS purchased,\n  ROUND(100.0 * (SELECT COUNT(*) FROM purchased)\n        / NULLIF((SELECT COUNT(*) FROM visited), 0), 1) AS conv_pct;"
+                },
+                {
+                  "t": "p",
+                  "x": "دو تصمیم طراحی در کوئری قیف همه‌چیز را عوض می‌کند: <b>ترتیب رویدادها</b> (آیا خرید واقعاً بعد از افزودن به سبد رخ داده؟ برای دقت باید با LAG روی توالی رویدادهای هر کاربر بررسی کنید) و <b>پنجرهٔ زمانی</b> (رویدادهای هر کاربر در بازهٔ ۳۰ روزه یا از ابتدای عمر؟). نتیجهٔ قیف بدون ذکر این دو فرض، قابل اتکا نیست."
+                },
+                {
+                  "t": "code",
+                  "f": "funnel-ordered.sql",
+                  "x": "-- بررسی ترتیب واقعی رویدادها با LAG\nWITH seq AS (\n  SELECT user_id, name, occurred_at,\n         LAG(name) OVER (PARTITION BY user_id ORDER BY occurred_at) AS prev\n  FROM events\n  WHERE name IN ('add_to_cart', 'purchase')\n)\nSELECT COUNT(*) AS direct_purchases_without_cart\nFROM seq\nWHERE name = 'purchase' AND (prev IS DISTINCT FROM 'add_to_cart');"
+                },
+                {
+                  "t": "tip",
+                  "x": "برای رفع ابهام در ارائهٔ گزارش، همیشه نرخ هر مرحله را جداگانه کنار نرخ کل بیاورید؛ افت بزرگ در یک مرحلهٔ مشخص، اولویت محصول را کاملاً تغییر می‌دهد.",
+                  "list": [
+                    "NULLIF(x, 0) جلوی تقسیم بر صفر را می‌گیرد و در صورت صفر بودن مخرج NULL برمی‌گرداند.",
+                    "روی جدول‌های رویداد بزرگ، فیلتر زمانی را همیشه اول اعمال کنید."
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "در کوئری قیف، چرا هر مرحله به مرحلهٔ قبل JOIN می‌شود؟",
+                  "options": [
+                    "برای سرعت بیشتر کوئری",
+                    "تا فقط کاربرانی شمرده شوند که واقعاً از مرحلهٔ قبلی گذشته‌اند و قیف ترتیبی باشد",
+                    "چون COUNT بدون JOIN کار نمی‌کند",
+                    "برای حذف ردیف‌های تکراری جدول events"
+                  ],
+                  "a": 1,
+                  "why": "بدون JOIN زنجیره‌ای، هر مرحله مستقل شمرده می‌شود و ممکن است کسی در «خرید» باشد ولی در «ثبت‌نام» نباشد؛ JOIN تضمین می‌کند قیف انباشتگی درست داشته باشد."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "تحلیل قیف با SQL فارسی", "q": "قیف conversion funnel sql فارسی" },
+                  { "title": "محاسبهٔ نرخ تبدیل در پایگاه داده", "q": "نرخ تبدیل sql فارسی" },
+                  { "title": "کار با جدول رویدادها", "q": "جدول events تحلیل sql فارسی" }
+                ],
+                "en": [
+                  { "title": "Building funnels in SQL", "q": "sql funnel analysis conversion query" },
+                  { "title": "Event analytics with window functions", "q": "sql event analytics user behavior sequences" },
+                  { "title": "Funnel pitfalls: ordering and time windows", "q": "funnel analysis ordered events sql pitfalls" },
+                  { "title": "Product analytics queries in practice", "q": "product analytics sql tutorial events table" }
+                ]
+              }
+            }
+          ]
+        },
+        { "t": "متوسط", "chip": "m", "lessons": [
+          { "id": "sql-in-backend", "t": "SQL در بک‌اند؛ امن و پارامتری", "m": 30,
+            "sum": "جلوگیری از تزریق SQL، پارامترهای آماده‌شده و الگوی دسترسی به داده",
+            "body": [
+              { "t": "p", "x": "بزرگ‌ترین خطر کد SQL در بک‌اند، <b>تزریق SQL</b> است: هر وقت ورودی کاربر با چسباندن رشته به کوئری وصل شود، مهاجم می‌تواند دستور خودش را داخلش قاچاق کند. راه‌حل ساده و قطعی: مقدارها همیشه به‌صورت پارامتر پاس شوند، هرگز داخل رشتهٔ کوئری." },
+              { "t": "code", "f": "injection.sql", "x": "-- خطرناک: ورودی کاربر داخل رشته\n-- SELECT * FROM users WHERE email = '\" + input + \"'\n-- ورودی: ' OR '1'='1 → کل جدول لو می‌رود!\n\n-- امن: پارامتر آماده‌شده\nSELECT * FROM users WHERE email = $1;\n-- درایور مقدار را به‌عنوان داده می‌فرستد، نه دستور" },
+              { "t": "p", "x": "پارامتر آماده‌شده (prepared statement) فقط امن نیست، سریع‌تر هم هست: طرح اجرای کوئری یک‌بار ساخته و کش می‌شود و اجراهای بعدی با مقدارهای تازه از همان طرح استفاده می‌کنند." },
+              { "t": "p", "x": "الگوی حرفه‌ای دسترسی به داده: کوئری‌ها را پراکنده در کل کد ننویس؛ در لایهٔ repository متمرکز کن، برای هر کوئری نام و هدف مشخص بگذار و کوئری‌های سنگین را با EXPLAIN جداگانه بسنج. این‌طوری وقتی پایگاه داده کند شد، دقیقاً می‌دانی کجا را بگردی." },
+              { "t": "p", "x": "نکتهٔ کمتر شناخته‌شده: محدودیت عمومی LIMIT همیشه بگذار — حتی برای کوئری‌های مدیریتی. یک SELECT بدون LIMIT روی جدول چندمیلیون-ردیفی، هم دیتابیس را درگیر می‌کند هم حافظهٔ برنامه را." },
+              { "t": "quiz", "q": "کدام روش از تزریق SQL جلوگیری می‌کند؟", "options": ["Escape کردن کوتیشن‌ها با تابع دست‌ساز", "پارامترهای آماده‌شده (prepared statements)", "فیلتر کردن ورودی با حذف کلمهٔ SELECT", "ذخیرهٔ ورودی در متغیر جلسه"], "a": 1, "why": "پارامترهای آماده‌شده ورودی را کاملاً جدا از دستور ارسال می‌کنند؛ روش‌های دست‌ساز escape و فیلتر بارها دور زده شده‌اند." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "تزریق SQL و جلوگیری از آن", "q": "تزریق sql sql injection فارسی" },
+                { "title": "کوئری پارامتری در بک‌اند", "q": "prepared statement sql فارسی" },
+                { "title": "لایهٔ دسترسی به داده", "q": "repository pattern sql فارسی" }
+              ],
+              "en": [
+                { "title": "SQL injection explained", "q": "sql injection explained prevention" },
+                { "title": "Prepared statements in practice", "q": "prepared statements performance security" },
+                { "title": "Data access layer patterns", "q": "repository pattern database best practices" }
+              ]
+            }
+          },
+          { "id": "safe-migrations", "t": "مهاجرت امن اسکیما؛ بدون خاموشی", "m": 35,
+            "sum": "ALTER بدون قفل کردن جدول، مهاجرت دو-مرحله‌ای و سازگاری با نسخه‌های قدیمی",
+            "body": [
+              { "t": "p", "x": "تیم‌های واقعی هر هفته دیپلوی می‌کنند و اسکیما هم باید با همان آرامش تغییر کند. ابزار مهاجرت (migrations) تغییرات اسکیما را به فایل‌های شماره‌دار تبدیل می‌کند که در git می‌آیند و روی هر محیط به‌ترتیب اجرا می‌شوند." },
+              { "t": "code", "f": "migrations/0003_add_phone.sql", "x": "-- مهاجرت رفت\nALTER TABLE users ADD COLUMN phone TEXT;\n\n-- مهاجرت برگشت (برای rollback)\n-- ALTER TABLE users DROP COLUMN phone;" },
+              { "t": "p", "x": "خطر اصلی: برخی ALTERها روی جدول بزرگ قفل می‌گیرند و سرویس را می‌خوابند. قاعدهٔ طلایی: تغییر اسکیما را از تغییر کد جدا کن و هر دو در سازگاری دوطرفه نگه دار — یعنی اول اسکیما را گسترش بده، بعد کد را، بعد در مهاجرتی جدا بنش." },
+              { "t": "p", "x": "الگوی expand/contract برای حذف یک ستون: (۱) کد را طوری عوض کن که دیگر ستون را نخواند؛ (۲) دیپلوی کن؛ (۳) چند روز صبر کن؛ (۴) حالا ستون را با DROP حذف کن. همین الگوی ساده، خاموشی شبانهٔ ناشی از ستون حذف‌شده را از بین می‌برد." },
+              { "t": "tip", "x": "هرگز در یک مهاجرت هم <b>ALTER</b> سنگین بزن هم تغییر دادهٔ حجیم؛ دو مهاجرت جدا بساز — یکی اسکیما، یکی پرکردن داده با batchهای کوچک." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "مهاجرت دیتابیس چیست؟", "q": "database migration فارسی دیتابیس" },
+                { "title": "تغییر امن اسکیما در پروداکشن", "q": "alter table lock پروداکشن دیتابیس" },
+                { "title": "الگوی expand contract", "q": "expand contract migration فارسی" }
+              ],
+              "en": [
+                { "title": "Zero-downtime migrations", "q": "zero downtime database migrations" },
+                { "title": "Expand-contract pattern", "q": "expand contract database schema pattern" },
+                { "title": "Postgres ALTER TABLE locks", "q": "postgres alter table locking large tables" }
+              ]
+            }
+          },
+          { "id": "etl-basics", "t": "ETL؛ دادهٔ عملیاتی به دادهٔ تحلیلی", "m": 30,
+            "sum": "استخراج، پاک‌سازی و بارگذاری — و چرا کوئری تحلیلی روی دیتابیس عملیاتی بد است",
+            "body": [
+              { "t": "p", "x": "دیتابیس عملیاتی برای تراکنش بهینه است: ردیف‌به-ردیف، سریع و همیشه به‌روز. اما سؤال‌های تحلیلی («میانگین سبد خرید در ۶ ماه؟») باید میلیون‌ها ردیف را بخوانند — اگر همین‌ها را روی دیتابیس عملیاتی اجرا کنی، هم سرویس اصلی کند می‌شود هم تحلیلت زود فرسوده می‌شود." },
+              { "t": "p", "x": "راه‌حل ETL است: <b>Extract</b> (استخراج از دیتابیس عملیاتی)، <b>Transform</b> (پاک‌سازی، یکسان‌سازی، محاسبهٔ متریک‌ها) و <b>Load</b> (بارگذاری در انبار دادهٔ جدا). در الگوی ELT بارگذاری خام اول انجام و تبدیل داخل خود انبار انجام می‌شود — امروز رایج‌تر است." },
+              { "t": "code", "f": "etl.sql", "x": "-- تبدیل ساده: جدول سفارش عملیاتی → جدول فروش روزانه\nINSERT INTO daily_sales (day, revenue, orders)\nSELECT\n    date_trunc('day', created_at) AS day,\n    SUM(total)                    AS revenue,\n    COUNT(*)                      AS orders\nFROM orders\nWHERE created_at >= current_date - interval '1 day'\nGROUP BY 1\nON CONFLICT (day) DO UPDATE\n    SET revenue = EXCLUDED.revenue, orders = EXCLUDED.orders;" },
+              { "t": "p", "x": "در پاک‌سازی به این‌ها دقت کن: ردیف‌های تکراری، مقدارهای NULL و رشته‌های آلوده (فاصلهٔ اضافه، فرمت تاریخ متفاوت). یک متریک که از دادهٔ کثیف ساخته شود، بدتر از نداشتن متریک است چون با اعتماد مدیر تصمیم می‌سازد." },
+              { "t": "tip", "x": "اولین جدول تحلیلی‌ات را با دست بساز و درست کن؛ وقتی شکل کار جاافتاد، ابزارهای زمان‌بندی (cron، Airflow) تکرارش را خودکار می‌کنند." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "ETL به زبان ساده", "q": "etl چیست فارسی دیتابیس" },
+                { "title": "جداسازی دادهٔ عملیاتی و تحلیلی", "q": "oltp vs olap فارسی" },
+                { "title": "پاک‌سازی داده با SQL", "q": "data cleaning sql فارسی" }
+              ],
+              "en": [
+                { "title": "ETL vs ELT explained", "q": "etl vs elt explained" },
+                { "title": "OLTP vs OLAP", "q": "oltp vs olap databases explained" },
+                { "title": "Incremental ETL patterns", "q": "incremental load etl patterns upsert" }
+              ]
+            }
+          }
+        ]},
+        { "t": "پیشرفته", "chip": "a", "lessons": [
+          { "id": "warehouse-basics", "t": "دیتاوارهاوس و مدل ستاره‌ای", "m": 35,
+            "sum": "fact و dimension، مدل ستاره‌ای و ستون‌محوری",
+            "body": [
+              { "t": "p", "x": "انبار داده جایی است که دادهٔ پاک‌شدهٔ همهٔ سیستم‌ها جمع می‌شود تا سؤال‌های سنگین تحلیلی از آن پرسیده شود. الگوی مرجع مدل‌سازی در آن <b>مدل ستاره‌ای</b> است: یک جدول fact وسط (رویدادها: فروش، کلیک، لاگین) و جدول‌های dimension دورش (کاربر، محصول، زمان)." },
+              { "t": "code", "f": "star-schema.sql", "x": "-- fact: هر ردیف یک فروش\nCREATE TABLE fact_sales (\n    id          BIGSERIAL PRIMARY KEY,\n    date_key    INT REFERENCES dim_date(key),\n    product_key INT REFERENCES dim_product(key),\n    quantity    INT,\n    revenue     NUMERIC(12,2)\n);\n\n-- کوئری تحلیلی: فروش برند X در سه ماه اخیر\nSELECT d.month, SUM(f.revenue)\nFROM fact_sales f\nJOIN dim_date d    ON d.key = f.date_key\nJOIN dim_product p ON p.key = f.product_key\nWHERE p.brand = 'X' AND d.month >= '2026-06'\nGROUP BY d.month\nORDER BY d.month;" },
+              { "t": "p", "x": "تفاوت مهم دیگر، موتور ذخیره‌سازی است: انبارهای مدرن (BigQuery، Snowflake، ClickHouse، Redshift) <b>ستون‌محور</b> هستند — هر ستون جدا ذخیره می‌شود. چون کوئری تحلیلی معمولاً فقط چند ستون از صدها ستون را می‌خواهد، خواندن و فشرده‌سازی چند برابر بهتر می‌شود." },
+              { "t": "p", "x": "در انبار، نرمال‌سازی سخت‌گیرانهٔ عملیاتی جای خود را به خوانایی می‌دهد: تکرار عمدی داده در dimension مجاز و حتی خواستنی است. قانون متفاوت بودن دو دنیا را جدی بگیر و قواعد OLTP را به آن‌جا نکش." },
+              { "t": "quiz", "q": "در مدل ستاره‌ای، جدول fact چه چیزی نگه می‌دارد؟", "options": ["توضیحات متنی رویدادها", "رویدادها و اندازه‌های عددی قابل جمع", "فقط کلیدهای خارجی", "کپی کامل جدول‌های عملیاتی"], "a": 1, "why": "fact نگه‌دارندهٔ رویدادها و اندازه‌هاست (فروش، تعداد) و dimension بُعد‌های تحلیل (زمان، محصول، کاربر) را توصیف می‌کند." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "دیتاوارهاوس چیست؟", "q": "data warehouse چیست فارسی" },
+                { "title": "مدل ستاره‌ای", "q": "star schema مدل ستاره‌ای فارسی" },
+                { "title": "دیتابیس ستون‌محور", "q": "columnar database فارسی" }
+              ],
+              "en": [
+                { "title": "Data warehouse fundamentals", "q": "data warehouse fundamentals explained" },
+                { "title": "Star schema modeling", "q": "star schema fact dimension modeling" },
+                { "title": "Columnar storage explained", "q": "columnar vs row oriented storage" }
+              ]
+            }
+          },
+          { "id": "reporting-queries", "t": "گزارش‌سازی برای مدیران؛ از سؤال تا کوئری", "m": 30,
+            "sum": "ترجمهٔ سؤال بیزینسی به متریک درست و کوئری مطمئن",
+            "body": [
+              { "t": "p", "x": "گزارش خوب از یک سؤال دقیق شروع می‌شود، نه از یک کوئری. «فروش چطور بود؟» ناقص است؛ «فروش خالص هفتهٔ گذشته نسبت به هفتهٔ قبل چقدر رشد کرد و کدام دسته محصول بیشترین سهم را داشت؟» یک کوئری قابل‌ساخت می‌سازد. سه چیز را همیشه روشن کن: بازهٔ زمانی، تعریف متریک و فیلترهای حذف‌شده." },
+              { "t": "code", "f": "wow-report.sql", "x": "-- رشد هفته‌به‌هفتهٔ فروش با CTE\nWITH weekly AS (\n    SELECT date_trunc('week', o.created_at) AS week,\n           SUM(o.total) AS revenue\n    FROM orders o\n    WHERE o.status = 'paid'          -- تعریف فروش = پرداخت‌شده\n      AND o.created_at >= current_date - interval '14 days'\n    GROUP BY 1\n)\nSELECT\n    week,\n    revenue,\n    ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY week))\n          / LAG(revenue) OVER (ORDER BY week), 1) AS growth_pct\nFROM weekly\nORDER BY week;" },
+              { "t": "p", "x": "دام‌های رایج گزارش‌سازی: تعریف متفاوتِ یک متریک در دو گزارش (فروش با سفارش‌های پرداخت‌نشده شمرده شده؟)، تورم دابل-کانت به‌خاطر JOIN یک‌به-چند (سفارش چند قلم کالا دارد و دو بار شمرده می‌شود!)، و فیلتر فراموش‌شدهٔ حساب‌های تست." },
+              { "t": "p", "x": "برای گزارش‌های تکرارشونده، متریک و فیلتر را یک‌بار در ویو تعریف کن تا همه از یک منبع بخوانند؛ «یک متریک، یک تعریف، یک کوئری مرجع» ریشهٔ اعتماد به گزارش‌هاست." },
+              { "t": "tip", "x": "قبل از فرستادن هر عدد مهم، یک چک سلامتی بزن: مجموع کل دوره با یک کوئری سادهٔ دیگر مقایسه کن — دو مسیر متفاوت به یک عدد یعنی گزارش قابل‌اعتماد است." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "ساخت گزارش با SQL", "q": "گزارش‌گیری با sql فارسی" },
+                { "title": "متریک‌های رشد محصول", "q": "product metrics sql فارسی" },
+                { "title": "دام‌های شمارش در JOIN", "q": "double counting join sql" }
+              ],
+              "en": [
+                { "title": "Business reporting in SQL", "q": "sql business reporting week over week" },
+                { "title": "Common reporting pitfalls", "q": "sql reporting pitfalls double counting joins" },
+                { "title": "Metrics that matter", "q": "product analytics metrics sql definitions" }
+              ]
+            }
+          },
+          { "id": "perf-checklist", "t": "چک‌لیست کارایی و نگهداری", "m": 35,
+            "sum": "قبل از اینکه کاربر بگوید «سایت کند شد»: مانیتور، EXPLAIN، ایندکس و نگهداری دوره‌ای",
+            "body": [
+              { "t": "p", "x": "کندی دیتابیس معمولاً یک‌شبه نمی‌آید؛ با آرامش رشد می‌کند تا روزی قابل‌تحمل نیست. تفاوت تیم حرفه‌ای: متریک‌های کوئری را از قبل می‌بیند (کدام کوئری کندترین است؟ pg_stat_statements) و رفع مشکل قبل از شکایت کاربر است، نه بعدش." },
+              { "t": "code", "f": "diagnose.sql", "x": "-- کندترین کوئری‌ها را پیدا کن (PostgreSQL)\nSELECT query, calls, mean_exec_time\nFROM pg_stat_statements\nORDER BY mean_exec_time DESC\nLIMIT 5;\n\n-- طرح اجرا را ببین\nEXPLAIN ANALYZE\nSELECT * FROM orders WHERE user_id = 42\nORDER BY created_at DESC LIMIT 10;" },
+              { "t": "p", "x": "EXPLAIN ANALYZE را یاد بگیر مثل یادگیری اعداد فارسی: Seq Scan روی جدول بزرگ که ببینی، یعنی ایندکس گم شده؛ Nested Loop با میلیون‌ها تکرار، یعنی پیوند اشتباه؛ Sort موقت حجیم، یعنی ایندکس مرتب‌شده کمک می‌کند." },
+              { "t": "p", "x": "نگهداری دوره‌ای: ایندکس‌های بلااستفاده را پیدا و حذف کن (هزینهٔ نوشتن دارند)، VACUUM/ANALYZE را به‌روز نگه دار، و نتیجهٔ تغییر ایندکس را با متریک بسنج — نه با حس درونی." },
+              { "t": "code", "f": "maintenance.sql", "x": "-- ایندکس‌های بلااستفاده (PostgreSQL)\nSELECT relname, indexrelname, idx_scan\nFROM pg_stat_user_indexes\nWHERE idx_scan = 0 AND relname NOT LIKE 'pg_%';\n\n-- بازپیکربندی فضا و آمار\nVACUUM ANALYZE orders;" },
+              { "t": "tip", "x": "قبل از افزودن ایندکس بپرس: این کوئری چقدر اجرا می‌شود؟ چقدر نوشتن این جدول مهم است؟ ایندکس هر INSERT را کمی کند می‌کند — کارایی خواندن را با هزینهٔ نوشتن می‌خری." }
+            ],
+            "videos": {
+              "fa": [
+                { "title": "پیدا کردن کوئری‌های کند", "q": "کوئری کند postgres فارسی" },
+                { "title": "خواندن EXPLAIN ANALYZE", "q": "explain analyze فارسی postgres" },
+                { "title": "نگهداری دیتابیس", "q": "vacuum analyze postgres فارسی" }
+              ],
+              "en": [
+                { "title": "Finding slow queries", "q": "postgres find slow queries pg_stat_statements" },
+                { "title": "Reading EXPLAIN ANALYZE", "q": "postgres explain analyze tutorial" },
+                { "title": "Database maintenance routine", "q": "postgres maintenance vacuum analyze unused indexes" }
+              ]
+            }
+          }
+        ]}
+      ]
+    }
+  ]
+}
+
+
+

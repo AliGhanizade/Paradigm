@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light" data-accent="default">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="رشد — مرجع فارسی مسیر رشد مهارت‌ها: گولنگ، SQL، جاوااسکریپت و کوبرنتیز؛ با ردیابی پیشرفت و ویدیوهای مرتبط. (اسم سایت از data/courses.json خوانده می‌شود)">
+<title>رشد · مسیر رشد مهارت‌ها</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 3 43 14v20L24 45 5 34V14Z' fill='%2308919f'/%3E%3Cpath d='M17 25l5 5 10-11' stroke='%23fff' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#/">
+      <svg viewBox="0 0 48 48"><path d="M24 3 43 14v20L24 45 5 34V14Z" fill="var(--ac)"/><path d="M17 25l5 5 10-11" stroke="var(--ac-ink)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>رشد<small>مسیر رشد مهارت</small></span>
+    </a>
+    <nav class="nav">
+      <a href="#/" data-nav="home">خانه</a>
+      <a href="#/courses" data-nav="courses">دوره‌ها</a>
+      <a href="#/overview" data-nav="overview">مرور کلی</a>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" data-action="quick-theme" title="تغییر حالت روشن/تیره" id="theme-btn"></button>
+      <button class="icon-btn" data-action="toggle-panel" title="تنظیمات" id="panel-btn"></button>
+    </div>
+  </div>
+</header>
+
+<main id="app">
+  <div class="boot"><div><div class="spin"></div><p>در حال بارگذاری داده‌ها…</p></div></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>رشد · مسیر رشد مهارت‌ها — همهٔ محتوا و پیشرفتت فقط در مرورگر خودت ذخیره می‌شود</span>
+    <span>ساخته‌شده به‌صورت ایستا؛ بدون سرور، بدون حساب کاربری</span>
+  </div>
+</footer>
+
+<!-- پنل تنظیمات -->
+<div class="panel" id="panel">
+  <h3><span id="panel-ico"></span>تنظیمات نمایش</h3>
+  <h4>حالت نمایش</h4>
+  <div class="seg" id="theme-seg">
+    <button data-action="set-theme" data-val="light"><span data-ico="sun"></span>روشن</button>
+    <button data-action="set-theme" data-val="dark"><span data-ico="moon"></span>تیره</button>
+    <button data-action="set-theme" data-val="system"><span data-ico="monitor"></span>سیستم</button>
+  </div>
+  <h4>رنگ اصلی</h4>
+  <div class="swatches">
+    <button class="swatch" data-action="set-accent" data-val="default" style="background:#08919f" title="پیش‌فرض"></button>
+    <button class="swatch" data-action="set-accent" data-val="blue" style="background:#2563eb" title="آبی"></button>
+    <button class="swatch" data-action="set-accent" data-val="red" style="background:#d3363f" title="قرمز"></button>
+    <button class="swatch" data-action="set-accent" data-val="green" style="background:#189a48" title="سبز"></button>
+  </div>
+  <h4>رنگ دلخواه</h4>
+  <div class="color-row" id="color-row">
+    <input type="color" id="color-input" value="#0891a0" title="انتخاب رنگ دلخواه">
+    <span class="cr-txt"><b>هر رنگی که دوست داری</b><span>روی دکمهٔ رنگی کلیک کن؛ رنگ در مرورگرت ذخیره می‌شود</span></span>
+    <code id="color-code">—</code>
+  </div>
+  <h4>گردی گوشه‌ها</h4>
+  <div class="radius-row">
+    <input type="range" id="radius-input" min="0" max="26" step="1" value="16">
+    <span id="rv">16px</span>
+  </div>
+  <button class="btn btn-ghost" data-action="reset-radius"><span data-ico="rotate"></span>بازنشانی گوشه‌ها</button>
+  <h4>پیشرفت من</h4>
+  <button class="btn btn-ghost" data-action="reset-progress"><span data-ico="trash"></span>پاک‌کردن همهٔ پیشرفت‌ها</button>
+</div>
+
+<div id="toast"><span id="toast-ico"></span><span id="toast-msg"></span></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

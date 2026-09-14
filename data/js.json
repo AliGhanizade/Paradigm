@@ -1,0 +1,1579 @@
+{
+  "id": "js",
+  "title": "جاوااسکریپت",
+  "tagline": "زبان وب؛ از DOM تا اکوسیستم مدرن فرانت‌اند",
+  "icon": "braces",
+  "status": "active",
+  "overview": {
+    "summary": "جاوااسکریپت تنها زبانی است که مستقیماً در مرورگر اجرا می‌شود و ستون فقرات تعامل و پویایی وب است. این دوره از بنیادهای زبان (تایپ‌ها، توابع، کلوژر و حلقهٔ رویداد) شروع می‌کند و تا ساخت یک محصول واقعی مرورگری با فرم، API، ذخیره‌سازی و بهینه‌سازی پیش می‌رود. مسیر اکادمیک روی درک عمیق خود زبان تمرکز دارد و مسیر حرفه‌ای هر مفهوم را در قالب یک قابلیت کاربردی به کار می‌گیرد.",
+    "keyPoints": [
+      "جاوااسکریپت زبان با تایپ پویاست؛ const را پیش‌فرض و let را فقط در صورت نیاز به تغییر انتخاب کنید",
+      "توابع شهروند درجه‌یک‌اند: می‌توان آن‌ها را به عنوان آرگومان، خروجی و مقدار متغیر به کار برد",
+      "map، filter و reduce تقریباً هر پردازش آرایه را بدون حلقهٔ دستی ممکن می‌کنند",
+      "کلوژر یعنی تابع به محیط متغیرهای محل تعریفش دسترسی ماندگار دارد",
+      "مقدار this به نحوهٔ فراخوانی تابع بستگی دارد، نه به محل تعریف آن",
+      "DOM رابط برنامه‌نویسی مرورگر برای خواندن و تغییر صفحه است",
+      "جاوااسکریپت تک‌نخی است؛ حلقهٔ رویداد با صف میکروتسک‌ها همزمانی موجه می‌سازد",
+      "async/await شکل خوانای کار با Promise است و مدیریت خطا با try/catch انجام می‌شود",
+      "پیش از هر fetch وضعیت response.ok را بررسی کنید؛ خطای HTTP با reject همراه نیست",
+      "ماژول‌های ES مبنای سازماندهی کد مدرن و ابزارهایی مثل Vite هستند",
+      "در محصول واقعی، state را از رندر جدا کنید تا رفتار اپ قابل پیش‌بینی بماند",
+      "localStorage ساده اما رشته‌محور است؛ هر چیزی باید با JSON ذخیره و بازیابی شود",
+      "عملیات پرهزینهٔ DOM را با DocumentFragment و debounce مهار کنید",
+      "DevTools شامل کنسول، بریک‌پوینت، تب شبکه و پروفایلر، ابزار روزمرهٔ حرفه‌ای‌هاست"
+    ],
+    "cheatsheet": [
+      {
+        "f": "cheatsheet.js",
+        "x": "// Variables\nconst name = 'Sara';\nlet count = 0;\ncount += 1;\n\n// Functions\nconst add = (a, b = 0) => a + b;\n\n// Arrays\nconst nums = [1, 2, 3, 4];\nconst evens = nums.filter(n => n % 2 === 0);\nconst doubled = nums.map(n => n * 2);\nconst total = nums.reduce((sum, n) => sum + n, 0);\n\n// Objects\nconst user = { id: 1, name: 'Ali' };\nconst { id, name: userName } = user;\nconst merged = { ...user, role: 'admin' };\n\n// Async\nasync function getUser(id) {\n  const res = await fetch(`/api/users/${id}`);\n  if (!res.ok) throw new Error(`HTTP ${res.status}`);\n  return await res.json();\n}\n\n// DOM\nconst btn = document.querySelector('#save');\nbtn.addEventListener('click', () => console.log('saved'));\n\n// Storage\nlocalStorage.setItem('key', JSON.stringify(user));\nconst restored = JSON.parse(localStorage.getItem('key'));\n\n// Modules\nimport { add } from './math.js';\nexport const multiply = (a, b) => a * b;"
+      }
+    ]
+  },
+  "tracks": [
+    {
+      "id": "academic",
+      "kind": "academic",
+      "title": "مسیر اکادمیک",
+      "icon": "cap",
+      "desc": "بر پایهٔ خودِ زبان: از تایپ‌ها و توابع تا حلقهٔ رویداد و async",
+      "levels": [
+        {
+          "t": "مقدماتی",
+          "chip": "b",
+          "lessons": [
+            {
+              "id": "js-types-variables",
+              "t": "تایپ‌ها و متغیرها",
+              "sum": "آشنایی با هفت تایپ اصلی، let و const، template literals و تبدیل تایپ",
+              "m": 22,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "جاوااسکریپت زبانی با <b>تایپ پویا</b> است؛ یعنی لازم نیست پیش از استفاده، نوع متغیر را اعلام کنید و یک متغیر می‌تواند در طول عمر خود مقداری از نوع متفاوت بگیرد. زبان هفت تایپ اصلی (primitive) دارد: <b>string</b>، <b>number</b>، <b>boolean</b>، <b>null</b>، <b>undefined</b>، <b>symbol</b> و <b>bigint</b>. همهٔ مقادیر دیگر (آرایه‌ها، توابع، تاریخ‌ها) از نوع object هستند."
+                },
+                {
+                  "t": "code",
+                  "f": "variables.js",
+                  "x": "const name = 'Sara';        // string, cannot be reassigned\nlet score = 0;              // number, reassignable\nscore = score + 10;\n\nconst isActive = true;      // boolean\nlet draft = null;           // explicit 'nothing'\nlet assigned;               // undefined by default\n\nconst PI = 3.14159;\nconsole.log(score, typeof score);   // 10 number\nconsole.log(typeof name);           // string\nconsole.log(typeof isActive);       // boolean"
+                },
+                {
+                  "t": "p",
+                  "x": "برای اعلام متغیر از <b>const</b> استفاده کنید مگر اینکه واقعاً به تغییر مقدار نیاز داشته باشید؛ در آن صورت از <b>let</b>. کلیدواژهٔ قدیمی <b>var</b> دامنهٔ تابعی و رفتار hoisting دارد و در کد مدرن تقریباً منسوخ شده است. هر دو const و let دامنهٔ بلوکی دارند: فقط داخل جفت آکولادی که در آن تعریف شده‌اند قابل دسترسی‌اند."
+                },
+                {
+                  "t": "tip",
+                  "x": "قرارداد نام‌گذاری که کد را خوانا نگه می‌دارد:",
+                  "list": [
+                    "متغیرها و توابع با camelCase: userName، totalPrice",
+                    "ثابت‌های واقعی با UPPER_SNAKE_CASE: MAX_RETRIES",
+                    "نام باید نقش مقدار را توصیف کند: items نه arr"
+                  ]
+                },
+                {
+                  "t": "code",
+                  "f": "strings.js",
+                  "x": "// Template literals: interpolation + multi-line\nconst first = 'Sara';\nconst cart = { items: 3, total: 250000 };\n\nconst message = `Hello ${first},\nyou have ${cart.items} items.\nTotal: ${cart.total.toLocaleString('fa-IR')} T`;\n\nconsole.log(message);\n\n// Useful string methods\nconsole.log(name.length);            // 4\nconsole.log(name.toUpperCase());     // SARA\nconsole.log('a,b,c'.split(','));     // ['a', 'b', 'c']\nconsole.log('  hi  '.trim());        // 'hi'"
+                },
+                {
+                  "t": "p",
+                  "x": "چون تایپ‌ها پویا هستند، گاهی لازم است صریحاً تبدیل انجام دهید: <b>Number()</b> رشته را عدد می‌کند، <b>String()</b> برعکس، و <b>Boolean()</b> مقدار را به true/false می‌برد. مقایسه با <b>===</b> هر دو مقدار و نوع را می‌سنجد و <b>==</b> با تبدیل تایپ ضمنی کار می‌کند؛ در کد مدرن همیشه === را انتخاب کنید تا خطاهای مخفی رخ ندهد."
+                },
+                {
+                  "t": "quiz",
+                  "q": "خروجی typeof null در جاوااسکریپت چیست؟",
+                  "options": ["\"null\"", "\"object\"", "\"undefined\"", "خطا می‌دهد"],
+                  "a": 1,
+                  "why": "رفتار تاریخی زبان است؛ typeof null رشتهٔ \"object\" برمی‌گرداند. برای تشخیص دقیق null باید از مقدار === null استفاده کنید."
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام عبارت با هیچ خطایی مقدار NaN تولید نمی‌کند؟",
+                  "options": ["Number('12')", "parseInt('42px')", "'abc' * 3", "Number('')"],
+                  "a": 0,
+                  "why": "Number('12') عدد ۱۲ می‌دهد. parseInt('42px') هم ۴۲ می‌دهد اما 'abc' * 3 و Number('') (که ۰ می‌دهد) را ببینید: گزینهٔ درست Number('12') است چون تبدیل تمیز انجام می‌شود."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "متغیرها و انواع داده در جاوااسکریپت از صفر", "q": "دوره جاوااسکریپت فارسی متغیرها و انواع داده" },
+                  { "title": "تفاوت let و const و var به زبان ساده", "q": "تفاوت let const var جاوااسکریپت فارسی" },
+                  { "title": "تبدیل نوع و اپراتور typeof در جاوااسکریپت", "q": "جاوااسکریپت تبدیل نوع typeof فارسی" }
+                ],
+                "en": [
+                  { "title": "Learn JavaScript - Full Course for Beginners", "vid": "PkZNo7MFNFg", "channel": "freeCodeCamp.org", "dur": "3:26:42" },
+                  { "title": "JavaScript Variables and Data Types Explained", "q": "javascript variables data types tutorial" },
+                  { "title": "let vs const vs var in Modern JavaScript", "q": "let vs const vs var javascript" }
+                ]
+              }
+            },
+            {
+              "id": "js-operators-conditionals",
+              "t": "عملگرها و شرط‌ها",
+              "sum": "عملگرهای حسابی، مقایسه‌ای و منطقی، nullish coalescing و کنترل جریان با if و switch",
+              "m": 18,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "عملگرها بلوک‌های سازندهٔ منطق برنامه‌اند. عملگرهای حسابی (+ - * / % **) روی اعداد کار می‌کنند، عملگرهای مقایسه‌ای (=== !== > < >= <=) مقدار بولی تولید می‌کنند و عملگرهای منطقی (&& || !) آن‌ها را ترکیب می‌نمایند. سه عملگر نسبتاً جدید هم دارند: <b>??</b> برای مقدار پیش‌فرض وقتی مقدار null یا undefined است، و <b>?. </b> برای دسترسی امن به ویژگی‌های تو در تو."
+                },
+                {
+                  "t": "code",
+                  "f": "operators.js",
+                  "x": "const price = 250_000;\nconst discount = 0.15;\nconst final = price * (1 - discount);\n\nconsole.log(7 % 3);            // 1 (remainder)\nconsole.log(2 ** 10);          // 1024 (power)\nconsole.log(5 === '5');        // false: strict compare\nconsole.log(5 == '5');         // true: avoid this\n\n// Logical + nullish\nconst input = null;\nconst pageSize = input ?? 10;          // 10\nconst user = { name: 'Ali', address: null };\nconsole.log(user.address?.city);        // undefined, no crash\nconsole.log(user.name ?? 'Guest');      // 'Ali'"
+                },
+                {
+                  "t": "p",
+                  "x": "کنترل جریان یعنی تصمیم‌گیری: با <b>if / else if / else</b> مسیرها را جدا کنید، با عملگر سه‌تایی <b>condition ? a : b</b> مقدار را در یک خط انتخاب کنید و وقتی چند شاخه روی یک مقدار تمرکز دارند از <b>switch</b> بهره ببرید. فراموش نکنید true و false یکسان تلقی نمی‌شوند: مقادیری مثل 0، ''، null، undefined و NaN «falsy» هستند و بقیه «truthy»."
+                },
+                {
+                  "t": "code",
+                  "f": "conditionals.js",
+                  "x": "function grade(score) {\n  if (score >= 90) return 'A';\n  else if (score >= 75) return 'B';\n  else if (score >= 60) return 'C';\n  return 'F';\n}\n\nconst status = score >= 60 ? 'passed' : 'failed';\n\nfunction planLabel(code) {\n  switch (code) {\n    case 'free':\n      return 'Basic';\n    case 'pro':\n    case 'team':\n      return 'Premium';\n    default:\n      return 'Unknown';\n  }\n}\n\n// Truthy check\nconst cart = [];\nif (cart.length) console.log('not empty');"
+                },
+                {
+                  "t": "tip",
+                  "x": "سه خطای رایج که با چند عادت ساده از بین می‌روند:",
+                  "list": [
+                    "همیشه === به جای == تا تبدیل تایپ ضمنی رخ ندهد",
+                    "بعد از هر case در switch از break استفاده کنید وگرنه اجرا به case بعدی می‌ریزد",
+                    "برای مقادیر پیش‌فرضِ واقعی از ?? استفاده کنید؛ || صفر و رشتهٔ خالی را هم نادیده می‌گیرد"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "خروجی کد زیر چیست؟ const x = 0; console.log(x || 'default', x ?? 'default');",
+                  "options": ["0 0", "default 0", "0 default", "default default"],
+                  "a": 1,
+                  "why": "عملگر || هر مقدار falsy (شامل 0) را رد می‌کند و 'default' می‌دهد، اما ?? فقط null و undefined را جایگزین می‌کند؛ پس 0 دست‌نخورده باقی می‌ماند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "اپراتورها و شرط‌ها در جاوااسکریپت", "q": "جاوااسکریپت اپراتورها شرط if else فارسی" },
+                  { "title": "مقادیر truthy و falsy به زبان ساده", "q": "جاوااسکریپت truthy falsy فارسی" },
+                  { "title": "تفاوت == و === در جاوااسکریپت", "q": "تفاوت == و === جاوااسکریپت فارسی" }
+                ],
+                "en": [
+                  { "title": "JavaScript Tutorial for Beginners", "vid": "W6NZfCO5SIk", "channel": "Programming with Mosh", "dur": "1:08:07" },
+                  { "title": "JavaScript Operators and Conditionals for Beginners", "q": "javascript operators if else tutorial" },
+                  { "title": "Nullish Coalescing and Optional Chaining in 10 Minutes", "q": "nullish coalescing optional chaining javascript" },
+                  { "title": "Truthy and Falsy Values in JavaScript", "q": "javascript truthy falsy values explained" }
+                ]
+              }
+            },
+            {
+              "id": "js-loops",
+              "t": "حلقه‌ها و تکرار",
+              "sum": "for، while، for...of و for...in و کنترل جریان با break و continue",
+              "m": 16,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "حلقه‌ها برای تکرار یک کار روی داده‌ها به کار می‌روند. حلقهٔ کلاسیک <b>for</b> سه بخش دارد: مقداردهی، شرط و گام. <b>while</b> تا زمانی که شرط برقرار است ادامه می‌دهد و <b>do...while</b> حداقل یک بار بدنه را اجرا می‌کند. برای پیمایش مقادیر یک آرایه یا رشته، حلقهٔ مدرن <b>for...of</b> خواناترین گزینه است."
+                },
+                {
+                  "t": "code",
+                  "f": "loops.js",
+                  "x": "// Classic for\nfor (let i = 1; i <= 5; i++) {\n  console.log(`step ${i}`);\n}\n\n// while\nlet power = 1;\nwhile (power < 1000) {\n  power *= 2;\n}\nconsole.log(power);   // 1024\n\n// for...of: iterate VALUES\nconst langs = ['js', 'python', 'go'];\nfor (const lang of langs) {\n  console.log(lang);\n}\n\n// break and continue\nfor (const n of [3, 7, 0, 9]) {\n  if (n === 0) continue;   // skip zero\n  if (n > 8) break;        // stop early\n  console.log(10 / n);\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "دو حلقهٔ for...of و for...in تفاوت مهمی دارند: <b>for...of</b> روی <b>مقادیر</b> ساختارهای تکرارپذیر (آرایه، رشته، Map و Set) حرکت می‌کند، در حالی که <b>for...in</b> روی <b>کلیدها</b> (نام ویژگی‌های آبجکت) می‌گردد. برای آبجکت‌های ساده for...in یا بهتر از آن Object.keys و Object.entries مناسب است."
+                },
+                {
+                  "t": "code",
+                  "f": "iterate-objects.js",
+                  "x": "const prices = { pen: 20000, book: 150000, bag: 900000 };\n\n// for...in: iterate KEYS\nfor (const key in prices) {\n  console.log(key, prices[key]);\n}\n\n// Preferred: Object.entries\nfor (const [key, value] of Object.entries(prices)) {\n  console.log(`${key}: ${value}`);\n}\n\nconst total = Object.values(prices)\n  .reduce((sum, p) => sum + p, 0);\nconsole.log(total);"
+                },
+                {
+                  "t": "tip",
+                  "x": "for...in روی آرایه‌ها بهتر است استفاده نشود؛ چون ویژگی‌های اضافی و ترتیب تضمین‌شده را درگیر می‌کند. برای آرایه for...of یا متدهایی مثل map و forEach را انتخاب کنید. حواس‌تان هم به حلقه‌های بی‌پایان باشد: هر while باید در نهایت شرطش false شود.",
+                  "list": [
+                    "برای شکستن حلقهٔ تو در تو می‌توانید برچسب (label) تعریف کنید",
+                    "درون حلقه، متغیر شمارنده را با let بسازید نه var"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "برای پیمایش مقادیر آرایه در جاوااسکریپت مدرن، کدام حلقه مناسب‌تر است؟",
+                  "options": ["for...in", "for...of", "do...while", "forEach روی آبجکت"],
+                  "a": 1,
+                  "why": "for...of روی مقادیر ساختارهای تکرارپذیر مثل آرایه حرکت می‌کند؛ for...in کلیدها را می‌دهد و برای آرایه مناسب نیست."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "حلقه‌های for و while در جاوااسکریپت", "q": "جاوااسکریپت حلقه for while فارسی" },
+                  { "title": "تفاوت for of و for in در جاوااسکریپت", "q": "تفاوت for of و for in جاوااسکریپت" },
+                  { "title": "کاربرد break و continue در حلقه‌ها", "q": "جاوااسکریپت break continue حلقه" }
+                ],
+                "en": [
+                  { "title": "JavaScript Loops Made Easy", "q": "javascript loops for while tutorial" },
+                  { "title": "for...of vs for...in - When to Use Which", "q": "for of vs for in javascript" },
+                  { "title": "Iterables and Iterators in JavaScript", "q": "javascript iterables iterators explained" }
+                ]
+              }
+            },
+            {
+              "id": "js-functions",
+              "t": "توابع و Arrow Functions",
+              "sum": "اعلام توابع، پارامترهای پیش‌فرض، rest، توابع پیکانی و callback",
+              "m": 25,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "تابع واحد سازماندهی منطق در جاوااسکریپت است: یک بسته از کد که ورودی می‌گیرد، کاری انجام می‌دهد و مقداری برمی‌گرداند. توابع در این زبان <b>شهروند درجه‌یک</b>‌اند؛ یعنی می‌توان آن‌ها را در متغیر نگه داشت، به‌عنوان آرگومان پاس داد و از تابع دیگر بازگرداند. همین ویژگی پایهٔ الگوهایی مثل callback و کلوژر است."
+                },
+                {
+                  "t": "code",
+                  "f": "functions.js",
+                  "x": "// Function declaration (hoisted)\nfunction add(a, b) {\n  return a + b;\n}\n\n// Function expression\nconst multiply = function (a, b) {\n  return a * b;\n};\n\n// Default parameters\nconst greet = (name = 'Guest') => `Hello, ${name}!`;\n\n// Rest parameters\nconst sum = (...nums) =>\n  nums.reduce((total, n) => total + n, 0);\n\nconsole.log(sum(1, 2, 3, 4));   // 10\nconsole.log(greet());           // Hello, Guest!"
+                },
+                {
+                  "t": "p",
+                  "x": "<b>توابع پیکانی</b> (arrow) نوشتار کوتاه‌تری دارند و برای توابع کوچک و callback‌ها انتخاب اول هستند. اگر بدنه فقط یک عبارت باشد، return ضمنی انجام می‌شود. نکتهٔ ظریف و مهم: تابع پیکانی <b>this خودش را ندارد</b> و this را از محیط اطرافش به ارث می‌برد — رفتاری که بعداً در درس this و کلاس‌ها عمیق بررسی می‌شود."
+                },
+                {
+                  "t": "code",
+                  "f": "arrows.js",
+                  "x": "// Full form\nconst power = (base, exp) => {\n  let result = 1;\n  for (let i = 0; i < exp; i++) result *= base;\n  return result;\n};\n\n// Implicit return\nconst double = n => n * 2;\nconst square = n => n * n;\n\n// Returning an object needs parentheses\nconst makeUser = (id, name) => ({ id, name });\n\n// Callbacks: functions as values\nconst numbers = [1, 2, 3, 4, 5];\nconst evens = numbers.filter(n => n % 2 === 0);\nconst squares = numbers.map(square);\nconsole.log(evens, squares);"
+                },
+                {
+                  "t": "tip",
+                  "x": "توابع خالص (pure) نگه دارید: برای ورودی یکسان همیشه خروجی یکسان بدهند و بیرون از خودشان حالت را تغییر ندهند. چنین توابعی راحت‌تر تست می‌شوند و در کدهای بزرگ کمتر باگ تولید می‌کنند.",
+                  "list": [
+                    "هر تابع باید یک کار مشخص انجام دهد؛ اگر طولانی شد، بشکنید",
+                    "از return زودهنگام (early return) برای کاهش تودرتویی if استفاده کنید"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "تفاوت اصلی تابع پیکانی با تابع معمولی در جاوااسکریپت چیست؟",
+                  "options": [
+                    "سرعت اجرای بیشتری دارد",
+                    "this اختصاصی ندارد و آن را از محیط اطراف می‌گیرد",
+                    "نمی‌تواند پارامتر داشته باشد",
+                    "فقط داخل کلاس قابل استفاده است"
+                  ],
+                  "a": 1,
+                  "why": "توابع پیکانی this خودشان را ندارند و در زمان تعریف از محیط lexical خود به ارث می‌برند؛ برای همین در callback‌ها رفتار قابل پیش‌بینی‌تری دارند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "توابع در جاوااسکریپت؛ تعریف، پارامتر و خروجی", "q": "جاوااسکریپت توابع function فارسی" },
+                  { "title": "توابع پیکانی Arrow Function به زبان ساده", "q": "arrow function جاوااسکریپت فارسی" },
+                  { "title": "مفهوم Callback در جاوااسکریپت", "q": "جاوااسکریپت callback فارسی" }
+                ],
+                "en": [
+                  { "title": "JavaScript Functions and Arrow Functions", "q": "javascript functions arrow functions tutorial" },
+                  { "title": "Default Parameters and Rest Parameters in JS", "q": "javascript default rest parameters" },
+                  { "title": "Higher Order Functions Explained", "q": "javascript higher order functions" },
+                  { "title": "Pure Functions and Why They Matter", "q": "javascript pure functions explained" }
+                ]
+              }
+            },
+            {
+              "id": "js-array-basics",
+              "t": "آرایه‌ها و متدهای پایه",
+              "sum": "ساخت و دستکاری آرایه، slice و splice، عملگر spread و destructuring",
+              "m": 20,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "آرایه ساختار دادهٔ پرکاربرد جاوااسکریپت است؛ فهرستی مرتب از مقادیر که ایندکس آن‌ها از صفر شروع می‌شود. برخلاف بسیاری زبان‌ها، آرایهٔ جاوااسکریپت تایپ ثابت ندارد و می‌تواند مقادیر ناهمگون نگه دارد. ویژگی <b>length</b> طول را می‌دهد و متدهای متعددی برای افزودن، حذف و جست‌وجو وجود دارد."
+                },
+                {
+                  "t": "code",
+                  "f": "arrays.js",
+                  "x": "const stack = ['html', 'css'];\n\n// Add / remove\nstack.push('javascript');      // end\nstack.unshift('git');          // start\nstack.pop();                   // remove from end\nstack.shift();                 // remove from start\n\n// Search\nconst langs = ['js', 'py', 'go'];\nconsole.log(langs.indexOf('go'));      // 2\nconsole.log(langs.includes('js'));     // true\nconsole.log(langs.find(l => l.length === 2));  // 'js'\n\n// slice: copy without mutation\nconst copy = langs.slice(0, 2);        // ['js', 'py']"
+                },
+                {
+                  "t": "p",
+                  "x": "دو متد <b>slice</b> و <b>splice</b> شبیه هم‌اند اما تفاوت حیاتی دارند: slice یک برش <b>غیرمخرب</b> از آرایه می‌سازد و آرایهٔ اصلی را دست نمی‌زند، در حالی که splice در جا حذف و افزودن <b>واقعی</b> انجام می‌دهد و آرایه را تغییر می‌دهد. در کد مدرن به تغییر مستقیم داده‌ها (mutation) کمتر متوسل می‌شویم و با <b>spread (...)</b> نسخهٔ جدید می‌سازیم."
+                },
+                {
+                  "t": "code",
+                  "f": "spread-destructure.js",
+                  "x": "// Spread: copy and merge\nconst base = ['react', 'vue'];\nconst all = [...base, 'svelte'];\nconst clone = [...all];\n\n// Destructuring arrays\nconst [first, second, ...rest] = all;\nconsole.log(first, second, rest);\n\n// Swap without a temp variable\nlet a = 1, b = 2;\n[a, b] = [b, a];\n\n// Useful conversions\nconsole.log(Array.from('abc'));        // ['a','b','c']\nconsole.log([...new Set([1, 1, 2])]);  // dedupe: [1, 2]"
+                },
+                {
+                  "t": "tip",
+                  "x": "قاعدهٔ طلایی state در فرانت‌اند: به جای تغییر آرایهٔ موجود، نسخهٔ جدید بسازید. مثلاً [...items, newItem] به جای items.push(newItem). فریم‌ورک‌ها و خود مرورگر تغییرِ مرجع را سریع‌تر و مطمئن‌تر تشخیص می‌دهند."
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام متد آرایهٔ اصلی را تغییر می‌دهد (mutation)؟",
+                  "options": ["slice", "concat", "splice", "map"],
+                  "a": 2,
+                  "why": "splice در جای خودِ آرایه حذف/افزودن انجام می‌دهد؛ slice و map و concat همیشه آرایهٔ جدید برمی‌گردانند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "آرایه‌ها در جاوااسکریپت و متدهای پرکاربرد", "q": "جاوااسکریپت آرایه متدها فارسی" },
+                  { "title": "تفاوت slice و splice در آرایه‌ها", "q": "تفاوت slice splice جاوااسکریپت" },
+                  { "title": "Destructuring و Spread در جاوااسکریپت", "q": "جاوااسکریپت destructuring spread فارسی" }
+                ],
+                "en": [
+                  { "title": "JavaScript Arrays and Array Methods Crash Course", "q": "javascript array methods tutorial" },
+                  { "title": "Spread Operator and Rest in JavaScript", "q": "javascript spread operator tutorial" },
+                  { "title": "Array Destructuring in JavaScript", "q": "javascript array destructuring" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "متوسط",
+          "chip": "m",
+          "lessons": [
+            {
+              "id": "js-objects-deep",
+              "t": "آبجکت‌ها و ابزارهای مدرن آن‌ها",
+              "sum": "ساخت آبجکت، متدها، Object.keys/values/entries، optional chaining و spread",
+              "m": 24,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "آبجکت مجموعه‌ای از جفت‌های <b>کلید-مقدار</b> است و رایج‌ترین ساختار برای مدل‌سازی داده در جاوااسکریپت: کاربر، محصول، تنظیمات. به ویژگی‌ها هم با نقطه و هم با براکت دسترسی دارید؛ براکت وقتی لازم است که نام کلید در متغیر باشد یا کاراکتر خاص داشته باشد. کلیدها می‌توانند در زمان اجرا ساخته شوند (computed keys)."
+                },
+                {
+                  "t": "code",
+                  "f": "objects.js",
+                  "x": "const product = {\n  id: 101,\n  title: 'Mechanical Keyboard',\n  price: 2_500_000,\n  inStock: true,\n  tags: ['hardware', 'office'],\n  applyDiscount(percent) {          // method shorthand\n    return this.price * (1 - percent / 100);\n  }\n};\n\nconsole.log(product.title);        // dot access\nconsole.log(product['price']);     // bracket access\nconsole.log(product.applyDiscount(10));\n\n// Computed keys\nconst field = 'createdAt';\nconst withMeta = { ...product, [field]: Date.now() };"
+                },
+                {
+                  "t": "p",
+                  "x": "کلاس ابزار Object چند متد کلیدی دارد: <b>Object.keys</b> کلیدها، <b>Object.values</b> مقادیر و <b>Object.entries</b> جفت‌ها را به صورت آرایه برمی‌گرداند؛ با entries می‌توانید با حلقهٔ for...of روی آبجکت بگردید. آبجکت‌ها با تساوی مرجعی مقایسه می‌شوند: دو آبجکت با محتوای یکسان برابر نیستند مگر مرجع یکسانی داشته باشند."
+                },
+                {
+                  "t": "code",
+                  "f": "obj-modern.js",
+                  "x": "const settings = { theme: 'dark', lang: 'fa', beta: false };\n\n// Iterate as pairs\nfor (const [key, value] of Object.entries(settings)) {\n  console.log(`${key} = ${value}`);\n}\n\n// Shorthand + spread\nconst lang = 'en';\nconst merged = { ...settings, lang, version: 2 };\n\n// Optional chaining & delete & hasOwnProperty\nconst nested = merged.ui?.sidebar?.collapsed ?? false;\nconsole.log('lang' in merged);      // true\ndelete merged.beta;\n\n// Freeze against accidental mutation\nObject.freeze(settings);"
+                },
+                {
+                  "t": "tip",
+                  "x": "برای شبیه‌سازی کپی عمیق از structuredClone استفاده کنید؛ spread فقط سطح اول را کپی می‌کند و آبجکت‌های تو در توی آن‌ها هنوز مشترک‌اند. این باگ خیلی رایج در مدیریت state است.",
+                  "list": [
+                    "structuredClone(obj) کپی عمیق استاندارد است",
+                    "JSON.parse(JSON.stringify(obj)) روش قدیمی است و توابع و undefined را حذف می‌کند"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "خروجی این کد چیست؟ const a = {x:1}; const b = {x:1}; console.log(a === b);",
+                  "options": ["true", "false", "خطای TypeError", "بستگی به مرورگر دارد"],
+                  "a": 1,
+                  "why": "آبجکت‌ها با مرجع مقایسه می‌شوند نه محتوا؛ a و b دو آبجکت مجزا هستند پس === مقدار false می‌دهد."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "آبجکت‌ها در جاوااسکریپت؛ ساخت و کار با ویژگی‌ها", "q": "جاوااسکریپت آبجکت object فارسی" },
+                  { "title": "متدهای Object.keys و values و entries", "q": "جاوااسکریپت Object entries values فارسی" },
+                  { "title": "Optional Chaining و کپی عمیق آبجکت", "q": "جاوااسکریپت optional chaining deep clone" }
+                ],
+                "en": [
+                  { "title": "JavaScript Objects Explained", "q": "javascript objects tutorial deep dive" },
+                  { "title": "Object Methods: keys, values, entries", "q": "javascript object keys values entries" },
+                  { "title": "Shallow vs Deep Copy in JavaScript", "q": "shallow vs deep copy javascript structuredClone" },
+                  { "title": "Optional Chaining and Nullish Coalescing", "q": "javascript optional chaining nullish coalescing" }
+                ]
+              }
+            },
+            {
+              "id": "js-array-methods",
+              "t": "map، filter و reduce",
+              "sum": "پردازش تابعی آرایه‌ها: تبدیل، فیلتر، تجمیع، جست‌وجو و زنجیره‌سازی",
+              "m": 28,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "بزرگ‌ترین جهش در خوانایی کد جاوااسکریپت، جایگزینی حلقه‌های دستی با متدهای تابعی آرایه است. <b>map</b> هر عنصر را به عنصر جدیدی تبدیل می‌کند، <b>filter</b> عناصری را که شرط را می‌گذرانند نگه می‌دارد و <b>reduce</b> کل آرایه را به یک مقدار (عدد، آبجکت، حتی آرایهٔ دیگر) تجمیع می‌کند. هر سه آرایهٔ جدید می‌سازند و آرایهٔ اصلی را تغییر نمی‌دهند."
+                },
+                {
+                  "t": "code",
+                  "f": "map-filter.js",
+                  "x": "const products = [\n  { title: 'Keyboard', price: 2500000, cat: 'hw' },\n  { title: 'Mouse',    price: 800000,  cat: 'hw' },\n  { title: 'E-book',   price: 190000,  cat: 'sw' }\n];\n\n// map: transform each item\nconst titles = products.map(p => p.title);\n\n// filter: keep matching items\nconst hardware = products.filter(p => p.cat === 'hw');\n\n// find / findIndex / some / every\nconst cheap = products.find(p => p.price < 200000);\nconst allPriced = products.every(p => p.price > 0);\n\n// sort needs a comparator for numbers\nconst byPrice = [...products].sort((a, b) => a.price - b.price);"
+                },
+                {
+                  "t": "p",
+                  "x": "<b>reduce</b> انعطاف‌پذیرترین متد است: یک accumulator دارد که در هر گام با مقدار برگشتی به‌روز می‌شود. با آن می‌توانید جمع بزنید، گروه‌بندی کنید یا داده را به ساختار دیگری تبدیل کنید. پارامتر دوم (مقدار اولیهٔ accumulator) را همیشه بدهید تا با آرایهٔ خالی هم امن باشد."
+                },
+                {
+                  "t": "code",
+                  "f": "reduce.js",
+                  "x": "const cart = [\n  { title: 'Keyboard', price: 2500000, qty: 1 },\n  { title: 'Mouse',    price: 800000,  qty: 2 }\n];\n\n// Sum\nconst total = cart.reduce(\n  (sum, item) => sum + item.price * item.qty, 0\n);\n\n// Group by category\nconst grouped = products.reduce((acc, p) => {\n  (acc[p.cat] ??= []).push(p);\n  return acc;\n}, {});\n\n// Chaining: filter -> map -> reduce\nconst hwTotal = products\n  .filter(p => p.cat === 'hw')\n  .map(p => p.price)\n  .reduce((a, b) => a + b, 0);"
+                },
+                {
+                  "t": "tip",
+                  "x": "زنجیرهٔ متدها را وقتی خیلی طولانی شد، در متغیرهای میانی با نام معنادار بشکنید؛ خوانایی مهم‌تر از کوتاهی است. یادتان باشد sort و reverse آرایهٔ خودِ ورودی را تغییر می‌دهند — پیش از آن‌ها با [...arr] یا toSorted() کپی بگیرید.",
+                  "list": [
+                    "toSorted، toReversed و toSpliced نسخه‌های غیرمخرب جدید این متدها هستند",
+                    "flatMap ترکیب map و flatten در یک گام است"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام ترکیب برای محاسبهٔ مجموع قیمت محصولات گران‌تر از یک میلیون درست است؟",
+                  "options": [
+                    "products.map(p => p.price > 1e6).reduce((a,b) => a+b)",
+                    "products.filter(p => p.price > 1e6).map(p => p.price).reduce((a,b) => a+b, 0)",
+                    "products.reduce(p => p.price > 1e6)",
+                    "products.filter(p => p.price).sum()"
+                  ],
+                  "a": 1,
+                  "why": "اول فیلتر، بعد استخراج قیمت با map و در نهایت جمع با reduce (با مقدار اولیهٔ 0). گزینهٔ اول خروجی map بولی است و reduce روی true/false بی‌معنا می‌شود."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "متدهای map و filter در جاوااسکریپت", "q": "جاوااسکریپت map filter فارسی" },
+                  { "title": "متد reduce به زبان ساده با مثال واقعی", "q": "جاوااسکریپت reduce فارسی مثال" },
+                  { "title": "زنجیره‌سازی متدهای آرایه در پروژهٔ واقعی", "q": "جاوااسکریپت array chaining پروژه فارسی" }
+                ],
+                "en": [
+                  { "title": "JavaScript Array map, filter, reduce Tutorial", "q": "javascript map filter reduce tutorial" },
+                  { "title": "Reduce Explained with Real Examples", "q": "javascript reduce explained" },
+                  { "title": "Array Methods You Should Master", "q": "javascript array methods master class" },
+                  { "title": "Sorting Arrays the Right Way", "q": "javascript sort comparator toSorted" }
+                ]
+              }
+            },
+            {
+              "id": "js-scope-closure",
+              "t": "Scope و Closure",
+              "sum": "دامنهٔ متغیرها، تودرتویی توابع، کلوژر و کاربردهای واقعی آن",
+              "m": 26,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "<b>Scope</b> یعنی حوزه‌ای از کد که یک متغیر در آن قابل دسترسی است. جاوااسکریپت سه نوع دامنه دارد: <b>global</b> (کل برنامه)، <b>function</b> (داخل تابع) و <b>block</b> (داخل هر جفت آکولاد، برای let و const). جست‌وجوی متغیر از داخل به بیرون انجام می‌شود؛ به این زنجیره، <b>scope chain</b> می‌گویند."
+                },
+                {
+                  "t": "code",
+                  "f": "scope.js",
+                  "x": "const global = 'visible everywhere';\n\nfunction outer() {\n  const outerVar = 'in outer function';\n\n  if (true) {\n    const blockVar = 'inside block';\n    console.log(global, outerVar, blockVar);  // all fine\n  }\n\n  // console.log(blockVar);  // ReferenceError!\n}\n\n// Shadowing: inner name hides outer name\nconst name = 'Ali';\nfunction show() {\n  const name = 'Sara';\n  console.log(name);   // 'Sara'\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "<b>Closure</b> یعنی تابع، همراه با محیط متغیرهای محل تعریفش، «به خاطر» می‌سپارد و حتی بعد از پایان اجرای تابع بیرونی به آن متغیرها دسترسی دارد. این مفهوم هستهٔ بسیاری از الگوهاست: شمارنده‌های خصوصی، دکوریتورها، debounce و حتی ماژول‌ها."
+                },
+                {
+                  "t": "code",
+                  "f": "closure.js",
+                  "x": "function makeCounter() {\n  let count = 0;                 // private state\n  return {\n    increment: () => ++count,\n    value: () => count\n  };\n}\n\nconst counter = makeCounter();\ncounter.increment();\ncounter.increment();\nconsole.log(counter.value());    // 2\n// No way to touch `count` from outside\n\n// Classic pitfall: var in a loop\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log('var', i));   // 3, 3, 3\n}\nfor (let j = 0; j < 3; j++) {\n  setTimeout(() => console.log('let', j));   // 0, 1, 2\n}"
+                },
+                {
+                  "t": "tip",
+                  "x": "کلوژر یعنی متغیرها تا زمانی که تابع داخلی زنده است از حافظه آزاد نمی‌شوند. اگر کلوژری روی دادهٔ بسیار بزرگ تعریف کنید و در آرایه‌ای نگهش دارید، نشت حافظه خواهید داشت؛ مرجع‌های بلااستفاده را release کنید.",
+                  "list": [
+                    "کلوژر پایهٔ پیاده‌سازی متدهای private قبل از #field بود",
+                    "هر فراخوانی makeCounter یک count مستقل می‌سازد"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "چرا در حلقهٔ با var همهٔ setTimeoutها عدد ۳ را چاپ می‌کنند اما با let اعداد ۰ تا ۲؟",
+                  "options": [
+                    "var سرعت اجرای بیشتری دارد",
+                    "var دامنهٔ تابعی دارد و همهٔ کلوژرها یک i مشترک می‌بینند؛ let در هر دور دامنهٔ جدید می‌سازد",
+                    "setTimeout با var کار نمی‌کند",
+                    "let سریع‌تر است و قبل از اجرای تایمر مقدار می‌گیرد"
+                  ],
+                  "a": 1,
+                  "why": "var متغیر واحدی در دامنهٔ تابع می‌سازد که تا پایان حلقه به ۳ رسیده؛ اما let در هر تکرار یک binding تازه ایجاد می‌کند و هر کلوژر مقدار همان تکرار را می‌بیند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "مفهوم Scope در جاوااسکریپت از پایه", "q": "جاوااسکریپت scope دامنه متغیر فارسی" },
+                  { "title": "کلوژر (Closure) با مثال‌های واقعی", "q": "جاوااسکریپت closure کلوژر فارسی" },
+                  { "title": "چرا let در حلقه و setTimeout فرق می‌کند", "q": "جاوااسکریپت var let حلقه setTimeout" }
+                ],
+                "en": [
+                  { "title": "JavaScript Scope and Scope Chain", "q": "javascript scope chain tutorial" },
+                  { "title": "Closures Explained Simply", "q": "javascript closures explained" },
+                  { "title": "10 Practical Closure Use Cases", "q": "javascript closure use cases" },
+                  { "title": "var, let, const and the Loop Problem", "q": "javascript var let loop setTimeout problem" }
+                ]
+              }
+            },
+            {
+              "id": "js-this-classes",
+              "t": "this و کلاس‌ها",
+              "sum": "قواعد تعیین this، call/bind، کلاس‌ها، ارث‌بری، فیلدهای خصوصی و static",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "مقدار <b>this</b> یکی از گیج‌کننده‌ترین بخش‌های زبان است، اما قاعده‌اش ساده است: this به <b>نحوهٔ فراخوانی</b> تابع بستگی دارد نه محل تعریفش. اگر تابع به صورت obj.method() صدا زده شود، this همان obj است؛ اگر مستقل صدا زده شود، this برابر undefined (در حالت strict) است؛ با new، this آبجکت تازه‌ساخته است."
+                },
+                {
+                  "t": "code",
+                  "f": "this.js",
+                  "x": "const user = {\n  name: 'Sara',\n  greet() {\n    return `I am ${this.name}`;\n  }\n};\nconsole.log(user.greet());      // I am Sara\n\nconst lost = user.greet;\n// lost();                      // this is undefined -> crash\n\n// Fix: bind, or use an arrow wrapper\nconst bound = user.greet.bind(user);\nconsole.log(bound());           // I am Sara\n\n// Arrows inherit this from their surroundings\nclass Timer {\n  seconds = 0;\n  start() {\n    setInterval(() => {         // arrow keeps class this\n      this.seconds++;\n    }, 1000);\n  }\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "<b>کلاس‌ها</b> الگوی استاندارد ساخت آبجکت‌های هم‌خانواده‌اند. داخل constructor فیلدهای اولیه تنظیم می‌شوند، متدها به prototype مشترک وصل می‌شوند و با <b>extends</b> و <b>super</b> ارث‌بری انجام می‌شود. فیلدهای خصوصی با <b>#</b> از بیرون مخفی می‌مانند و متدهای <b>static</b> به خود کلاس تعلق دارند نه نمونه‌ها."
+                },
+                {
+                  "t": "code",
+                  "f": "classes.js",
+                  "x": "class Cart {\n  #items = [];                  // private field\n\n  add(item) {\n    this.#items.push(item);\n    return this;                // chaining\n  }\n\n  get total() {\n    return this.#items.reduce((s, i) => s + i.price, 0);\n  }\n\n  get count() {\n    return this.#items.length;\n  }\n\n  static merge(a, b) {\n    const cart = new Cart();\n    cart.#items = [...a.#items, ...b.#items];\n    return cart;\n  }\n}\n\nclass DiscountCart extends Cart {\n  constructor(discount) {\n    super();\n    this.discount = discount;\n  }\n  get total() {\n    return super.total * (1 - this.discount);\n  }\n}"
+                },
+                {
+                  "t": "tip",
+                  "x": "در callbackهای تزریق‌شده به addEventListener یا setInterval، تابع معمولی this را از دست می‌دهد؛ راه‌حل‌ها: تابع پیکانی، bind(this)، یا arrow که متد را در خود فراخوانی می‌کند. اگر این باگ را ندیده بگیرید، معمولاً پیام «Cannot read properties of undefined» می‌بینید."
+                },
+                {
+                  "t": "quiz",
+                  "q": "در کد setTimeout(this.tick, 1000) داخل یک متد کلاس، چرا this.tick درست کار نمی‌کند؟",
+                  "options": [
+                    "چون setTimeout توابع async را پشتیبانی نمی‌کند",
+                    "چون tick بدون صاحب فراخوانی می‌شود و this از دست می‌رود",
+                    "چون tick باید static باشد",
+                    "چون setTimeout فقط رشته قبول می‌کند"
+                  ],
+                  "a": 1,
+                  "why": "پاس دادن this.tick فقط مرجع تابع را منتقل می‌کند؛ هنگام اجرا، this برابر undefined است. راه‌حل: () => this.tick یا this.tick.bind(this)."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "مفهوم this در جاوااسکریپت به زبان ساده", "q": "جاوااسکریپت this فارسی" },
+                  { "title": "کلاس‌ها و ارث‌بری در جاوااسکریپت", "q": "جاوااسکریپت کلاس extends فارسی" },
+                  { "title": "فیلدهای خصوصی # و متدهای static", "q": "جاوااسکریپت private fields static فارسی" }
+                ],
+                "en": [
+                  { "title": "this in JavaScript Explained Once and For All", "q": "javascript this keyword explained" },
+                  { "title": "JavaScript Classes Deep Dive", "q": "javascript classes tutorial deep dive" },
+                  { "title": "bind, call and apply in JavaScript", "q": "javascript bind call apply" },
+                  { "title": "Inheritance with extends and super", "q": "javascript class inheritance super" }
+                ]
+              }
+            },
+            {
+              "id": "js-dom",
+              "t": "DOM و دستکاری صفحه",
+              "sum": "ساختار DOM، انتخاب عناصر، ایجاد و حذف نودها، کلاس‌ها و dataset",
+              "m": 32,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "وقتی مرورگر HTML را می‌خواند، آن را به درختی از آبجکت‌ها تبدیل می‌کند که به آن <b>DOM</b> (Document Object Model) می‌گویند. با جاوااسکریپت می‌توانید این درخت را بخوانید و تغییر دهید: متن را عوض کنید، عنصر بسازید، کلاس اضافه کنید یا بخشی را حذف نمایید. نقطهٔ ورود، آبجکت سراسری document است."
+                },
+                {
+                  "t": "code",
+                  "f": "dom.js",
+                  "x": "// Select elements\nconst list = document.querySelector('#todos');\nconst items = document.querySelectorAll('.todo');\nconst byClass = document.getElementsByClassName('todo');\n\n// Read & change content\nconst title = document.querySelector('h1');\nconsole.log(title.textContent);\ntitle.textContent = 'My Tasks';\n\n// Change classes & styles\nlist.classList.add('is-active');\nlist.classList.toggle('hidden');\nlist.style.backgroundColor = '#f6f7fb';\n\n// Attributes & data-*\nconst btn = document.querySelector('button');\nbtn.dataset.action = 'save';      // <button data-action=\"save\">\nbtn.setAttribute('aria-label', 'Save');"
+                },
+                {
+                  "t": "p",
+                  "x": "برای ساختن عنصر جدید سه گام دارید: بسازید (createElement)، پر کنید و به درخت وصل کنید (append یا appendChild). برای حذف، remove() را روی خود عنصر صدا بزنید. هنگام افزودن تعداد زیادی عنصر، همه را اول داخل یک <b>DocumentFragment</b> جمع کنید تا مرورگر فقط یک بار رندر را به‌روزرسانی کند."
+                },
+                {
+                  "t": "code",
+                  "f": "dom-build.js",
+                  "x": "function renderTask(text) {\n  const li = document.createElement('li');\n  li.className = 'todo';\n  li.dataset.id = crypto.randomUUID();\n\n  const span = document.createElement('span');\n  span.textContent = text;          // safe: escapes HTML\n\n  const del = document.createElement('button');\n  del.textContent = 'x';\n  del.className = 'btn-del';\n\n  li.append(span, del);\n  return li;\n}\n\nconst frag = document.createDocumentFragment();\nfor (const task of ['Learn JS', 'Build app']) {\n  frag.append(renderTask(task));\n}\ndocument.querySelector('#todos').append(frag);\n\n// Remove\n// document.querySelector('.todo').remove();"
+                },
+                {
+                  "t": "tip",
+                  "x": "تفاوت امنیتی مهم: <b>textContent</b> هر رشته‌ای را به متن ساده تبدیل می‌کند و امن است، اما <b>innerHTML</b> رشته را به‌عنوان HTML تفسیر می‌کند. اگر innerHTML با ورودی کاربر تغذیه شود، درگاه حملهٔ XSS باز می‌شود؛ تنها با محتوای مورد اعتماد از آن استفاده کنید.",
+                  "list": [
+                    "برای اجرای درست اسکریپت‌های DOM، تگ script را آخر body یا با defer بگذارید",
+                    "query ثابت را یک‌بار بیرون از توابع نگه دارید تا هر بار دنبال عنصر نگردید"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "برای نمایش متنی که کاربر در فرم وارد کرده و جلوگیری از حملهٔ XSS، کدام روش درست است؟",
+                  "options": ["element.innerHTML = userInput", "element.textContent = userInput", "element.outerHTML = userInput", "document.write(userInput)"],
+                  "a": 1,
+                  "why": "textContent محتوا را به‌صورت متن خام درج می‌کند و تگ‌های تزریقی اجرا نمی‌شوند؛ innerHTML و outerHTML ورودی را به‌عنوان HTML پردازش می‌کنند و مسیر XSS هستند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "مفهوم DOM و کار با document در جاوااسکریپت", "q": "جاوااسکریپت DOM document فارسی" },
+                  { "title": "querySelector و انتخاب عناصر صفحه", "q": "جاوااسکریپت querySelector فارسی" },
+                  { "title": "ساختن و حذف عناصر DOM با جاوااسکریپت", "q": "جاوااسکریپت createElement append فارسی" }
+                ],
+                "en": [
+                  { "title": "DOM Manipulation Full Tutorial", "q": "javascript dom manipulation tutorial" },
+                  { "title": "querySelector vs getElementById", "q": "javascript querySelector tutorial" },
+                  { "title": "Create, Append and Remove DOM Elements", "q": "javascript create element document fragment" },
+                  { "title": "textContent vs innerHTML and XSS", "q": "textcontent vs innerhtml xss" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "پیشرفته",
+          "chip": "a",
+          "lessons": [
+            {
+              "id": "js-events",
+              "t": "رویدادها و Event Delegation",
+              "sum": "addEventListener، آبجکت event، حباب‌زنی و گرفتن رویداد با delegation",
+              "m": 26,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "تعامل صفحه از طریق <b>رویدادها</b> اتفاق می‌افتد: کلیک، تایپ، حرکت موس، ارسال فرم و بارگذاری صفحه. با <b>addEventListener</b> تابعی را به رویداد یک عنصر وصل می‌کنید؛ تابع handler یک آبجکت event دریافت می‌کند که اطلاعات کامل رویداد (هدف، کلید فشرده‌شده، مختصات و…) را دارد."
+                },
+                {
+                  "t": "code",
+                  "f": "events.js",
+                  "x": "const btn = document.querySelector('#save');\n\nbtn.addEventListener('click', (event) => {\n  console.log(event.type);        // 'click'\n  console.log(event.target);      // the clicked element\n});\n\ndocument.addEventListener('keydown', (e) => {\n  if (e.key === 'Escape') closeModal();\n  if (e.ctrlKey && e.key === 's') {\n    e.preventDefault();           // block browser save\n    saveForm();\n  }\n});\n\n// Remove later (needs the same reference)\nfunction onClick(e) { /* ... */ }\nbtn.addEventListener('click', onClick);\nbtn.removeEventListener('click', onClick);"
+                },
+                {
+                  "t": "p",
+                  "x": "رویدادها از عنصر هدف به سمت بالا در درخت DOM حرکت می‌کنند؛ به این فرایند <b>حباب‌زنی</b> (bubbling) می‌گویند و با stopPropagation() می‌توان جلویش را گرفت. همین رفتار پایهٔ تکنیک قدرتمند <b>Event Delegation</b> است: به جای وصل کردن listener به صد دکمه، یک listener به والد می‌زنید و با event.target می‌فهمید کدام فرزند کلیک شده. کد کمتر، مصرف حافظهٔ کمتر و پشتیبانی خودکار از عناصر جدید."
+                },
+                {
+                  "t": "code",
+                  "f": "delegation.js",
+                  "x": "const list = document.querySelector('#todos');\n\nlist.addEventListener('click', (event) => {\n  const btn = event.target.closest('button.btn-del');\n  if (!btn) return;                  // click was elsewhere\n  const li = btn.closest('li');\n  li.remove();\n});\n\n// Works even for items added AFTER this code ran\naddNewTask('Delegation rocks');\n\n// Forms: submit event instead of button click\nform.addEventListener('submit', (e) => {\n  e.preventDefault();\n  handleData(new FormData(form));\n});"
+                },
+                {
+                  "t": "tip",
+                  "x": "برای رویدادهای پرتکرار مثل scroll یا mousemove از گزینهٔ { passive: true } استفاده کنید تا مرورگر بتواند بدون انتظار برای handler اسکرول روان نگه دارد. در فرم‌ها همیشه رویداد submit را بگیرید و preventDefault کنید، نه click دکمه؛ چون Enter هم فرم را می‌فرستد.",
+                  "list": [
+                    "event.target عنصر اصلی کلیک است؛ event.currentTarget عنصری که listener روی آن است",
+                    "closest() برای یافتن نزدیک‌ترین والد منطبق در delegation حیاتی است"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "مزیت اصلی Event Delegation چیست؟",
+                  "options": [
+                    "سرعت اجرای جاوااسکریپت را بیشتر می‌کند",
+                    "با یک listener روی والد، همهٔ فرزندان حتی عناصر بعدی را پوشش می‌دهد",
+                    "رویدادها را قبل از رسیدن به مرورگر رهگیری می‌کند",
+                    "کد را در فایل جداگانه اجرا می‌کند"
+                  ],
+                  "a": 1,
+                  "why": "delegation از حباب‌زنی استفاده می‌کند تا با تعداد کم listener همهٔ عناصر فرزند (حالا و آینده) را مدیریت کند؛ حافظهٔ کمتر و کد ساده‌تر."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "رویدادها در جاوااسکریپت و addEventListener", "q": "جاوااسکریپت addEventListener رویدادها فارسی" },
+                  { "title": "مفهوم حباب‌زنی رویداد و Event Delegation", "q": "جاوااسکریپت event delegation bubbling فارسی" },
+                  { "title": "مدیریت رویدادهای فرم و keyboard", "q": "جاوااسکریپت رویداد فرم keydown فارسی" }
+                ],
+                "en": [
+                  { "title": "JavaScript Events Tutorial for Beginners", "q": "javascript events addeventlistener tutorial" },
+                  { "title": "Event Bubbling and Capturing Explained", "q": "javascript event bubbling capturing" },
+                  { "title": "Event Delegation in Practice", "q": "javascript event delegation tutorial" },
+                  { "title": "The Event Object and preventDefault", "q": "javascript event object preventDefault" }
+                ]
+              }
+            },
+            {
+              "id": "js-async-promises",
+              "t": "Promise، async/await و مدیریت خطا",
+              "sum": "مدل ناهمگام زبان، ساخت Promise، async/await و کنترل خطا با try/catch",
+              "m": 34,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "جاوااسکریپت تک‌نخی است؛ نمی‌تواند منتظر یک عملیات کند (شبکه، فایل، تایمر) بماند و بقیهٔ صفحه را قفل کند. راه‌حل زبان، <b>Promise</b> است: نماینده‌ای از یک مقداری که «در آینده» مشخص می‌شود و می‌تواند fulfilled یا rejected شود. زنجیرهٔ then/catch روش کلاسیک مصرف آن است و <b>async/await</b> همان کار را با شکلی شبیه کد همگام می‌کند."
+                },
+                {
+                  "t": "code",
+                  "f": "promises.js",
+                  "x": "// Creating a promise\nconst wait = (ms) =>\n  new Promise((resolve) => setTimeout(resolve, ms));\n\n// Consuming with .then/.catch\nwait(500)\n  .then(() => console.log('half a second passed'))\n  .catch((err) => console.error('failed', err));\n\n// async/await: same thing, sync-like syntax\nasync function boot() {\n  try {\n    await wait(300);\n    console.log('ready');\n  } catch (err) {\n    console.error(err);\n  } finally {\n    console.log('always runs');\n  }\n}\nboot();"
+                },
+                {
+                  "t": "p",
+                  "x": "نکتهٔ کلیدی: <b>await فقط مقدار نهایی promise را می‌دهد</b> و خطای rejected را به throw تبدیل می‌کند؛ پس هر await که ممکن است شکست بخورد باید داخل try/catch باشد. متدهای ترکیبی هم دارند: <b>Promise.all</b> وقتی همه باید موفق باشند، <b>allSettled</b> وقتی نتیجهٔ همه را می‌خواهید و <b>race</b> وقتی اولین پاسخ کافی است."
+                },
+                {
+                  "t": "code",
+                  "f": "combinators.js",
+                  "x": "async function loadDashboard(userId) {\n  // Parallel: start both, then await together\n  const [profile, orders] = await Promise.all([\n    fetchUser(userId),\n    fetchOrders(userId)\n  ]);\n  return { profile, orders };\n}\n\n// Tolerate partial failure\nconst results = await Promise.allSettled([\n  fetchComments(),\n  fetchStats()\n]);\nresults\n  .filter(r => r.status === 'rejected')\n  .forEach(r => console.warn(r.reason));\n\n// Custom errors + rethrow pattern\nclass HttpError extends Error {\n  constructor(status, message) {\n    super(message);\n    this.status = status;\n  }\n}\n\ntry {\n  await loadDashboard(1);\n} catch (err) {\n  if (err instanceof HttpError && err.status === 404) {\n    showEmptyState();\n  } else {\n    throw err;      // rethrow unknown errors\n  }\n}"
+                },
+                {
+                  "t": "tip",
+                  "x": "خطای رایج: فراخوانی await داخل حلقهٔ for روی صدها آیتم، همه را پشت سر هم کند می‌کند. اگر ترتیب مهم نیست، ابتدا آرایه‌ای از promise بسازید و با Promise.all منتظر همه بمانید؛ سرعت ده‌ها برابر می‌شود.",
+                  "list": [
+                    "تابع async همیشه Promise برمی‌گرداند؛ حتی بدون return",
+                    "برای لغو عملیات، AbortController را یاد بگیرید (درس fetch)"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "تفاوت Promise.all و Promise.allSettled چیست؟",
+                  "options": [
+                    "all فقط یک promise می‌گیرد و allSettled آرایه",
+                    "all با اولین شکست reject می‌شود؛ allSettled نتیجهٔ همه را می‌دهد حتی شکست‌ها",
+                    "all سریع‌تر است و allSettled کندتر",
+                    "هیچ تفاوتی ندارند"
+                  ],
+                  "a": 1,
+                  "why": "Promise.all به محض اولین rejection شکست می‌خورد؛ allSettled هرگز reject نمی‌شود و وضعیت و مقدار/دلیل هر promise را جداگانه برمی‌گرداند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "مفهوم Promise در جاوااسکریپت از صفر", "q": "جاوااسکریپت promise فارسی" },
+                  { "title": "async و await به زبان ساده با مثال", "q": "جاوااسکریپت async await فارسی" },
+                  { "title": "مدیریت خطا در کدهای ناهمگام با try catch", "q": "جاوااسکریپت try catch async خطا فارسی" }
+                ],
+                "en": [
+                  { "title": "Promises in JavaScript Explained", "q": "javascript promises tutorial" },
+                  { "title": "async/await Crash Course", "q": "javascript async await tutorial" },
+                  { "title": "Promise.all vs allSettled vs race", "q": "promise all allsettled race explained" },
+                  { "title": "Error Handling in Async JavaScript", "q": "javascript async error handling try catch" }
+                ]
+              }
+            },
+            {
+              "id": "js-fetch-api",
+              "t": "fetch و کار با API",
+              "sum": "ارسال درخواست HTTP، بررسی وضعیت پاسخ، POST با JSON و لغو درخواست",
+              "m": 28,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "تابع سراسری <b>fetch</b> رابط استاندارد ارسال درخواست HTTP از مرورگر است. promise آن با رسیدن پاسخ resolve می‌شود و یک آبجکت Response می‌دهد که هنوز بدنه را ندارد؛ بدنه را با متدهایی مثل <b>res.json()</b> یا <b>res.text()</b> می‌خوانید که خودشان async هستند."
+                },
+                {
+                  "t": "p",
+                  "x": "دام بزرگ‌ترین خطای مبتدیان: fetch در خطاهای HTTP مثل 404 و 500 <b>reject نمی‌شود</b>؛ فقط خطاهای شبکه promise را reject می‌کنند. پس همیشه پیش از خواندن بدنه، <b>res.ok</b> یا res.status را بررسی کنید وگرنه خطای سرور بی‌صدا به‌صورت «پاسخ موفق» در می‌آید."
+                },
+                {
+                  "t": "code",
+                  "f": "fetch.js",
+                  "x": "async function getProducts() {\n  const res = await fetch('/api/products?page=1');\n  if (!res.ok) {\n    throw new Error(`HTTP ${res.status}`);\n  }\n  const data = await res.json();\n  return data;\n}\n\n// With query params and timeout via AbortController\nasync function search(q, { timeout = 5000 } = {}) {\n  const ctrl = new AbortController();\n  const timer = setTimeout(() => ctrl.abort(), timeout);\n  try {\n    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {\n      signal: ctrl.signal\n    });\n    if (!res.ok) throw new Error(`HTTP ${res.status}`);\n    return await res.json();\n  } finally {\n    clearTimeout(timer);\n  }\n}"
+                },
+                {
+                  "t": "code",
+                  "f": "post.js",
+                  "x": "async function createProduct(payload) {\n  const res = await fetch('/api/products', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify(payload)\n  });\n\n  if (res.status === 201) {\n    return await res.json();       // created resource\n  }\n  if (res.status === 422) {\n    const errors = await res.json();\n    renderFormErrors(errors);      // server validation\n    return null;\n  }\n  throw new Error(`Unexpected status ${res.status}`);\n}"
+                },
+                {
+                  "t": "tip",
+                  "x": "قاعده‌های طلایی fetch در محصول واقعی: ورودی کاربر را با encodeURIComponent به کوئری بفرستید، هدر Content-Type را روی application/json بگذارید، برای تکرار و خطای شبکه یک retry ساده با تأخیر بچینید و درخواست‌های منقضی را با AbortController لغو کنید.",
+                  "list": [
+                    "mode و credentials برای درخواست‌های cross-origin مهم‌اند",
+                    "پاسخ‌های کش‌شده را با هدرهای Cache-Control سرور کنترل کنید"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "کد fetch('/api/x') روی سرور 404 برمی‌گرداند. چه اتفاقی می‌افتد؟",
+                  "options": [
+                    "promise reject می‌شود و باید catch کنیم",
+                    "promise resolve می‌شود و تا res.ok را چک نکنیم خطا پنهان می‌ماند",
+                    "مرورگر صفحهٔ خطا نشان می‌دهد",
+                    "خودکار دوباره تلاش می‌کند"
+                  ],
+                  "a": 1,
+                  "why": "fetch فقط در خطاهای شبکه reject می‌شود؛ وضعیت‌های HTTP مثل 404 همچنان resolve می‌شوند و بررسی res.ok وظیفهٔ شماست."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "کار با fetch و خواندن JSON از API", "q": "جاوااسکریپت fetch api فارسی" },
+                  { "title": "ارسال درخواست POST و مدیریت خطای HTTP", "q": "جاوااسکریپت fetch post json فارسی" },
+                  { "title": "لغو درخواست با AbortController", "q": "جاوااسکریپت AbortController timeout" }
+                ],
+                "en": [
+                  { "title": "Fetch API Crash Course", "q": "javascript fetch api tutorial" },
+                  { "title": "Handling HTTP Errors with fetch the Right Way", "q": "fetch response ok error handling" },
+                  { "title": "AbortController and Request Cancellation", "q": "javascript abortcontroller fetch timeout" },
+                  { "title": "Consuming REST APIs in the Browser", "q": "javascript consume rest api browser" }
+                ]
+              }
+            },
+            {
+              "id": "js-modules",
+              "t": "ماژول‌ها (ESM)",
+              "sum": "نظم‌دهی کد با import/export، ماژول پیش‌فرض و نام‌دار، import داینامیک",
+              "m": 20,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "هر فایل JS مدرن یک <b>ماژول</b> است: فضای نام مستقل که فقط چیزی را بیرون می‌دهد که خودش بخواهد. با <b>export</b> مقدارها را عمومی می‌کنید و با <b>import</b> در فایل دیگری مصرف می‌کنید. این تفکیک، تست‌پذیری و بازاستفاده را ممکن می‌کند و از آلودگی دامنهٔ سراسری جلوگیری می‌نماید."
+                },
+                {
+                  "t": "code",
+                  "f": "math.js",
+                  "x": "// math.js — named exports\nexport const TAX = 0.09;\n\nexport function add(a, b) {\n  return a + b;\n}\n\nexport const formatPrice = (n) =>\n  n.toLocaleString('fa-IR');\n\n// helper stays private (not exported)\nfunction round2(n) {\n  return Math.round(n * 100) / 100;\n}"
+                },
+                {
+                  "t": "code",
+                  "f": "main.js",
+                  "x": "// main.js\nimport { add, TAX, formatPrice } from './math.js';\nimport * as math from './math.js';   // namespace import\n\nconsole.log(add(2, 3), math.TAX);\n\n// Dynamic import: lazy loading on demand\nbutton.addEventListener('click', async () => {\n  const { openChart } = await import('./chart.js');\n  openChart();\n});"
+                },
+                {
+                  "t": "p",
+                  "x": "دو نوع خروجی وجود دارد: <b>named</b> (چند خروجی با نام صریح) و <b>default</b> (یک خروجی اصلی هر فایل). مرسوم است فایل‌ها حداکثر یک default داشته باشند و بقیه named. در مرورگر، ماژول با <b>type=\"module\"</b> فعال می‌شود و به‌صورت خودکار strict mode و defer دارد؛ یعنی اجرا بعد از تجزیهٔ HTML انجام می‌شود."
+                },
+                {
+                  "t": "code",
+                  "f": "index.html",
+                  "x": "<script type=\"module\" src=\"main.js\"></script>\n\n<!-- Classic scripts run in order and block parsing.\n     Modules are deferred by default: they run after\n     the HTML is fully parsed, so DOM is ready. -->\n\n// Inside a module:\n// - top-level variables stay module-scoped,\n//   not attached to the global window\n// - 'use strict' is implied"
+                },
+                {
+                  "t": "tip",
+                  "x": "وابستگی‌های چرخه‌ای (A به B و B به A) علامت شکست معماری‌اند؛ کد مشترک را به ماژول سومی منتقل کنید. import داینامیک ابزار اصلی <b>code splitting</b> است: ماژول‌های سنگین را فقط هنگام نیاز بار کنید تا زمان بارگذاری اولیه کم بماند.",
+                  "list": [
+                    "نام‌های named import باید دقیقاً با export یکی باشند مگر با as نام دیگری بدهید",
+                    "مسیرها در ماژول باید کامل باشند: ./math.js نه math"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "اسکریپت با type=\"module\" چه تفاوتی با اسکریپت معمولی دارد؟",
+                  "options": [
+                    "فقط سرعت بارگذاری بیشتری دارد",
+                    "دامنهٔ مستقل دارد، strict است و مثل defer بعد از تجزیهٔ HTML اجرا می‌شود",
+                    "در همهٔ مرورگرهای قدیمی هم کار می‌کند",
+                    "نیازی به فایل جداگانه ندارد"
+                  ],
+                  "a": 1,
+                  "why": "ماژول‌ها دامنهٔ خودشان را دارند، خودکار strict mode هستند و مثل defer تا پایان تجزیهٔ سند صبر می‌کنند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "ماژول‌ها در جاوااسکریپت؛ import و export", "q": "جاوااسکریپت ماژول import export فارسی" },
+                  { "title": "تفاوت export default و named export", "q": "جاوااسکریپت export default named فارسی" },
+                  { "title": "بارگذاری تنبل با dynamic import", "q": "جاوااسکریپت dynamic import code splitting" }
+                ],
+                "en": [
+                  { "title": "JavaScript Modules (ESM) Explained", "q": "javascript es modules import export tutorial" },
+                  { "title": "Default vs Named Exports", "q": "javascript default vs named exports" },
+                  { "title": "Dynamic Imports and Code Splitting", "q": "javascript dynamic import code splitting" },
+                  { "title": "script type=module How It Works", "q": "script type module defer explained" }
+                ]
+              }
+            },
+            {
+              "id": "js-event-loop",
+              "t": "حلقهٔ رویداد و میکروتسک‌ها",
+              "sum": "نحوهٔ اجرای کد در تک‌نخی: call stack، صف میکروتسک و ماکروتسک و ترتیب console.logها",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "برای نوشتن کد ناهمگامِ بی‌باگ باید بدانید موتور جاوااسکریپت چگونه اجرا می‌کند. هر فراخوانی تابع روی <b>call stack</b> می‌نشیند و بعد از پایان برمی‌گردد. عملیات زمان‌بندی‌شده و رویدادها در صف‌ها قرار می‌گیرند و <b>event loop</b> مدام کار می‌کند: وقتی stack خالی شد، اول همهٔ <b>میکروتسک‌ها</b> (callbackهای Promise و queueMicrotask) و بعد یک <b>ماکروتسک</b> (setTimeout، رویدادها) را اجرا می‌کند."
+                },
+                {
+                  "t": "code",
+                  "f": "eventloop.js",
+                  "x": "console.log('1: sync');\n\nsetTimeout(() => console.log('2: timeout'), 0);\n\nPromise.resolve()\n  .then(() => console.log('3: microtask'));\n\nconsole.log('4: sync');\n\n// Output order:\n// 1: sync\n// 4: sync\n// 3: microtask   <- all microtasks first\n// 2: timeout     <- macrotask last"
+                },
+                {
+                  "t": "p",
+                  "x": "یعنی حتی setTimeout با تأخیر صفر هم بعد از کد همگام و همهٔ میکروتسک‌های موجود اجرا می‌شود؛ چون تأخیر 0 به معنای «فوری» نیست بلکه «در نوبت بعدی» است. این دانش ترتیب اجرا را در باگ‌های race و رندر پیش‌بینی‌پذیر می‌کند: مثلاً اگر بخواهید بعد از به‌روزرسانی DOM کاری کنید، میکروتسک جای مناسب‌تری از setTimeout است."
+                },
+                {
+                  "t": "code",
+                  "f": "micro.js",
+                  "x": "async function run() {\n  console.log('A');\n  await null;              // pauses, schedules continuation\n  console.log('C');        // microtask continuation\n}\n\nrun();\nconsole.log('B');\n\n// Output: A, B, C\n// await splits the function: everything after it\n// runs as a microtask, after current sync code.\n\n// Blocking the loop freezes the page\n// while (true) {}   // never do this!"
+                },
+                {
+                  "t": "tip",
+                  "x": "همهٔ تعامل‌ها روی همان نخ اصلی اجرا می‌شوند؛ یک حلقهٔ سنگین یا پردازش میلیونی ردیف، کل رابط کاربری را فریز می‌کند. راه‌حل‌ها: شکستن کار به تکه‌های کوچک با await نوبت‌دهی، انتقال محاسبات سنگین به Web Worker، یا پردازش تدریجی (chunking) در requestIdleCallback.",
+                  "list": [
+                    "queueMicrotask(fn) اولویت بالاتری از setTimeout(fn, 0) دارد",
+                    "requestAnimationFrame با چرخهٔ رندر هماهنگ است و جای مناسب انیمیشن است"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "ترتیب خروجی این کد چیست؟ console.log('a'); setTimeout(() => console.log('b')); Promise.resolve().then(() => console.log('c')); console.log('d');",
+                  "options": ["a b c d", "a d c b", "a d b c", "a c d b"],
+                  "a": 1,
+                  "why": "اول کد همگام (a و d)، سپس میکروتسک‌های promise (c) و در پایان ماکروتسک setTimeout (b)."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "مفهوم Event Loop در جاوااسکریپت", "q": "جاوااسکریپت event loop فارسی" },
+                  { "title": "تفاوت میکروتسک و ماکروتسک با مثال", "q": "جاوااسکریپت microtask macrotask فارسی" },
+                  { "title": "چرا setTimeout با تاخیر صفر فوری نیست", "q": "جاوااسکریپت setTimeout 0 event loop" }
+                ],
+                "en": [
+                  { "title": "What the heck is the Event Loop? (JSConf)", "q": "what the heck is the event loop philip roberts" },
+                  { "title": "Microtasks and the JavaScript Runtime", "q": "javascript microtasks queue explained" },
+                  { "title": "Async JavaScript: Stack, Heap, Queues", "q": "javascript call stack event loop visualization" },
+                  { "title": "Blocking the Main Thread and Web Workers", "q": "javascript web workers main thread" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "business",
+      "kind": "business",
+      "title": "مسیر حرفه‌ای و بیزینسی",
+      "icon": "brief",
+      "desc": "ساختن محصول واقعی مرورگر: فرم، API، ذخیره‌سازی و ابزارها",
+      "levels": [
+        {
+          "t": "مبتدی",
+          "chip": "b",
+          "lessons": [
+            {
+              "id": "js-biz-dom-project",
+              "t": "پروژهٔ اپ کارها (Todo) با DOM",
+              "sum": "ساخت اولین اپ کامل مرورگری: افزودن، لیست کردن و حذف وظایف با ساختار تمیز",
+              "m": 35,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "بهترین راه تثبیت دانش، ساخت یک محصول کوچک اما کامل است. در این درس یک اپ مدیریت وظایف می‌سازیم: فرم افزودن، لیست رندرشده و حذف هر آیتم. تمرکز اصلی روی <b>جدا کردن داده از نمایش</b> است: آرایهٔ tasks تنها منبع حقیقت است و صفحه همیشه از روی آن رندر می‌شود. این الگو در هر فریم‌ورکی هم همان است."
+                },
+                {
+                  "t": "code",
+                  "f": "app.js",
+                  "x": "// State: single source of truth\nlet tasks = [\n  { id: 1, text: 'Read the JS course', done: false }\n];\n\nconst list = document.querySelector('#list');\nconst form = document.querySelector('#add-form');\nconst input = document.querySelector('#task-input');\n\nfunction render() {\n  list.innerHTML = '';\n  for (const task of tasks) {\n    const li = document.createElement('li');\n    li.className = task.done ? 'done' : '';\n    li.innerHTML = `\n      <span>${task.text}</span>\n      <button class=\"del\" data-id=\"${task.id}\">x</button>`;\n    list.append(li);\n  }\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "رویدادها را به دو نقطه وصل می‌کنیم: رویداد submit فرم برای افزودن، و یک listener واحد روی لیست (event delegation) برای حذف. مهم این است که handlerها فقط <b>state را تغییر دهند و render را صدا بزنند</b>؛ هرگز مستقیماً DOM را ویرایش نمی‌کنیم. این انضباط بعداً نگه‌داری اپ را بسیار ساده می‌کند."
+                },
+                {
+                  "t": "code",
+                  "f": "events.js",
+                  "x": "form.addEventListener('submit', (e) => {\n  e.preventDefault();\n  const text = input.value.trim();\n  if (!text) return;\n  tasks = [...tasks, { id: Date.now(), text, done: false }];\n  input.value = '';\n  input.focus();\n  render();\n});\n\nlist.addEventListener('click', (e) => {\n  const btn = e.target.closest('.del');\n  if (!btn) return;\n  const id = Number(btn.dataset.id);\n  tasks = tasks.filter(t => t.id !== id);\n  render();\n});\n\nrender();   // first paint"
+                },
+                {
+                  "t": "tip",
+                  "x": "در این نسخه با innerHTML و متن کاربر ریسک XSS داریم؛ در درس فرم‌ها راه امن را می‌بینید. ضمناً render کامل (پاک کردن و بازسازی کل لیست) برای اپ کوچک کاملاً قابل قبول است و وقتی در درس کارایی رسیدیم، تکنیک‌های رندر جزئی را اضافه می‌کنیم.",
+                  "list": [
+                    "id ساده با Date.now() کافی است؛ crypto.randomUUID() هم گزینهٔ استاندارد است",
+                    "input.focus() بعد از افزودن، تجربهٔ کاربری را روان نگه می‌دارد"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "چرا در این معماری handlerهای رویداد مستقیماً DOM را تغییر نمی‌دهند؟",
+                  "options": [
+                    "چون DOM کند است و نباید از جاوااسکریپت به آن دست زد",
+                    "تا state تنها منبع حقیقت بماند و رندر همیشه از روی آن انجام شود",
+                    "چون مرورگر اجازه نمی‌دهد",
+                    "برای کم شدن حجم فایل JS"
+                  ],
+                  "a": 1,
+                  "why": "وقتی همهٔ تغییرها از مسیر state و رندر عبور کنند، صفحه همیشه تصویر درستی از داده است و ردیابی باگ‌ها ساده می‌شود."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "ساخت اپ لیست کارها با جاوااسکریپت خالص", "q": "ساخت اپ todo جاوااسکریپت فارسی" },
+                  { "title": "پروژه عملی DOM و رویدادها در جاوااسکریپت", "q": "پروژه جاوااسکریپت DOM رویداد فارسی" },
+                  { "title": "الگوی state و رندر در اپ‌های مرورگری", "q": "مدیریت state رندر جاوااسکریپت بدون فریمورک" }
+                ],
+                "en": [
+                  { "title": "JavaScript Crash Course For Beginners", "vid": "hdI2bqOjy3c", "channel": "Traversy Media", "dur": "1:23:43" },
+                  { "title": "Build a Todo App with Vanilla JavaScript", "q": "build todo app vanilla javascript" },
+                  { "title": "Vanilla JS Project: Task Manager from Scratch", "q": "vanilla javascript project task manager" },
+                  { "title": "Thinking in State and Render (no framework)", "q": "vanilla javascript state render pattern" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-forms",
+              "t": "فرم‌ها و اعتبارسنجی",
+              "sum": "دریافت امن ورودی کاربر، FormData، اعتبارسنجی سمت کلاینت و پیام خطای مناسب",
+              "m": 26,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "فرم نقطهٔ تماس محصول با کاربر است؛ هر خطای اینجا مستقیماً اعتماد را کم می‌کند. گردش کار استاندارد: رویداد <b>submit</b> را بگیرید، <b>preventDefault()</b> کنید تا صفحه ریلود نشود، داده را با <b>FormData</b> استخراج کنید، اعتبارسنجی کنید و در صورت خطا پیام دقیق کنار همان فیلد نشان دهید."
+                },
+                {
+                  "t": "code",
+                  "f": "form.js",
+                  "x": "const form = document.querySelector('#signup');\n\nform.addEventListener('submit', (event) => {\n  event.preventDefault();\n  const data = Object.fromEntries(new FormData(form));\n  // { name: '...', email: '...', age: '...' }\n\n  const errors = validate(data);\n  clearErrors(form);\n\n  if (Object.keys(errors).length) {\n    showErrors(form, errors);\n    return;\n  }\n  submitToServer(data);   // your fetch POST\n});\n\nfunction validate({ name, email }) {\n  const errors = {};\n  if (!name || name.trim().length < 2) {\n    errors.name = 'نام باید حداقل ۲ نویسه باشد';\n  }\n  if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email)) {\n    errors.email = 'ایمیل معتبر نیست';\n  }\n  return errors;\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "برای نمایش خطا، به هر فیلد یک عنصر پیام می‌دهید و کلاس‌های حالت را روی فیلد می‌گذارید. تجربهٔ بهتر: اعتبارسنجی «زنده» هنگام blur فیلد، نه فقط هنگام submit. ابزارهای native هم بی‌ارزش نیستند: ویژگی‌های required، type=\"email\"، minlength و pattern رایگان اعتبارسنجی می‌کنند و با API <b>checkValidity()</b> قابل ترکیب‌اند."
+                },
+                {
+                  "t": "code",
+                  "f": "errors.js",
+                  "x": "function showErrors(form, errors) {\n  for (const [field, message] of Object.entries(errors)) {\n    const input = form.querySelector(`[name=\"${field}\"]`);\n    input.classList.add('is-invalid');\n    input.setAttribute('aria-invalid', 'true');\n\n    const hint = document.createElement('p');\n    hint.className = 'field-error';\n    hint.textContent = message;      // safe rendering\n    input.after(hint);\n  }\n  form.querySelector('.is-invalid')?.focus();\n}\n\nfunction clearErrors(form) {\n  form.querySelectorAll('.field-error').forEach(e => e.remove());\n  form.querySelectorAll('.is-invalid')\n    .forEach(i => i.classList.remove('is-invalid'));\n}"
+                },
+                {
+                  "t": "tip",
+                  "x": "اعتبارسنجی سمت کلاینت فقط برای تجربهٔ کاربر است، نه امنیت؛ کاربر می‌تواند درخواست را مستقیم بفرستد. سرور باید همهٔ چک‌ها را دوباره انجام دهد و پاسخ 422 با فهرست خطاها را در فرم رندر کنید (در درس API می‌بینیم).",
+                  "list": [
+                    "پیام خطا را کنار خود فیلد نشان دهید، نه فقط یک alert بالای فرم",
+                    "برای اعداد و تاریخ، ورودی را بعد از تبدیل با Number/Date اعتبارسنجی کنید چون FormData همه را رشته می‌دهد"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "چرا به جای رویداد click دکمه، رویداد submit فرم را می‌گیریم؟",
+                  "options": [
+                    "چون click در همهٔ مرورگرها کار نمی‌کند",
+                    "چون فرم با Enter هم ارسال می‌شود و submit همهٔ مسیرها را پوشش می‌دهد",
+                    "چون submit سریع‌تر اجرا می‌شود",
+                    "چون click فقط برای لینک‌هاست"
+                  ],
+                  "a": 1,
+                  "why": "کاربر می‌تواند با کلید Enter یا دکمهٔ دیگری فرم را بفرستد؛ گرفتن رویداد submit تضمین می‌کند همهٔ مسیرهای ارسال مدیریت شوند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "کار با فرم‌ها در جاوااسکریپت و FormData", "q": "جاوااسکریپت فرم FormData فارسی" },
+                  { "title": "اعتبارسنجی فرم با جاوااسکریپت خالص", "q": "اعتبارسنجی فرم جاوااسکریپت فارسی" },
+                  { "title": "نمایش خطای فیلدها و تجربهٔ کاربری فرم", "q": "جاوااسکریپت فرم نمایش خطا فارسی" }
+                ],
+                "en": [
+                  { "title": "Form Validation with Vanilla JavaScript", "q": "javascript form validation tutorial" },
+                  { "title": "FormData and Object.fromEntries Explained", "q": "javascript formdata object fromentries" },
+                  { "title": "Native HTML Validation APIs", "q": "javascript checkvalidity constraint validation" },
+                  { "title": "Accessible Form Error Messages", "q": "accessible form error messages aria" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-storage",
+              "t": "localStorage و ماندگاری داده",
+              "sum": "ذخیره‌سازی سمت کلاینت با localStorage، سریالایز JSON و الگوی لایهٔ storage",
+              "m": 22,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "<b>localStorage</b> فضای ذخیرهٔ دائمی مرورگر است (حدود ۵ مگابایت برای هر دامنه) و پس از بستن مرورگر هم باقی می‌ماند. API آن فقط با رشته کار می‌کند: setItem، getItem، removeItem و clear. پس برای آبجکت‌ها باید اول JSON.stringify و هنگام خواندن JSON.parse کنید — و همیشه احتمال دادهٔ خراب را بپذیرید."
+                },
+                {
+                  "t": "code",
+                  "f": "storage.js",
+                  "x": "// Strings only\nlocalStorage.setItem('theme', 'dark');\nconsole.log(localStorage.getItem('theme'));   // 'dark'\nlocalStorage.removeItem('theme');\n\n// Objects need JSON\nconst tasks = [{ id: 1, text: 'Ship it', done: false }];\nlocalStorage.setItem('tasks', JSON.stringify(tasks));\n\n// Reading safely: corrupted data must not crash the app\nfunction loadTasks() {\n  try {\n    const raw = localStorage.getItem('tasks');\n    if (!raw) return [];                  // first visit\n    const parsed = JSON.parse(raw);\n    return Array.isArray(parsed) ? parsed : [];\n  } catch {\n    console.warn('corrupted storage, resetting');\n    localStorage.removeItem('tasks');\n    return [];\n  }\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "در محصول واقعی بهتر است دسترسی به localStorage را پشت یک <b>لایهٔ کوچک</b> پنهان کنید: توابع saveTasks و loadTasks با کلید و اعتبارسنجی نسخهٔ داده. این کار سه سود دارد: مهاجرت آسان به IndexedDB یا API در آینده، یک نقطه برای لاگ و خطایابی، و پیشگیری از پخش شدن کلیدهای خام در کل کد."
+                },
+                {
+                  "t": "code",
+                  "f": "persist.js",
+                  "x": "const KEY = 'tasks:v2';\n\nfunction saveTasks(tasks) {\n  try {\n    localStorage.setItem(KEY, JSON.stringify({\n      savedAt: Date.now(),\n      tasks\n    }));\n  } catch (err) {\n    // Quota exceeded (private mode, full storage)\n    console.warn('could not persist', err);\n  }\n}\n\n// Keep state and storage in sync\nfunction updateTasks(mutator) {\n  tasks = mutator(tasks);\n  render();\n  saveTasks(tasks);\n}\n\nupdateTasks(list => [...list, newTask]);"
+                },
+                {
+                  "t": "tip",
+                  "x": "localStorage همگام (sync) است و روی نخ اصلی اجرا می‌شود؛ داده‌های بزرگ در آن ننویسید. برای داده‌های حجم‌دار یا جست‌وجوپذیر، <b>IndexedDB</b> انتخاب درست است. هرگز توکن یا اطلاعات حساس را در localStorage نگذارید؛ اسکریپت‌های صفحه به آن دسترسی دارند.",
+                  "list": [
+                    "رویداد storage در تب‌های دیگر صدا زده می‌شود؛ ابزار خوبی برای همگام‌سازی بین تب‌هاست",
+                    "sessionStorage همان API است ولی با بسته شدن تب پاک می‌شود"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "localStorage.setItem('cfg', {lang:'fa'}) چه چیزی ذخیره می‌کند؟",
+                  "options": ["آبجکت را کامل ذخیره می‌کند", "رشتهٔ \"[object Object]\" را ذخیره می‌کند", "خطا می‌دهد", "خودکار JSON می‌سازد"],
+                  "a": 1,
+                  "why": "localStorage فقط رشته قبول می‌کند و مقدار به‌صورت ضمنی با toString به \"[object Object]\" تبدیل می‌شود؛ باید JSON.stringify کنید."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "ذخیره‌سازی داده با localStorage در جاوااسکریپت", "q": "جاوااسکریپت localStorage فارسی" },
+                  { "title": "ذخیره و بازیابی آبجکت با JSON در localStorage", "q": "localStorage JSON stringify parse فارسی" },
+                  { "title": "ساخت لایهٔ ذخیره‌سازی امن در پروژه", "q": "localStorage پروژه مدیریت داده فارسی" }
+                ],
+                "en": [
+                  { "title": "localStorage Explained with Real Examples", "q": "localstorage javascript tutorial" },
+                  { "title": "localStorage vs sessionStorage vs Cookies", "q": "localstorage vs sessionstorage vs cookies" },
+                  { "title": "Safe JSON Persistence Patterns", "q": "javascript localstorage json persistence pattern" },
+                  { "title": "When to Use IndexedDB Instead", "q": "indexeddb vs localstorage when to use" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-devtools",
+              "t": "دیباگ با DevTools",
+              "sum": "کنسول حرفه‌ای، بریک‌پوینت و stepper، تب شبکه و پیدا کردن ریشهٔ باگ سریع‌تر",
+              "m": 24,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "تفاوت یک توسعه‌دهندهٔ حرفه‌ای با تازه‌کار، سرعت پیدا کردن ریشهٔ باگ است؛ و این سرعت از DevTools می‌آید. فراتر از console.log: ابزار <b>Sources</b> با <b>بریک‌پوینت</b> اجازه می‌دهد اجرا دقیقاً در خط مشکوک متوقف شود و مقادیر همهٔ متغیرها را همان لحظه ببینید. با Step over و Step into مسیر اجرا را قدم‌به‌قدم دنبال می‌کنید."
+                },
+                {
+                  "t": "code",
+                  "f": "console.js",
+                  "x": "// Richer logging\nconst cart = [{ price: 100 }, { price: 250 }];\nconsole.table(cart);                  // tabular view\nconsole.group('checkout');\nconsole.log('items', cart.length);\nconsole.warn('no discount applied');\nconsole.groupEnd();\n\n// Assertion: logs only when false\nconsole.assert(cart.length > 0, 'cart is empty!');\n\n// Measure a slow function\nconsole.time('render');\nrenderList(items);\nconsole.timeEnd('render');\n\n// debugger statement = breakpoint in code\nfunction tricky(data) {\n  debugger;   // pauses DevTools here\n  return data.map(x => x.value);\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "برخی ابزارهای کلیدی که روزانه به کار می‌آیند: در تب <b>Network</b> درخواست‌های fetch را با هدر و پاسخ می‌بینید و سریع می‌فهمید مشکل از سرور است یا کد شما؛ در تب <b>Console</b> می‌توانید کد را زنده در صفحه اجرا کنید و state را دستکاری کنید؛ در تب <b>Elements</b> تغییرات DOM و کلاس‌ها را مشاهده و ویرایش می‌کنید."
+                },
+                {
+                  "t": "tip",
+                  "x": "سه تکنیک پیشرفته که وقت زیادی نجات می‌دهند: بریک‌پوینت شرطی (فقط وقتی id === 42 توقف کن)، Logpoint (لاگ بدون تغییر کد) و blackboxing فایل‌های کتابخانه تا استک‌تریس فقط کد خودتان را نشان دهد.",
+                  "list": [
+                    "با debugger; می‌توانید بریک‌پوینت موقت داخل کد بگذارید",
+                    "ویرایش زنده (Live Edit) در تب Sources اجازهٔ تست سریع فیکس را می‌دهد"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "درخواست fetch خطای 500 می‌دهد. سریع‌ترین راه دیدن پاسخ کامل سرور کدام است؟",
+                  "options": ["جست‌وجو در کد جاوااسکریپت", "تب Network در DevTools", "تب Elements", "console.log کردن response"],
+                  "a": 1,
+                  "why": "تب Network بدنه، هدر و وضعیت دقیق هر درخواست/پاسخ را نشان می‌دهد؛ سریع‌ترین راه تشخیص خطاهای سمت سرور."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "دیباگ جاوااسکریپت با DevTools مرورگر", "q": "دیباگ جاوااسکریپت devtools فارسی" },
+                  { "title": "بریک‌پوینت و دیباگ قدم‌به‌قدم در مرورگر", "q": "بریک پوینت دیباگ مرورگر فارسی" },
+                  { "title": "تب Network و بررسی درخواست‌های API", "q": "تب network بررسی درخواست فارسی" }
+                ],
+                "en": [
+                  { "title": "Debugging JavaScript Like a Pro", "q": "javascript debugging devtools tutorial" },
+                  { "title": "Chrome DevTools Deep Dive", "q": "chrome devtools full tutorial" },
+                  { "title": "Breakpoints, Watch and Conditional Pauses", "q": "chrome devtools breakpoints conditional" },
+                  { "title": "Debugging Fetch Requests in the Network Tab", "q": "devtools network tab fetch debugging" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "متوسط",
+          "chip": "m",
+          "lessons": [
+            {
+              "id": "js-biz-rest-api",
+              "t": "REST API و JSON در محصول",
+              "sum": "ساخت کلاینت API تمیز با مدیریت خطا، لودینگ، retry و پارامترهای کوئری",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "تقریباً هر محصول واقعی به یک بک‌اند وصل است. الگوی درست، ساخت یک <b>لایهٔ API</b> مجزا از رابط کاربری است: یک ماژول که همهٔ درخواست‌ها را انجام می‌دهد، خطاها را نرمال می‌کند و دادهٔ آمادهٔ رندر برمی‌گرداند. با این کار کامپوننت‌ها فقط با توابع معناداری مثل api.listProducts() کار می‌کنند، نه با جزئیات fetch."
+                },
+                {
+                  "t": "code",
+                  "f": "api.js",
+                  "x": "class ApiError extends Error {\n  constructor(status, payload) {\n    super(`HTTP ${status}`);\n    this.status = status;\n    this.payload = payload;   // server error details\n  }\n}\n\nasync function request(path, { method = 'GET', body, signal } = {}) {\n  const res = await fetch(path, {\n    method,\n    signal,\n    headers: body ? { 'Content-Type': 'application/json' } : {},\n    body: body ? JSON.stringify(body) : undefined\n  });\n\n  if (!res.ok) {\n    const payload = await res.json().catch(() => null);\n    throw new ApiError(res.status, payload);\n  }\n  return res.status === 204 ? null : res.json();\n}\n\nexport const api = {\n  listProducts: (page = 1) =>\n    request(`/api/products?page=${page}&limit=20`),\n  createProduct: (data) =>\n    request('/api/products', { method: 'POST', body: data })\n};"
+                },
+                {
+                  "t": "p",
+                  "x": "در سمت UI هر درخواست سه حالت دارد که هر سه باید رندر شوند: <b>loading</b> (اسپینر یا اسکلت)، <b>success</b> (داده) و <b>error</b> (پیام قابل فهم + دکمهٔ تلاش دوباره). جا انداختن یکی از این سه حالت، رایج‌ترین علت «صفحهٔ سفید» یا تجربهٔ گیج‌کننده است."
+                },
+                {
+                  "t": "code",
+                  "f": "products.js",
+                  "x": "async function loadProducts() {\n  state.loading = true;\n  render();                      // show skeleton\n  try {\n    state.products = await api.listProducts(state.page);\n    state.error = null;\n  } catch (err) {\n    state.error = err.status === 500\n      ? 'خطای سرور؛ بعداً تلاش کنید'\n      : 'اتصال برقرار نشد';\n  } finally {\n    state.loading = false;\n    render();\n  }\n}\n\n// Retry with backoff for flaky networks\nasync function withRetry(fn, attempts = 3) {\n  for (let i = 0; i < attempts; i++) {\n    try { return await fn(); }\n    catch (err) {\n      if (i === attempts - 1) throw err;\n      await new Promise(r => setTimeout(r, 2 ** i * 500));\n    }\n  }\n}"
+                },
+                {
+                  "t": "tip",
+                  "x": "درخواست‌های جست‌وجو را debounce کنید و پاسخ‌های قدیمی را با AbortController لغو نمایید؛ در غیر این صورت نتیجهٔ جست‌وجوی «a» ممکن است روی «ab» بنشیند (race condition کلاسیک UI).",
+                  "list": [
+                    "کوئری‌های تکراری را با یک Map ساده در حافظه کش کنید",
+                    "همیشه پارامترهای کوئری را encodeURIComponent کنید"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "چرا لایهٔ API جدا از کد UI نگه می‌داریم؟",
+                  "options": [
+                    "برای اینکه فایل JS کوچک‌تر شود",
+                    "تا جزئیات شبکه در یک نقطه باشد، خطاها نرمال شوند و UI فقط با توابع معنادار کار کند",
+                    "چون fetch فقط در ماژول کار می‌کند",
+                    "چون مرورگر لایه‌بندی را اجباری می‌کند"
+                  ],
+                  "a": 1,
+                  "why": "لایهٔ API نقطهٔ واحدی برای هدرها، خطاها، کش و تست می‌سازد؛ تغییر بک‌اند یا افزودن توکن فقط یک فایل را لمس می‌کند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "ساخت لایهٔ API در پروژهٔ جاوااسکریپت", "q": "ساخت لایه api جاوااسکریپت fetch فارسی" },
+                  { "title": "مدیریت حالت‌های لودینگ و خطا در فرانت‌اند", "q": "مدیریت لودینگ خطا fetch پروژه فارسی" },
+                  { "title": "الگوی retry و debounce در درخواست‌ها", "q": "retry debounce fetch جاوااسکریپت" }
+                ],
+                "en": [
+                  { "title": "Building a Clean API Client in Vanilla JS", "q": "javascript api client class fetch pattern" },
+                  { "title": "REST API Crash Course for Frontend Developers", "q": "rest api frontend tutorial" },
+                  { "title": "Loading, Error and Success States in UI", "q": "loading error success states frontend" },
+                  { "title": "Fetch Retry with Exponential Backoff", "q": "javascript fetch retry backoff" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-state",
+              "t": "مدیریت state در اپ مرورگری",
+              "sum": "آبجکت state مرکزی، رندر بر اساس state، به‌روزرسانی یک‌طرفه و الگوی pub/sub",
+              "m": 28,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "وقتی اپ بزرگ‌تر می‌شود، «کجا چه داده‌ای است» جدی‌ترین سؤال می‌شود. راه‌حل بدون فریم‌ورک: یک آبجکت <b>state</b> مرکزی که تنها منبع حقیقت است، توابعی که فقط state را تغییر می‌دهند (actions)، و رندری که همیشه از روی state اجرا می‌شود. تغییرات یک‌طرفه‌اند: UI هرگز مستقیم تغییر نمی‌کند، فقط action اجرا می‌شود."
+                },
+                {
+                  "t": "code",
+                  "f": "state.js",
+                  "x": "const state = {\n  tasks: [],\n  filter: 'all',       // all | active | done\n  loading: false\n};\n\n// Actions: the ONLY way to change state\nfunction addTask(text) {\n  state.tasks = [...state.tasks, { id: Date.now(), text, done: false }];\n  commit();\n}\n\nfunction toggleTask(id) {\n  state.tasks = state.tasks.map(t =>\n    t.id === id ? { ...t, done: !t.done } : t\n  );\n  commit();\n}\n\nfunction commit() {\n  saveTasks(state.tasks);   // persistence\n  render();                 // UI follows state\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "رندر مجدد کل صفحه برای اپ کوچک کافی است، اما در اپ بزرگ می‌خواهید فقط بخش تغییرکرده به‌روز شود. الگوی <b>publish/subscribe</b> این را ممکن می‌کند: بخش‌های صفحه در رویدادهای state مشترک می‌شوند و هر تغییر، فقط مشترکان مرتبط را رندر می‌کند. این همان ایدهٔ هستهٔ Redux و سایر کتابخانه‌های state است، با سی خط کد."
+                },
+                {
+                  "t": "code",
+                  "f": "store.js",
+                  "x": "function createStore(initial) {\n  let current = initial;\n  const listeners = new Map();\n\n  return {\n    get: () => current,\n    set(next) {\n      const prev = current;\n      current = { ...current, ...next };\n      for (const [key, fns] of listeners) {\n        if (prev[key] !== current[key]) {\n          fns.forEach(fn => fn(current[key]));\n        }\n      }\n    },\n    subscribe(key, fn) {\n      listeners.set(key, (listeners.get(key) ?? new Set()).add(fn));\n      fn(current[key]);          // initial render\n    }\n  };\n}\n\nconst store = createStore({ tasks: [], filter: 'all' });\nstore.subscribe('tasks', renderTaskList);\nstore.subscribe('filter', renderTaskList);"
+                },
+                {
+                  "t": "tip",
+                  "x": "state را به دو دسته تقسیم کنید: <b>سروری</b> (داده‌ای که از API می‌آید و کش می‌شود) و <b>کلاینتی</b> (فیلتر، فرم، مودال باز). قاطی کردن این دو، رایج‌ترین منبع پیچیدگی بی‌دلیل در اپ‌های متوسط است.",
+                  "list": [
+                    "state مشترک بین تب‌ها را با رویداد storage همگام کنید",
+                    "از mutation مستقیم بپرهیزید؛ spread و map دوستان شما هستند"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "در الگوی state و رندر، جای درست فراخوانی saveTasks کجاست؟",
+                  "options": [
+                    "داخل هر handler رویداد، جدا از تغییر state",
+                    "در یک تابع commit واحد که بعد از هر تغییر state اجرا می‌شود",
+                    "داخل render",
+                    "فقط هنگام بستن مرورگر"
+                  ],
+                  "a": 1,
+                  "why": "تمرکز عوارض (state، ذخیره‌سازی، رندر) در یک commit باعث می‌شود هیچ مسیری فراموش نشود و ترتیب عملیات همیشه یکسان باشد."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "مدیریت state بدون فریم‌ورک در جاوااسکریپت", "q": "مدیریت state جاوااسکریپت بدون فریمورک فارسی" },
+                  { "title": "الگوی یک‌طرفه data flow در اپ مرورگری", "q": "data flow یک طرفه جاوااسکریپت فارسی" },
+                  { "title": "پیاده‌سازی store با pub sub در جاوااسکریپت", "q": "پیاده‌سازی store pub sub جاوااسکریپت" }
+                ],
+                "en": [
+                  { "title": "State Management with Vanilla JavaScript", "q": "vanilla javascript state management pattern" },
+                  { "title": "Build a Tiny Store (Redux idea in 30 lines)", "q": "build tiny store pubsub javascript" },
+                  { "title": "Unidirectional Data Flow Explained", "q": "unidirectional data flow explained" },
+                  { "title": "Server State vs UI State", "q": "server state vs ui state frontend" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-components",
+              "t": "کامپوننت‌های بدون فریم‌ورک",
+              "sum": "تفکر کامپوننتی با توابع رندر، template literals امن و Web Components استاندارد",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "کامپوننت یعنی قطعه‌ای از رابط کاربری که داده می‌گیرد و نمایش می‌سازد — بدون نیاز به فریم‌ورک. ساده‌ترین شکل، <b>تابع رندر خالص</b> است: props می‌گیرد، رشتهٔ HTML برمی‌گرداند، و با escape درست امن می‌ماند. ترکیب این توابع، همان چیزی است که در React هم انجام می‌شود."
+                },
+                {
+                  "t": "code",
+                  "f": "components.js",
+                  "x": "// Escape user data before injecting into HTML\nconst esc = (s = '') => String(s)\n  .replaceAll('&', '&amp;')\n  .replaceAll('<', '&lt;')\n  .replaceAll('\"', '&quot;');\n\n// Pure components: props in, HTML string out\nconst TaskItem = (task) => `\n  <li class=\"task ${task.done ? 'done' : ''}\" data-id=\"${task.id}\">\n    <span>${esc(task.text)}</span>\n    <button class=\"del\" aria-label=\"delete\">x</button>\n  </li>`;\n\nconst TaskList = (tasks) => `\n  <ul id=\"list\">${tasks.map(TaskItem).join('')}</ul>`;\n\n// Mounting\ndocument.querySelector('#app').innerHTML = TaskList(state.tasks);"
+                },
+                {
+                  "t": "p",
+                  "x": "استاندارد پلتفرم برای کامپوننت واقعی، <b>Web Components</b> است: عنصر سفارشی با customElements.define که behavior و استایل خودش را دارد و در هر فریم‌ورکی (یا بدون هیچ فریم‌ورکی) قابل استفاده است. سایهٔ DOM (shadow DOM) استایل داخلی را از صفحه ایزوله می‌کند."
+                },
+                {
+                  "t": "code",
+                  "f": "counter-card.js",
+                  "x": "class CounterCard extends HTMLElement {\n  #count = 0;\n\n  connectedCallback() {\n    this.attachShadow({ mode: 'open' });\n    this.#render();\n  }\n\n  #render() {\n    this.shadowRoot.innerHTML = `\n      <style>\n        button { font: inherit; padding: 4px 12px; }\n        output { margin-inline: 8px; }\n      </style>\n      <button>+</button>\n      <output>${this.#count}</output>`;\n\n    this.shadowRoot.querySelector('button')\n      .addEventListener('click', () => {\n        this.#count++;\n        this.#render();\n        this.dispatchEvent(\n          new CustomEvent('change', { detail: { value: this.#count } })\n        );\n      });\n  }\n}\n\ncustomElements.define('counter-card', CounterCard);"
+                },
+                {
+                  "t": "tip",
+                  "x": "قاعدهٔ تقسیم: هر چیزی که در UI دوباره دیده می‌شود یا دادهٔ مستقل دارد، کاندیدای کامپوننت است. نام‌گذاری کامپوننت‌ها به‌صورت اسم (TaskList, PriceTag) و توابع کمکی به‌صورت فعل (formatDate) خوانایی را نگه می‌دارد.",
+                  "list": [
+                    "event delegation در سطح ریشهٔ اپ، هزینهٔ listenerهای کامپوننت‌ها را حذف می‌کند",
+                    "template element در HTML جای مناسب HTMLهای تکرارشوندهٔ ثابت است"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "چرا در کامپوننت‌های رشته‌ای از تابع esc استفاده می‌کنیم؟",
+                  "options": [
+                    "برای زیبایی خروجی HTML",
+                    "برای خنثی کردن کاراکترهای خطرناک ورودی کاربر و جلوگیری از XSS",
+                    "برای فشرده‌سازی کد",
+                    "چون innerHTML رشته قبول نمی‌کند"
+                  ],
+                  "a": 1,
+                  "why": "هر داده‌ای که به innerHTML می‌رود باید escape شود تا تگ‌های تزریقی مثل <script> اجرا نشوند؛ این خط دفاعی اصلی در رندر رشته‌ای است."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "کامپوننت‌نویسی با جاوااسکریپت خالص", "q": "کامپوننت جاوااسکریپت خالص بدون فریمورک" },
+                  { "title": "Web Components و customElements در عمل", "q": "web components customElements فارسی" },
+                  { "title": "رندر امن HTML و جلوگیری از XSS", "q": "جاوااسکریپت XSS جلوگیری escape فارسی" }
+                ],
+                "en": [
+                  { "title": "Web Components Full Tutorial", "q": "web components custom elements tutorial" },
+                  { "title": "Building UI Without a Framework", "q": "build ui without framework vanilla js components" },
+                  { "title": "Shadow DOM Explained", "q": "shadow dom tutorial explained" },
+                  { "title": "Preventing XSS in JavaScript Apps", "q": "prevent xss javascript escape html" }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "t": "پیشرفته",
+          "chip": "a",
+          "lessons": [
+            {
+              "id": "js-biz-npm-tooling",
+              "t": "npm، Vite و گردش کار مدرن",
+              "sum": "مدیریت پکیج با npm، فایل package.json، اسکریپت‌ها و محیط توسعه با Vite",
+              "m": 26,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "<b>npm</b> مدیر پکیج اکوسیستم جاوااسکریپت است: هزاران کتابخانهٔ آماده و ابزارهای ساخت. با npm init پروژه شروع می‌شود، فایل <b>package.json</b> فهرست وابستگی‌ها و اسکریپت‌هاست و پوشهٔ node_modules بسته‌های نصب‌شده را نگه می‌دارد (که هرگز در گیت کامیت نمی‌شود؛ package-lock.json جای آن را دارد)."
+                },
+                {
+                  "t": "code",
+                  "f": "package.json",
+                  "x": "{\n  \"name\": \"task-app\",\n  \"type\": \"module\",\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"vite build\",\n    \"preview\": \"vite preview\"\n  },\n  \"dependencies\": {\n    \"chart.js\": \"^4.4.0\"\n  },\n  \"devDependencies\": {\n    \"vite\": \"^5.2.0\"\n  }\n}\n\n# commands\nnpm install            # install from lockfile\nnpm install dayjs      # add a runtime dependency\nnpm install -D eslint  # add a dev tool"
+                },
+                {
+                  "t": "p",
+                  "x": "<b>Vite</b> استاندارد فعلی ابزار ساخت فرانت‌اند است: در توسعه با ESM بومی مرورگر کار می‌کند و شروع و Hot Reload تقریباً آنی دارد؛ در build نهایی کد را باندل، مینیفای و بر اساس importهای داینامیک تقسیم می‌کند. در پروژهٔ ما فقط کافی است importها را در main.js نگه دارید و Vite گراف وابستگی را خودش می‌سازد."
+                },
+                {
+                  "t": "code",
+                  "f": "src/main.js",
+                  "x": "import './style.css';\nimport { store } from './store.js';\nimport { api } from './api.js';\n\n// Lazy load the heavy chart module only when needed\nasync function showStats() {\n  const { renderChart } = await import('./chart.js');\n  renderChart(await api.listProducts());\n}\n\nstore.subscribe('tasks', renderTaskList);\nloadProducts();"
+                },
+                {
+                  "t": "tip",
+                  "x": "برای انتخاب پکیج مثل یک حرفه‌ای فکر کنید: حجم نصب‌شده و باندل، میزان نگهداری، وابستگی‌های خودش و جایگزین native زبان. روزبه‌روز بیشتری از کارهای کتابخانه‌ای با APIهای استاندارد مرورگر انجام می‌شود: fetch به‌جای axios، روز JS خالص به‌جای moment، Intl به‌جای پلاگین‌های فرمت.",
+                  "list": [
+                    "npm ci در CI/CD از lockfile دقیق نصب می‌کند",
+                    "npx برای اجرای یک‌بارهٔ ابزار بدون نصب دائمی است"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "تفاوت dependencies و devDependencies در package.json چیست؟",
+                  "options": [
+                    "اولی برای Node است و دومی برای مرورگر",
+                    "اولی در کد نهایی محصول لازم است و دومی فقط برای ابزارهای توسعه مثل لینتر و باندلر",
+                    "تفاوت فقط در حجم دانلود است",
+                    "هیچ تفاوتی ندارند"
+                  ],
+                  "a": 1,
+                  "why": "devDependencies فقط در محیط توسعه به کار می‌آیند (vite، eslint، تست) و در باندل نهایی محصول حضور ندارند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "npm و مدیریت پکیج در جاوااسکریپت", "q": "npm پکیج جاوااسکریپت فارسی" },
+                  { "title": "راه‌اندازی پروژه با Vite از صفر", "q": "vite پروژه جاوااسکریپت فارسی" },
+                  { "title": "باندلینگ و ساخت نسخهٔ نهایی محصول", "q": "vite build باندل جاوااسکریپت فارسی" }
+                ],
+                "en": [
+                  { "title": "npm Tutorial for Beginners", "q": "npm tutorial beginners package.json" },
+                  { "title": "Vite in 100 Seconds and Beyond", "q": "vite tutorial getting started" },
+                  { "title": "Modern JavaScript Tooling Explained", "q": "modern javascript build tools bundlers" },
+                  { "title": "Code Splitting with Dynamic Imports in Vite", "q": "vite code splitting dynamic import" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-auth",
+              "t": "احراز هویت و توکن در کلاینت",
+              "sum": "لاگین با API، نگهداری امن‌تر توکن، هدر Authorization و خروج و انقضای نشست",
+              "m": 28,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "محصول واقعی باید بداند کاربر کیست. جریان رایج <b>token-based</b> چنین است: فرم لاگین به سرور داده می‌فرستد، سرور در صورت درستی، توکن (معمولاً JWT) برمی‌گرداند؛ کلاینت آن را نگه می‌دارد و در همهٔ درخواست‌های بعدی با هدر <b>Authorization: Bearer</b> می‌فرستد. سرور توکن را امضا کرده و بدون ذخیرهٔ نشست اعتبارسنجی می‌کند."
+                },
+                {
+                  "t": "code",
+                  "f": "auth.js",
+                  "x": "const TOKEN_KEY = 'auth:token';\n\nexport function getToken() {\n  return sessionStorage.getItem(TOKEN_KEY);\n}\n\nexport async function login(email, password) {\n  const res = await fetch('/api/auth/login', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ email, password })\n  });\n  if (!res.ok) {\n    throw new Error(res.status === 401\n      ? 'ایمیل یا رمز اشتباه است'\n      : 'ورود ناموفق بود');\n  }\n  const { token, user } = await res.json();\n  sessionStorage.setItem(TOKEN_KEY, token);\n  return user;\n}\n\nexport function logout() {\n  sessionStorage.removeItem(TOKEN_KEY);\n  location.assign('/login');\n}"
+                },
+                {
+                  "t": "p",
+                  "x": "لایهٔ API حالا باید توکن را به درخواست‌ها اضافه کند و پاسخ 401 را به‌صورت مرکزی مدیریت کند: یعنی «نشست تمام شده» و هدایت به صفحهٔ لاگین. این تمرکز دقیقاً همان دلیلی است که لایهٔ API جدا ساختیم. برای محافظت از مسیرها، یک گارد ساده قبل از رندر بررسی می‌کند که توکن معتبر وجود دارد یا نه."
+                },
+                {
+                  "t": "code",
+                  "f": "api-auth.js",
+                  "x": "async function request(path, options = {}) {\n  const token = getToken();\n  const res = await fetch(path, {\n    ...options,\n    headers: {\n      ...(options.headers ?? {}),\n      ...(token ? { Authorization: `Bearer ${token}` } : {})\n    }\n  });\n\n  if (res.status === 401) {\n    logout();                    // session expired\n    throw new Error('unauthorized');\n  }\n  if (!res.ok) throw new ApiError(res.status);\n  return res.status === 204 ? null : res.json();\n}\n\n// Route guard\nexport function requireAuth(renderPage) {\n  if (!getToken()) return renderLogin();\n  renderPage();\n}"
+                },
+                {
+                  "t": "tip",
+                  "x": "ذخیرهٔ توکن در localStorage راحت اما در برابر XSS آسیب‌پذیر است؛ گزینهٔ امن‌تر مرورگرها، کوکی <b>httpOnly</b> سمت سرور است که اسکریپت به آن دسترسی ندارد. اگر مجبورید در کلاینت نگه دارید، sessionStorage عمر کوتاه‌تری دارد و ریسک را کم می‌کند. هرگز منطق مجوز را فقط در فرانت ننویسید؛ سرور باید هر درخواست را خودش اعتبارسنجی کند.",
+                  "list": [
+                    "توکن منقضی (refresh) را با یک تلاش خودکار پیش از هدایت به لاگین به‌روزرسانی کنید",
+                    "payload توکن JWT فقط encode شده است نه رمزنگاری‌شده؛ چیزی محرمانه در آن نگذارید"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "پاسخ 401 از API به همراه توکن ذخیره‌شده چه معنایی دارد و واکنش درست چیست؟",
+                  "options": [
+                    "خطای سرور؛ چند لحظه صبر و تلاش دوباره",
+                    "توکن نامعتبر یا منقضی است؛ پاک کردن نشست و هدایت به لاگین",
+                    "فقط پیام خطا نشان دهید و ادامه دهید",
+                    "دوباره لاگین بدون پاک کردن توکن"
+                  ],
+                  "a": 1,
+                  "why": "401 یعنی اعتبارنامه معتبر نیست؛ واکنش استاندارد، خروج تمیز و هدایت کاربر به فرم لاگین است."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "لاگین و احراز هویت با توکن در جاوااسکریپت", "q": "احراز هویت توکن جاوااسکریپت فارسی" },
+                  { "title": "JWT چیست و چگونه کار می‌کند", "q": "JWT توکن چیست فارسی" },
+                  { "title": "مدیریت نشست و خروج کاربر در فرانت‌اند", "q": "مدیریت session خروج کاربر فرانت‌اند" }
+                ],
+                "en": [
+                  { "title": "JWT Authentication Explained", "q": "jwt authentication explained frontend" },
+                  { "title": "Frontend Auth Flow from Scratch", "q": "javascript frontend authentication flow" },
+                  { "title": "localStorage vs httpOnly Cookies for Tokens", "q": "localstorage vs httponly cookie jwt" },
+                  { "title": "Handling 401 and Refresh Tokens", "q": "handle 401 refresh token javascript" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-performance",
+              "t": "کارایی و بهینه‌سازی رندر",
+              "sum": "کاهش هزینهٔ DOM، DocumentFragment، debounce و throttle، اندازه‌گیری با Performance",
+              "m": 30,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "قانون اول بهینه‌سازی: <b>اندازه بگیرید</b>. APIهای performance.now() و پنل Performance در DevTools نشان می‌دهند وقت کجا می‌رود. در رابط‌های کاربری، گلوگاه تقریباً همیشه DOM است: هر تغییر ظاهری عناصر می‌تواند چیدمان مجدد (reflow) و رنگ‌آمیزی (repaint) تریگر کند؛ پس هدف، کم کردن تعداد و هزینهٔ تغییرهاست."
+                },
+                {
+                  "t": "code",
+                  "f": "perf-dom.js",
+                  "x": "// Bad: 1000 layout invalidations\nfor (const item of items) {\n  list.append(renderItem(item));\n}\n\n// Good: one commit with a fragment\nconst frag = document.createDocumentFragment();\nfor (const item of items) {\n  frag.append(renderItem(item));\n}\nlist.replaceChildren(frag);\n\n// Reading layout in a loop forces reflow each time\n// Bad:  if (el.offsetHeight > 100) { ... } per item\n\n// Prefer class toggles over inline style writes\nrow.classList.toggle('selected', isSelected);\n\n// measure once\nconst t0 = performance.now();\nrenderAll(items);\nconsole.log('render ms:', performance.now() - t0);"
+                },
+                {
+                  "t": "p",
+                  "x": "برای رویدادهای پرتکرار (scroll، resize، keydown در جست‌وجو) دو ابزار دارید: <b>debounce</b> اجرای تابع را تا سکوت کاربر عقب می‌اندازد (مناسب جست‌وجو) و <b>throttle</b> اجرا را به حداکثر یک بار در بازهٔ زمانی محدود می‌کند (مناسب اسکرول). هر دو چند خط کدند و تأثیرشان روی روانی رابط چشمگیر است."
+                },
+                {
+                  "t": "code",
+                  "f": "perf-events.js",
+                  "x": "function debounce(fn, delay = 300) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n\nfunction throttle(fn, interval = 100) {\n  let last = 0;\n  return (...args) => {\n    const now = Date.now();\n    if (now - last >= interval) {\n      last = now;\n      fn(...args);\n    }\n  };\n}\n\nsearchInput.addEventListener('input',\n  debounce(e => search(e.target.value)));\n\nwindow.addEventListener('scroll',\n  throttle(updateHeader, 100), { passive: true });"
+                },
+                {
+                  "t": "tip",
+                  "x": "برای لیست‌های بسیار بلند (صدها ردیف)، همه را یک‌جا رندر نکنید: فقط صفحهٔ قابل مشاهده را رندر کنید (virtual list) یا ابتدا تعداد محدودی نشان دهید و با IntersectionObserver بقیه را در لحظهٔ نزدیک شدن به انتها بارگذاری کنید (infinite scroll).",
+                  "list": [
+                    "استایل‌خوانی و استایل‌نویسی را در یک تیک قاطی نکنید (layout thrashing)",
+                    "انیمیشن‌ها را با transform و opacity بسازید که ارزان‌تر از top/left هستند"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "برای جست‌وجوی زنده هنگام تایپ کاربر، debounce مناسب‌تر از throttle است چون:",
+                  "options": [
+                    "کد کوتاه‌تری دارد",
+                    "فقط بعد از مکث کاربر یک درخواست می‌فرستد، نه در هر بازهٔ زمانی",
+                    "همیشه سریع‌تر اجرا می‌شود",
+                    "حافظهٔ کمتری مصرف می‌کند"
+                  ],
+                  "a": 1,
+                  "why": "debounce منتظر مکث می‌ماند؛ پس حروف میانی درخواست تولید نمی‌کنند و تعداد درخواست‌ها به حداقل می‌رسد."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "بهینه‌سازی کارایی جاوااسکریپت در مرورگر", "q": "بهینه‌سازی کارایی جاوااسکریپت فارسی" },
+                  { "title": "debounce و throttle با پیاده‌سازی عملی", "q": "debounce throttle جاوااسکریپت فارسی" },
+                  { "title": "پنل Performance و پیدا کردن گلوگاه‌ها", "q": "پنل performance کروم فارسی" }
+                ],
+                "en": [
+                  { "title": "JavaScript Performance Optimization Guide", "q": "javascript performance optimization tutorial" },
+                  { "title": "Implement Debounce and Throttle from Scratch", "q": "implement debounce throttle javascript" },
+                  { "title": "Layout Thrashing and How to Avoid It", "q": "layout thrashing javascript fix" },
+                  { "title": "Virtual Scrolling for Huge Lists", "q": "virtual scrolling javascript tutorial" }
+                ]
+              }
+            },
+            {
+              "id": "js-biz-testing-deploy",
+              "t": "کیفیت، تست و انتشار محصول",
+              "sum": "تست با Vitest، لینت و فرمت، ممیزی Lighthouse و انتشار نسخهٔ نهایی روی هاست استاتیک",
+              "m": 24,
+              "body": [
+                {
+                  "t": "p",
+                  "x": "محصول بدون تست، هر تغییر را شرط‌بندی است. برای کد منطقی (توابع، لایهٔ API، store) <b>تست واحد</b> با Vitest ساده و سریع است: توابع خالص که در درس‌های قبل نوشتیم دقیقاً برای همین لحظه ساخته شده‌اند. تست رابط کاربری هم با شبیه‌سازی DOM در محیط Node (jsdom) ممکن است."
+                },
+                {
+                  "t": "code",
+                  "f": "math.test.js",
+                  "x": "import { describe, it, expect } from 'vitest';\nimport { applyDiscount, validate } from './pricing.js';\n\ndescribe('applyDiscount', () => {\n  it('reduces price by percent', () => {\n    expect(applyDiscount(1000, 10)).toBe(900);\n  });\n  it('rejects out-of-range percent', () => {\n    expect(() => applyDiscount(1000, 150)).toThrow();\n  });\n});\n\ndescribe('validate', () => {\n  it('flags empty name', () => {\n    expect(validate({ name: ' ', email: 'a@b.co' }))\n      .toHaveProperty('name');\n  });\n});\n\n// package.json: \"test\": \"vitest run\""
+                },
+                {
+                  "t": "p",
+                  "x": "سه لایهٔ کیفیت مکمل تست‌اند: <b>ESLint</b> الگوهای خطرناک را می‌گیرد، <b>Prettier</b> فرمت را یکدست می‌کند تا بحث‌های بی‌فایده حذف شود، و <b>Lighthouse</b> کیفیت محصول (کارایی، دسترس‌پذیری، SEO) را امتیاز می‌دهد. این‌ها را به اسکریپت‌های npm اضافه کنید تا اجرایشان همیشه یک فرمان باشد."
+                },
+                {
+                  "t": "code",
+                  "f": "package.json",
+                  "x": "{\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"vite build\",\n    \"test\": \"vitest run\",\n    \"lint\": \"eslint src\",\n    \"format\": \"prettier --write src\"\n  }\n}\n\n# release checklist\n# 1. npm run lint && npm test\n# 2. npm run build       -> dist/ folder\n# 3. deploy dist/ to any static host (Netlify, GitHub Pages)\n# 4. run Lighthouse on the live URL"
+                },
+                {
+                  "t": "tip",
+                  "x": "پیش از انتشار نسخهٔ نهایی چک‌لیست سریع: عنوان و متاها، صفحهٔ خطای شبکه بدون داده، حالت خالی لیست، رفتار با localStorage خالی یا خراب، و ریسپانسیو بودن در عرض‌های مختلف. هر یک از این‌ها تجربهٔ روز اول کاربر را تعیین می‌کند.",
+                  "list": [
+                    "خروجی build را با npm run preview روی سیستم خودتان قبل از انتشار ببینید",
+                    "تست‌ها را به هوش مصنوعی یا CI بسپارید تا روی هر تغییر اجرا شوند"
+                  ]
+                },
+                {
+                  "t": "quiz",
+                  "q": "کدام نوع تابع برای تست واحد مناسب‌تر است؟",
+                  "options": [
+                    "تابعی که همزمان DOM را تغییر می‌دهد و API صدا می‌زند",
+                    "تابع خالص با ورودی و خروجی مشخص",
+                    "تابعی که state سراسری را تغییر می‌دهد",
+                    "تابعی که خروجی ندارد"
+                  ],
+                  "a": 1,
+                  "why": "توابع خالص ورودی ثابت به خروجی ثابت می‌دهند و به محیط وابسته نیستند؛ بنابراین ساده‌ترین حالت ممکن برای assertionهای تست هستند."
+                }
+              ],
+              "videos": {
+                "fa": [
+                  { "title": "تست واحد با Vitest در پروژهٔ جاوااسکریپت", "q": "vitest تست واحد جاوااسکریپت فارسی" },
+                  { "title": "ESLint و Prettier در پروژهٔ واقعی", "q": "eslint prettier پروژه فارسی" },
+                  { "title": "انتشار سایت استاتیک روی هاست", "q": "انتشار سایت استاتیک فارسی" }
+                ],
+                "en": [
+                  { "title": "Vitest Unit Testing Crash Course", "q": "vitest tutorial unit testing javascript" },
+                  { "title": "ESLint and Prettier Setup Guide", "q": "eslint prettier setup tutorial" },
+                  { "title": "Lighthouse: Measure Real-World Quality", "q": "lighthouse audit tutorial" },
+                  { "title": "Deploy a Static Site the Right Way", "q": "deploy static site netlify vite" }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

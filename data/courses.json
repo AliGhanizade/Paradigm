@@ -1,0 +1,9 @@
+{
+  "site": { "name": "رشد", "tagline": "مسیر رشد مهارت‌ها" },
+  "courses": [
+    { "id": "go",  "file": "go.json"  },
+    { "id": "sql", "file": "sql.json" },
+    { "id": "js",  "file": "js.json"  },
+    { "id": "k8s", "file": "k8s.json" }
+  ]
+}
